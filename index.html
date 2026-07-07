@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>IT Budget Planner — Arvind Limited | FY 2026-27</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8fafc;--sf:#fff;--sf2:#f1f5f9;--bd:#e2e8f0;--bd2:#cbd5e1;
+  --tx:#0f172a;--tx2:#64748b;--tx3:#94a3b8;
+  --bl:#1e40af;--bl2:#3b82f6;--bll:#dbeafe;
+  --gn:#166534;--gnl:#dcfce7;--am:#92400e;--aml:#fef3c7;
+  --rd:#991b1b;--rdl:#fee2e2;--pu:#5b21b6;--pul:#ede9fe;
+  --cy:#0e7490;--cyl:#cffafe;
+  --r:8px;--rl:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);font-size:13px}
+/* LOADING SCREEN */
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:16px;background:var(--bg)}
+.spinner{width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--bl);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--tx2)}
+/* APP */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:215px;min-width:215px;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow-y:auto}
+.sb-logo{padding:14px 16px;border-bottom:1px solid var(--bd);background:var(--bl)}
+.sb-logo h2{font-size:13px;font-weight:700;color:#fff}
+.sb-logo span{font-size:10px;color:rgba(255,255,255,.7)}
+.user-pill{margin:10px;background:var(--bll);border-radius:var(--r);padding:9px 12px;display:flex;align-items:center;gap:9px}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:#fff;background:var(--bl)}
+.uname{font-size:12px;font-weight:600;color:var(--bl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.urole{font-size:10px;color:var(--tx2)}
+.sec{padding:6px 16px 2px;font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px}
+.nav{display:flex;align-items:center;gap:8px;padding:8px 16px;font-size:12px;cursor:pointer;color:var(--tx2);border-left:3px solid transparent}
+.nav:hover{background:var(--sf2);color:var(--tx)}
+.nav.on{background:#eff6ff;color:var(--bl);border-left-color:var(--bl);font-weight:600}
+.nav svg{width:14px;height:14px;flex-shrink:0}
+.sb-foot{margin-top:auto;padding:12px 16px;border-top:1px solid var(--bd)}
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{padding:11px 20px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar h3{font-size:14px;font-weight:600}
+.content{padding:16px;display:flex;flex-direction:column;gap:12px}
+.page{display:none;flex-direction:column;gap:12px}
+.page.on{display:flex}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:14px}
+.ct{font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:12px 14px}
+.mc .lbl{font-size:10px;color:var(--tx2);font-weight:500;margin-bottom:3px}
+.mc .val{font-size:20px;font-weight:700}
+.mc .sub{font-size:10px;color:var(--tx3);margin-top:2px}
+.v-b{color:var(--bl)}.v-g{color:var(--gn)}.v-a{color:var(--am)}.v-r{color:var(--rd)}
+.tw{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:var(--sf2)}
+th{padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:var(--tx2);border-bottom:1px solid var(--bd);white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#f8fafc}
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.b-b{background:var(--bll);color:var(--bl)}.b-g{background:var(--gnl);color:var(--gn)}
+.b-a{background:var(--aml);color:var(--am)}.b-r{background:var(--rdl);color:var(--rd)}
+.b-p{background:var(--pul);color:var(--pu)}.b-gr{background:#f1f5f9;color:#475569}
+.b-it{background:#e0f2fe;color:#0c4a6e}.b-biz{background:#fce7f3;color:#831843}
+.btn{padding:7px 13px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;background:var(--sf);color:var(--tx);font-weight:500}
+.btn:hover{background:var(--sf2)}
+.btn-p{background:var(--bl);color:#fff;border-color:var(--bl)}.btn-p:hover{background:#1e3a8a}
+.btn-d{background:var(--rdl);color:var(--rd);border-color:#fca5a5;padding:4px 8px;font-size:11px}
+.btn-e{background:var(--aml);color:var(--am);border-color:#fcd34d;padding:4px 8px;font-size:11px}
+.btn-c{background:var(--cyl);color:var(--cy);border-color:#67e8f9;padding:4px 8px;font-size:11px}
+.btn-g{background:var(--gnl);color:var(--gn);border-color:#86efac}
+.fg{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}
+.fg label{font-size:11px;font-weight:600;color:var(--tx2)}
+.req{color:var(--rd);margin-left:2px}
+.fg input,.fg select,.fg textarea{padding:8px 11px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px;color:var(--tx);background:var(--sf);outline:none;transition:border .15s;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--bl2)}
+.fg input.err,.fg select.err{border-color:var(--rd)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center}
+.ov.open{display:flex}
+.modal{background:var(--sf);border-radius:var(--rl);border:1px solid var(--bd);padding:22px;width:600px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-lg{width:820px}
+.modal h4{font-size:14px;font-weight:700;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--bd)}
+.ma{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--bd)}
+.ph{display:flex;justify-content:space-between;align-items:center}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.info-box{background:var(--bll);border:1px solid #93c5fd;border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--bl);line-height:1.6}
+.warn-box{background:var(--aml);border:1px solid #f59e0b;border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--am);line-height:1.6}
+.toast{position:fixed;bottom:22px;right:22px;background:#1e293b;color:#fff;padding:11px 16px;border-radius:var(--r);font-size:12px;z-index:9999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;max-width:340px}
+.toast.show{opacity:1;transform:translateY(0)}
+.empty{text-align:center;padding:30px;color:var(--tx3);font-size:12px}
+.sel-panel{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rl);padding:14px;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end}
+.result-panel{background:var(--bll);border:1px solid #93c5fd;border-radius:var(--rl);padding:14px;display:none}
+.result-panel.show{display:block}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
+.kpi-item .kl{font-size:10px;color:var(--tx2);margin-bottom:2px}
+.kpi-item .kv{font-size:14px;font-weight:700;color:var(--bl)}
+.revised-box{background:var(--aml);border:2px solid #f59e0b;border-radius:var(--r);padding:12px}
+.revised-box label{font-size:11px;font-weight:700;color:var(--am);display:block;margin-bottom:6px}
+.revised-box input{width:100%;padding:9px;border:2px solid #f59e0b;border-radius:var(--r);font-size:15px;font-weight:700;color:var(--am);background:#fffbeb;outline:none}
+.var-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;margin-top:7px}
+.var-p{background:var(--gnl);color:var(--gn)}.var-n{background:var(--rdl);color:var(--rd)}.var-z{background:var(--sf2);color:var(--tx2)}
+.audit-row{display:grid;grid-template-columns:90px 1fr 100px 100px 90px 90px 120px;gap:8px;padding:8px 10px;border-bottom:1px solid var(--bd);align-items:start;font-size:11px}
+.audit-hdr{background:var(--sf2);font-weight:600;color:var(--tx2);font-size:10px;align-items:center}
+.sp-pill{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.sp-sub{background:var(--bll);color:var(--bl)}.sp-app{background:var(--gnl);color:var(--gn)}.sp-rej{background:var(--rdl);color:var(--rd)}
+.sync-bar{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--tx2)}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--gn);flex-shrink:0}
+.sync-dot.syncing{background:var(--am);animation:pulse 1s infinite}
+.sync-dot.err{background:var(--rd)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.dist-grid{overflow-x:auto;border-radius:var(--rl);border:1px solid var(--bd)}
+.dist-grid table th{background:#1e3a8a;color:#fff;font-size:10px;padding:7px 9px}
+.dist-grid table td{font-size:11px;padding:6px 9px}
+.fixed-cell{background:var(--aml);color:var(--am);font-weight:600}
+.dist-cell{background:var(--gnl);color:var(--gn)}
+.total-cell{background:var(--bll);color:var(--bl);font-weight:600}
+.tab-row{display:flex;border-bottom:1px solid var(--bd);margin-bottom:14px}
+.tab{padding:8px 16px;font-size:12px;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--bl);border-bottom-color:var(--bl);font-weight:600}
+</style>
+<!-- Microsoft Authentication Library -->
+<script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text">Connecting to SharePoint...</div>
+  <div id="loading-detail" style="font-size:11px;color:var(--tx3);margin-top:4px"></div>
+</div>
+
+<div class="app" id="app" style="display:none">
+  <div class="sidebar">
+    <div class="sb-logo"><h2>IT Budget Planner</h2><span id="sb-year">Arvind Limited</span></div>
+    <div class="user-pill">
+      <div class="av" id="sb-av">?</div>
+      <div style="min-width:0"><div class="uname" id="sb-name">Loading...</div><div class="urole" id="sb-role"></div></div>
+    </div>
+    <div class="sec">Overview</div>
+    <div class="nav on" onclick="go('dash',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+    <div class="sec">Master Data</div>
+    <div class="nav" id="nav-ent" onclick="go('entities',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Entities &amp; Users</div>
+    <div class="sec">Budget</div>
+    <div class="nav" onclick="go('opex',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>OPEX</div>
+    <div class="nav" onclick="go('capex',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>CAPEX</div>
+    <div class="sec">Distribution</div>
+    <div class="nav" onclick="go('dist',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Distribution table</div>
+    <div class="nav" onclick="go('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Entity edit</div>
+    <div class="sec">Admin</div>
+    <div class="nav" onclick="go('audit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Audit log</div>
+    <div class="sb-foot">
+      <div class="sync-bar" style="margin-bottom:8px">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">Connected to SharePoint</span>
+      </div>
+      <button class="btn" style="width:100%;justify-content:center;font-size:11px" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <h3 id="pg-title">Dashboard</h3>
+      <div style="display:flex;align-items:center;gap:10px">
+        <select id="year-sel" onchange="onYearChange()" style="padding:5px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
+        <button id="btn-add-year" class="btn btn-p" style="padding:5px 10px;font-size:11px" onclick="addYear()">+ Year</button>
+        <div id="pg-sub" style="font-size:11px;color:var(--tx2)"></div>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page on" id="page-dash">
+        <div class="metrics" id="dash-metrics"></div>
+        <div class="tab-row">
+          <div class="tab on" onclick="switchTab('group',this)">Group</div>
+          <div class="tab" onclick="switchTab('functional',this)">Functional cost type</div>
+          <div class="tab" onclick="switchTab('subgroup',this)">Sub-group</div>
+          <div class="tab" onclick="switchTab('itbiz',this)">IT vs Business</div>
+          <div class="tab" onclick="switchTab('entity',this)">Entity-wise</div>
+        </div>
+        <div id="summary-table"></div>
+        <div class="card"><div class="ct" id="pending-title">Pending entity edits</div><div id="dash-pending"></div></div>
+      </div>
+
+      <!-- ENTITIES -->
+      <div class="page" id="page-entities">
+        <div class="ph">
+          <div class="info-box" style="flex:1;margin-right:12px">Add entities and their HR / SAP user counts. These drive the automatic cost distribution. After any change click <strong>Recalculate</strong> to recompute the full budget.</div>
+          <button class="btn btn-p" onclick="openModal('entity')">+ Add entity</button>
+        </div>
+        <div class="tw"><table><thead><tr><th>#</th><th>Entity</th><th>HR users</th><th>SAP users</th><th>HR%</th><th>SAP%</th><th>Cost center</th><th>Payer</th><th>Active</th><th>Actions</th></tr></thead><tbody id="t-ent"></tbody><tfoot id="t-ent-foot"></tfoot></table></div>
+        <div class="warn-box" id="recalc-banner" style="display:none">Entity counts changed. <button class="btn btn-p" style="margin-left:12px;padding:5px 10px;font-size:11px" onclick="recalculate()">Recalculate now</button></div>
+      </div>
+
+      <!-- OPEX -->
+      <div class="page" id="page-opex">
+        <div class="ph">
+          <div style="display:flex;gap:8px">
+            <select id="opex-f-grp" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
+            <select id="opex-f-own" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
+          </div>
+          <button class="btn btn-p" id="btn-opex" onclick="openModal('opex')">+ Add OPEX item</button>
+        </div>
+        <div class="tw"><table><thead><tr><th>Budget ID</th><th>Year</th><th>Owner</th><th>Cost type</th><th>Group</th><th>Sub-group</th><th>Activity</th><th>Payer</th><th>Method</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Fixed total</th><th>Actions</th></tr></thead><tbody id="t-opex"></tbody></table></div>
+      </div>
+
+      <!-- CAPEX -->
+      <div class="page" id="page-capex">
+        <div class="ph"><div></div><button class="btn btn-p" id="btn-capex" onclick="openModal('capex')">+ Add CAPEX item</button></div>
+        <div class="tw"><table><thead><tr><th>Budget ID</th><th>Year</th><th>Owner</th><th>Group</th><th>Sub-group</th><th>Activity</th><th>Payer</th><th>Method</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Actions</th></tr></thead><tbody id="t-capex"></tbody></table></div>
+      </div>
+
+      <!-- DISTRIBUTION -->
+      <div class="page" id="page-dist">
+        <div class="ph">
+          <div style="display:flex;gap:8px">
+            <select id="dist-f-own" onchange="renderDist()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
+            <select id="dist-f-grp" onchange="renderDist()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
+          </div>
+          <div class="info-box" style="font-size:11px;padding:6px 12px">Amber = fixed &nbsp; Green = SAP/HR distributed &nbsp; Blue = total</div>
+        </div>
+        <div class="dist-grid" id="dist-table"></div>
+      </div>
+
+      <!-- ENTITY EDIT -->
+      <div class="page" id="page-edit">
+        <div class="warn-box" id="edit-banner"></div>
+        <div class="sel-panel">
+          <div class="fg" style="margin:0"><label>1. IT Owner</label><select id="sel-own" onchange="onOwnerChange()"><option value="">— select —</option></select></div>
+          <div class="fg" style="margin:0"><label>2. Activity</label><select id="sel-act" onchange="onActChange()" disabled><option value="">— select —</option></select></div>
+          <div class="fg" style="margin:0"><label>3. Entity</label><select id="sel-ent" onchange="onEntChange()" disabled><option value="">— select —</option></select></div>
+          <button class="btn" onclick="clearSel()" style="height:36px">Clear</button>
+        </div>
+        <div class="result-panel" id="edit-result">
+          <div class="kpi-row" id="er-kpis"></div>
+          <div class="two-col">
+            <div class="revised-box">
+              <label>&#x20B9; Revised budget (Lakhs)</label>
+              <input type="number" id="edit-revised" step="0.01" min="0" placeholder="Enter revised amount" oninput="calcVar()">
+              <div id="edit-var"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div class="fg" style="margin:0"><label>Justification <span class="req">*</span></label><textarea id="edit-just" rows="3" placeholder="Reason for change from auto-distributed value"></textarea></div>
+              <button class="btn btn-p" style="justify-content:center" onclick="submitEdit()">Submit for approval</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ph" style="margin-bottom:10px"><div class="ct" style="margin:0">Your submitted edits</div><div id="edit-count"></div></div>
+          <div id="edit-list"></div>
+        </div>
+      </div>
+
+      <!-- AUDIT -->
+      <div class="page" id="page-audit">
+        <div class="ph" style="margin-bottom:10px">
+          <div class="info-box" style="flex:1;margin-right:12px">Complete audit trail. IT Head can approve or reject each edit — changes take effect immediately in the distribution table.</div>
+          <select id="audit-f" onchange="renderAudit()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px">
+            <option value="">All statuses</option><option>Submitted</option><option>Approved</option><option>Rejected</option>
+          </select>
+        </div>
+        <div class="card" style="padding:0">
+          <div class="audit-row audit-hdr"><div>Date</div><div>Owner · Activity · Entity</div><div>Auto (&#x20B9;L)</div><div>Revised (&#x20B9;L)</div><div>Variance</div><div>Status</div><div>Actions</div></div>
+          <div id="audit-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ov"><div class="modal" id="modal-box"><h4 id="m-title"></h4><div id="m-body"></div><div class="ma"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-p" onclick="saveModal()">Save</button></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  CONFIGURATION
+// ═══════════════════════════════════════════════════════
+const SP_CONFIG = {
+  siteUrl: 'https://arvindgroup.sharepoint.com/sites/ITBudget-ITBudgetChannel',
+  lists: {
+    entities:    'ITB_Entities',
+    opex:        'ITB_OPEX',
+    capex:       'ITB_CAPEX',
+    edits:       'ITB_EntityEdits',
+    config:      'ITB_Config'
+  }
+};
+
+// MSAL Configuration — uses your existing Azure AD app registration
+// Client ID below is for the SharePoint Online Client Extensibility app
+// which is pre-registered in every M365 tenant
+const MSAL_CONFIG = {
+  auth: {
+    clientId: 'f2fc9bae-23b7-4243-9bce-ea1a08bf94a0', // Arvind Limited — IT Budget Planner
+    authority: 'https://login.microsoftonline.com/d6454b9f-4ca2-4392-b62f-20e21e54335a',
+    redirectUri: window.location.origin + window.location.pathname
+  },
+  cache: { cacheLocation: 'sessionStorage' }
+};
+
+const SCOPES = ['https://arvindgroup.sharepoint.com/AllSites.Manage'];
+const msalInstance = new msal.PublicClientApplication(MSAL_CONFIG);
+let ACCESS_TOKEN = null;
+
+// ═══════════════════════════════════════════════════════
+//  SHAREPOINT REST API LAYER
+// ═══════════════════════════════════════════════════════
+let SP_HEADERS = {
+  'Accept': 'application/json;odata=nometadata',
+  'Content-Type': 'application/json;odata=nometadata',
+  'X-Requested-With': 'XMLHttpRequest'
+};
+let REQUEST_DIGEST = null;
+
+async function getAccessToken() {
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length === 0) throw new Error('Not logged in');
+  try {
+    const result = await msalInstance.acquireTokenSilent({
+      scopes: SCOPES, account: accounts[0]
+    });
+    return result.accessToken;
+  } catch (e) {
+    const result = await msalInstance.acquireTokenPopup({ scopes: SCOPES });
+    return result.accessToken;
+  }
+}
+
+async function getDigest(){
+  if(REQUEST_DIGEST) return REQUEST_DIGEST;
+  const token = await getAccessToken();
+  const r = await fetch(`${SP_CONFIG.siteUrl}/_api/contextinfo`, {
+    method:'POST',
+    headers:{...SP_HEADERS, 'Authorization': `Bearer ${token}`}
+  });
+  const d = await r.json();
+  REQUEST_DIGEST = d.FormDigestValue;
+  setTimeout(()=>{ REQUEST_DIGEST=null; }, 1500000);
+  return REQUEST_DIGEST;
+}
+
+async function spGet(listName, filter='', select='', top=5000){
+  let url = `${SP_CONFIG.siteUrl}/_api/web/lists/getbytitle('${listName}')/items?$top=${top}`;
+  if(filter) url += `&$filter=${encodeURIComponent(filter)}`;
+  if(select) url += `&$select=${encodeURIComponent(select)}`;
+  const token = await getAccessToken();
+  const r = await fetch(url, {headers:{...SP_HEADERS, 'Authorization':`Bearer ${token}`}});
+  if(!r.ok) throw new Error(`GET ${listName} failed: ${r.status} - List may not exist yet`);
+  const d = await r.json();
+  return d.value;
+}
+
+async function spPost(listName, data){
+  const digest = await getDigest();
+  const token = await getAccessToken();
+  const r = await fetch(`${SP_CONFIG.siteUrl}/_api/web/lists/getbytitle('${listName}')/items`, {
+    method:'POST',
+    headers:{...SP_HEADERS, 'X-RequestDigest': digest, 'Authorization':`Bearer ${token}`},
+    body: JSON.stringify(data)
+  });
+  if(!r.ok){const e=await r.text();throw new Error(`POST ${listName} failed: ${r.status} ${e}`);}
+  return await r.json();
+}
+
+async function spPatch(listName, id, data){
+  const digest = await getDigest();
+  const token = await getAccessToken();
+  const r = await fetch(`${SP_CONFIG.siteUrl}/_api/web/lists/getbytitle('${listName}')/items(${id})`, {
+    method:'PATCH',
+    headers:{...SP_HEADERS, 'X-RequestDigest': digest, 'IF-MATCH':'*', 'X-HTTP-Method':'MERGE', 'Authorization':`Bearer ${token}`},
+    body: JSON.stringify(data)
+  });
+  if(!r.ok) throw new Error(`PATCH ${listName}(${id}) failed: ${r.status}`);
+}
+
+async function spDelete(listName, id){
+  const digest = await getDigest();
+  const token = await getAccessToken();
+  const r = await fetch(`${SP_CONFIG.siteUrl}/_api/web/lists/getbytitle('${listName}')/items(${id})`, {
+    method:'DELETE',
+    headers:{...SP_HEADERS, 'X-RequestDigest': digest, 'IF-MATCH':'*', 'Authorization':`Bearer ${token}`}
+  });
+  if(!r.ok) throw new Error(`DELETE ${listName}(${id}) failed: ${r.status}`);
+}
+
+async function getCurrentUser(){
+  const token = await getAccessToken();
+  const r = await fetch(`${SP_CONFIG.siteUrl}/_api/web/currentuser?$select=Title,Email,LoginName`, {
+    headers:{...SP_HEADERS, 'Authorization':`Bearer ${token}`}
+  });
+  if(!r.ok) throw new Error('Cannot get current user — check SharePoint site access');
+  return await r.json();
+}
+
+// ═══════════════════════════════════════════════════════
+//  APP STATE
+// ═══════════════════════════════════════════════════════
+let CU = null;        // current SharePoint user
+let STATE = {
+  entities: [], opex: [], capex: [], edits: [], config: [],
+  activeYear: 'FY 2026-27', budgetYears: ['FY 2025-26','FY 2026-27']
+};
+const fmt = v => Number(v||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct = (a,b) => b>0 ? ((a/b)*100).toFixed(1)+'%' : '0%';
+
+// Role mapping — email prefix → owner name in budget data
+const ROLE_MAP = {
+  'kirit.mehta':     { role:'IT Head',      ownerName: null },
+  'bharat':          { role:'CAB Manager',  ownerName: 'Kirit Mehta' },
+  'advait':          { role:'Network Lead', ownerName: 'Advait' },
+  'anil':            { role:'EUS Lead',     ownerName: 'Anil Patel' },
+  'mishal':          { role:'DC Lead',      ownerName: 'Mishal/Shailesh' },
+  'shailesh':        { role:'DC Lead',      ownerName: 'Mishal/Shailesh' },
+};
+function getUserRole(email){
+  const prefix = (email||'').split('@')[0].toLowerCase();
+  return ROLE_MAP[prefix] || { role:'Viewer', ownerName: email };
+}
+function isAdmin(){ return CU && CU.spRole==='IT Head'; }
+function myOwner(){ return CU ? CU.ownerName : null; }
+function canSeeOwner(o){ return isAdmin() || myOwner()===null || myOwner()===o; }
+
+// ═══════════════════════════════════════════════════════
+//  BOOT — authenticate via SharePoint current user
+// ═══════════════════════════════════════════════════════
+async function boot(){
+  setLoading('Checking Microsoft 365 authentication...');
+  try {
+    const spUser = await getCurrentUser();
+    const roleInfo = getUserRole(spUser.Email);
+    CU = {
+      name: spUser.Title,
+      email: spUser.Email,
+      loginName: spUser.LoginName,
+      initials: spUser.Title.trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2),
+      spRole: roleInfo.role,
+      ownerName: roleInfo.ownerName
+    };
+    setLoading('Loading budget data from SharePoint...');
+    await loadAllData();
+    startApp();
+  } catch(err){
+    showLoadError(err);
+  }
+}
+
+function setLoading(msg){
+  document.getElementById('loading-detail').textContent = msg;
+}
+function showLoadError(err){
+  document.getElementById('loading').innerHTML = `
+    <div style="text-align:center;padding:40px;max-width:440px">
+      <div style="font-size:24px;margin-bottom:12px">&#x26A0;</div>
+      <div style="font-size:15px;font-weight:500;margin-bottom:8px">Unable to connect to SharePoint</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:16px">${err.message}</div>
+      <div style="font-size:12px;color:#94a3b8;background:#f1f5f9;padding:12px;border-radius:8px;text-align:left">
+        <strong>Possible reasons:</strong><br>
+        &bull; You're not logged into Microsoft 365<br>
+        &bull; The SharePoint site hasn't been created yet<br>
+        &bull; You don't have access to the ITBudgetPlanner site<br><br>
+        Open <a href="https://arvindgroup.sharepoint.com/sites/ITBudget-ITBudgetChannel" target="_blank" style="color:#1e40af">the SharePoint site</a> to check access.
+      </div>
+    </div>`;
+}
+
+async function loadAllData(){
+  setSyncing();
+  const [entities, opex, capex, edits, config] = await Promise.all([
+    spGet(SP_CONFIG.lists.entities),
+    spGet(SP_CONFIG.lists.opex),
+    spGet(SP_CONFIG.lists.capex),
+    spGet(SP_CONFIG.lists.edits),
+    spGet(SP_CONFIG.lists.config)
+  ]);
+
+  STATE.entities = entities.map(e=>({
+    id: e.Id, name: e.EntityName, hr: Number(e.HRUsers||0), sap: Number(e.SAPUsers||0),
+    costCenter: e.CostCenter, payer: e.Payer, active: e.IsActive!==false
+  }));
+
+  STATE.opex = opex.map(r=>({
+    id: r.Id, budgetId: r.BudgetID, year: r.BudgetYear, owner: r.ITOwner,
+    ctype: r.FunctionalCost, group: r.GroupName, sub: r.SubGroup,
+    activity: r.ActivityName, payer: r.Payer, method: r.DistMethod,
+    prevBudget: Number(r.PrevBudget||0), curBudget: Number(r.CurBudget||0),
+    overrides: r.Overrides ? JSON.parse(r.Overrides) : {}
+  }));
+
+  STATE.capex = capex.map(r=>({
+    id: r.Id, budgetId: r.BudgetID, year: r.BudgetYear, owner: r.ITOwner,
+    group: r.GroupName, sub: r.SubGroup, activity: r.ActivityName,
+    payer: r.Payer, method: r.DistMethod,
+    prevBudget: Number(r.PrevBudget||0), curBudget: Number(r.CurBudget||0)
+  }));
+
+  STATE.edits = edits.map(e=>({
+    id: e.Id, budgetId: e.BudgetID, itemId: Number(e.OPEXItemID||0),
+    owner: e.ITOwner, activity: e.ActivityName,
+    entityId: Number(e.EntityID||0), entityName: e.EntityName,
+    auto: Number(e.AutoValue||0), revised: Number(e.RevisedValue||0),
+    justification: e.Justification, status: e.EditStatus,
+    submittedBy: e.SubmittedBy, approvedBy: e.ApprovedBy,
+    year: e.BudgetYear, created: e.Created
+  }));
+
+  const ay = config.find(c=>c.ConfigKey==='ActiveYear');
+  const by = config.find(c=>c.ConfigKey==='BudgetYears');
+  if(ay) STATE.activeYear = ay.ConfigValue;
+  if(by) try { STATE.budgetYears = JSON.parse(by.ConfigValue); } catch(e){}
+
+  setSynced();
+}
+
+// ═══════════════════════════════════════════════════════
+//  START APP (post-auth)
+// ═══════════════════════════════════════════════════════
+function startApp(){
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('sb-name').textContent = CU.name;
+  document.getElementById('sb-role').textContent = CU.spRole + ' · ' + CU.email;
+  document.getElementById('sb-av').textContent = CU.initials;
+  buildYearSelector();
+  populateFilters();
+  populateEditSelectors();
+  renderAll();
+  go('dash');
+  // auto-refresh every 60 seconds
+  setInterval(async ()=>{ await loadAllData(); renderAll(); }, 60000);
+}
+
+function signOut(){
+  const accounts = msalInstance.getAllAccounts();
+  if(accounts.length > 0) {
+    msalInstance.logoutRedirect({account: accounts[0]});
+  } else {
+    window.location.href = 'https://login.microsoftonline.com/common/oauth2/logout';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  SYNC INDICATOR
+// ═══════════════════════════════════════════════════════
+function setSyncing(){ const d=document.getElementById('sync-dot'); d.className='sync-dot syncing'; document.getElementById('sync-label').textContent='Syncing...'; }
+function setSynced(){  const d=document.getElementById('sync-dot'); d.className='sync-dot'; document.getElementById('sync-label').textContent='Connected to SharePoint'; }
+function setSyncErr(){ const d=document.getElementById('sync-dot'); d.className='sync-dot err'; document.getElementById('sync-label').textContent='Sync error — refresh page'; }
+
+// ═══════════════════════════════════════════════════════
+//  YEAR
+// ═══════════════════════════════════════════════════════
+function buildYearSelector(){
+  const sel = document.getElementById('year-sel');
+  sel.innerHTML = STATE.budgetYears.map(y=>`<option${y===STATE.activeYear?' selected':''}>${y}</option>`).join('');
+}
+async function onYearChange(){
+  STATE.activeYear = document.getElementById('year-sel').value;
+  await updateConfig('ActiveYear', STATE.activeYear);
+  renderAll();
+}
+async function addYear(){
+  const y = prompt('Enter new budget year (e.g. FY 2027-28):');
+  if(!y||!y.trim()) return;
+  if(STATE.budgetYears.includes(y.trim())){showToast('Year already exists.');return}
+  STATE.budgetYears.push(y.trim());
+  STATE.activeYear = y.trim();
+  await updateConfig('BudgetYears', JSON.stringify(STATE.budgetYears));
+  await updateConfig('ActiveYear', STATE.activeYear);
+  buildYearSelector();
+  showToast('Year added: '+y.trim());
+}
+async function updateConfig(key, value){
+  const existing = await spGet(SP_CONFIG.lists.config, `ConfigKey eq '${key}'`);
+  if(existing.length) await spPatch(SP_CONFIG.lists.config, existing[0].Id, {ConfigValue: value});
+  else await spPost(SP_CONFIG.lists.config, {ConfigKey: key, ConfigValue: value});
+}
+
+// ═══════════════════════════════════════════════════════
+//  DISTRIBUTION ENGINE
+// ═══════════════════════════════════════════════════════
+function activeEntities(){ return STATE.entities.filter(e=>e.active!==false); }
+function totHR(){ return activeEntities().reduce((a,e)=>a+e.hr,0); }
+function totSAP(){ return activeEntities().reduce((a,e)=>a+e.sap,0); }
+function entById(id){ return STATE.entities.find(e=>e.id===Number(id)); }
+
+function getAutoValue(item, eid){
+  const ov = item.overrides||{};
+  const fixedSum = Object.values(ov).reduce((a,v)=>a+Number(v),0);
+  const residual = Number(item.curBudget)-fixedSum;
+  if(ov.hasOwnProperty(String(eid))) return Number(ov[String(eid)]);
+  const ent = entById(eid); if(!ent) return 0;
+  if(item.method==='SAP'){
+    const fixedSAP = Object.keys(ov).reduce((a,k)=>{const e=entById(k);return a+(e?e.sap:0);},0);
+    const pool = Math.max(0, totSAP()-fixedSAP);
+    return pool>0 ? residual*(ent.sap/pool) : 0;
+  } else if(item.method==='HR'){
+    const fixedHR = Object.keys(ov).reduce((a,k)=>{const e=entById(k);return a+(e?e.hr:0);},0);
+    const pool = Math.max(0, totHR()-fixedHR);
+    return pool>0 ? residual*(ent.hr/pool) : 0;
+  }
+  return 0;
+}
+function getEffectiveValue(item, eid){
+  const approved = STATE.edits.find(e=>e.budgetId===item.budgetId&&e.entityId===eid&&e.status==='Approved');
+  if(approved) return approved.revised;
+  return getAutoValue(item, eid);
+}
+function getFixedSum(item){ return Object.values(item.overrides||{}).reduce((a,v)=>a+Number(v),0); }
+function isHybrid(item){ return Object.keys(item.overrides||{}).length>0 && item.method!=='FIXED'; }
+function methodBadge(item){
+  if(isHybrid(item)) return '<span class="badge b-b" style="background:var(--cyl);color:var(--cy)">HYBRID</span>';
+  return `<span class="badge ${item.method==='SAP'?'b-p':item.method==='HR'?'b-g':'b-a'}">${item.method}</span>`;
+}
+function yearItems(type){ return (STATE[type]||[]).filter(r=>r.year===STATE.activeYear); }
+
+// ═══════════════════════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════════════════════
+function renderAll(){
+  renderDash();
+  renderEntities();
+  renderOPEX();
+  renderCAPEX();
+  renderDist();
+  renderEditList();
+  renderAudit();
+}
+
+function renderDash(){
+  const opex=yearItems('opex'), capex=yearItems('capex'), edits=STATE.edits;
+  const opexT=opex.reduce((a,r)=>a+r.curBudget,0);
+  const capexT=capex.reduce((a,r)=>a+r.curBudget,0);
+  const pending=edits.filter(e=>e.status==='Submitted').length;
+  document.getElementById('dash-metrics').innerHTML=`
+    <div class="mc"><div class="lbl">OPEX budget (${STATE.activeYear})</div><div class="val v-b">&#x20B9;${fmt(opexT)}L</div><div class="sub">${opex.length} items</div></div>
+    <div class="mc"><div class="lbl">CAPEX budget</div><div class="val v-b" style="color:var(--pu)">&#x20B9;${fmt(capexT)}L</div><div class="sub">${capex.length} items</div></div>
+    <div class="mc"><div class="lbl">Active entities</div><div class="val v-g">${activeEntities().length}</div><div class="sub">HR: ${totHR().toLocaleString()} · SAP: ${totSAP().toLocaleString()}</div></div>
+    <div class="mc"><div class="lbl">Edits pending</div><div class="val ${pending>0?'v-a':'v-g'}">${pending}</div><div class="sub">Awaiting approval</div></div>`;
+  switchTab('group');
+  const myP = isAdmin() ? edits.filter(e=>e.status==='Submitted') : edits.filter(e=>e.status==='Submitted'&&e.submittedBy===CU.email);
+  document.getElementById('pending-title').textContent = isAdmin() ? 'Pending edits — awaiting your approval' : 'Your submitted edits';
+  document.getElementById('dash-pending').innerHTML = myP.length ?
+    myP.slice(0,5).map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bd)"><div><div style="font-size:12px;font-weight:500">${e.owner} · ${e.activity}</div><div style="font-size:11px;color:var(--tx2)">${e.entityName} · Auto: &#x20B9;${fmt(e.auto)}L → Revised: &#x20B9;${fmt(e.revised)}L</div></div><div style="display:flex;gap:5px">${isAdmin()?`<button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="approveEdit(${e.id})">✓</button><button class="btn btn-d" style="font-size:10px;padding:3px 7px" onclick="rejectEdit(${e.id})">✕</button>`:''}</div></div>`).join('')
+    : '<div class="empty" style="padding:14px">No pending edits</div>';
+}
+
+let currentTab='group';
+function switchTab(tab, el){
+  currentTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  if(el) el.classList.add('on');
+  const opex=yearItems('opex');
+  const el2=document.getElementById('summary-table');
+  if(tab==='itbiz'){
+    const it=opex.filter(r=>r.payer==='IT').reduce((a,r)=>a+r.curBudget,0);
+    const biz=opex.filter(r=>r.payer==='Business').reduce((a,r)=>a+r.curBudget,0);
+    const tot=it+biz;
+    el2.innerHTML=`<div class="tw"><table><thead><tr><th>Payer</th><th>Budget (&#x20B9;L)</th><th>% of total</th><th>Items</th></tr></thead><tbody>
+      <tr><td><span class="badge b-it">IT</span></td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(it)}</td><td>${pct(it,tot)}</td><td>${opex.filter(r=>r.payer==='IT').length}</td></tr>
+      <tr><td><span class="badge b-biz">Business</span></td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(biz)}</td><td>${pct(biz,tot)}</td><td>${opex.filter(r=>r.payer==='Business').length}</td></tr>
+      <tr style="background:var(--bll)"><td><strong>TOTAL</strong></td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(tot)}</td><td>100%</td><td>${opex.length}</td></tr>
+    </tbody></table></div>`;
+  } else if(tab==='entity'){
+    const ents=activeEntities();
+    const rows=ents.map(ent=>{
+      const tot=opex.reduce((a,item)=>a+getEffectiveValue(item,ent.id),0);
+      const fixed=opex.reduce((a,item)=>{const ov=item.overrides||{};return a+(ov[String(ent.id)]?Number(ov[String(ent.id)]):0);},0);
+      return{name:ent.name,hr:ent.hr,sap:ent.sap,fixed,dist:tot-fixed,tot,payer:ent.payer};
+    }).sort((a,b)=>b.tot-a.tot);
+    const grand=rows.reduce((a,r)=>a+r.tot,0);
+    el2.innerHTML=`<div class="tw"><table><thead><tr><th>Entity</th><th>HR users</th><th>SAP users</th><th>Fixed (&#x20B9;L)</th><th>Distributed (&#x20B9;L)</th><th>Total (&#x20B9;L)</th><th>% share</th><th>Payer</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td style="font-weight:500">${r.name}</td><td style="text-align:right">${r.hr.toLocaleString()}</td><td style="text-align:right">${r.sap.toLocaleString()}</td><td style="text-align:right;color:var(--am)">&#x20B9;${fmt(r.fixed)}</td><td style="text-align:right;color:var(--gn)">&#x20B9;${fmt(r.dist)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.tot)}</td><td>${pct(r.tot,grand)}</td><td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td></tr>`).join('')}
+      <tr style="background:var(--bll)"><td><strong>TOTAL</strong></td><td style="text-align:right;font-weight:700">${totHR().toLocaleString()}</td><td style="text-align:right;font-weight:700">${totSAP().toLocaleString()}</td><td></td><td></td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(grand)}</td><td>100%</td><td></td></tr>
+    </tbody></table></div>`;
+  } else {
+    const keyFn={group:r=>r.group,functional:r=>r.ctype,subgroup:r=>r.sub||'(none)'}[tab];
+    const labelMap={group:'Group',functional:'Functional cost type',subgroup:'Sub-group'};
+    const map={};
+    opex.forEach(r=>{const k=keyFn(r);if(!map[k])map[k]={it:0,biz:0,tot:0,n:0};map[k].tot+=r.curBudget;map[k].n++;r.payer==='IT'?map[k].it+=r.curBudget:map[k].biz+=r.curBudget;});
+    const grand=opex.reduce((a,r)=>a+r.curBudget,0);
+    const rows=Object.entries(map).sort((a,b)=>b[1].tot-a[1].tot);
+    el2.innerHTML=`<div class="tw"><table><thead><tr><th>${labelMap[tab]}</th><th>IT cost (&#x20B9;L)</th><th>Business cost (&#x20B9;L)</th><th>Total (&#x20B9;L)</th><th>% of budget</th><th>Items</th></tr></thead><tbody>
+      ${rows.map(([k,v])=>`<tr><td style="font-weight:500">${k}</td><td style="text-align:right;color:var(--bl)">&#x20B9;${fmt(v.it)}</td><td style="text-align:right;color:var(--pu)">&#x20B9;${fmt(v.biz)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(v.tot)}</td><td>${pct(v.tot,grand)}</td><td>${v.n}</td></tr>`).join('')}
+      <tr style="background:var(--bll)"><td><strong>TOTAL</strong></td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(opex.filter(r=>r.payer==='IT').reduce((a,r)=>a+r.curBudget,0))}</td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(opex.filter(r=>r.payer==='Business').reduce((a,r)=>a+r.curBudget,0))}</td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(grand)}</td><td>100%</td><td>${opex.length}</td></tr>
+    </tbody></table></div>`;
+  }
+}
+
+function renderEntities(){
+  const ents=STATE.entities;
+  const tH=ents.reduce((a,e)=>a+e.hr,0), tS=ents.reduce((a,e)=>a+e.sap,0);
+  document.getElementById('t-ent').innerHTML=ents.map((e,i)=>`<tr style="${!e.active?'opacity:.5':''}">
+    <td>${i+1}</td><td style="font-weight:600">${e.name}</td>
+    <td style="text-align:right">${e.hr.toLocaleString()}</td><td style="text-align:right">${e.sap.toLocaleString()}</td>
+    <td style="text-align:right">${tH>0?((e.hr/tH)*100).toFixed(2)+'%':'—'}</td>
+    <td style="text-align:right">${tS>0?((e.sap/tS)*100).toFixed(2)+'%':'—'}</td>
+    <td>${e.costCenter}</td><td><span class="badge ${e.payer==='IT'?'b-it':'b-biz'}">${e.payer}</span></td>
+    <td><span class="badge ${e.active?'b-g':'b-r'}">${e.active?'Yes':'No'}</span></td>
+    <td><div style="display:flex;gap:4px">
+      ${isAdmin()?`<button class="btn btn-e" onclick="editEntity(${e.id})">✎</button>
+      <button class="btn btn-d" onclick="toggleEntity(${e.id})">${e.active?'Deactivate':'Activate'}</button>`:''}
+    </div></td></tr>`).join('');
+  document.getElementById('t-ent-foot').innerHTML=`<tr style="background:var(--bll);font-weight:700"><td colspan="2">TOTAL</td><td style="text-align:right">${tH.toLocaleString()}</td><td style="text-align:right">${tS.toLocaleString()}</td><td>100%</td><td>100%</td><td colspan="4"></td></tr>`;
+}
+
+function populateFilters(){
+  const opex=STATE.opex;
+  const groups=[...new Set(opex.map(r=>r.group))];
+  const owners=[...new Set(opex.map(r=>r.owner))].filter(o=>canSeeOwner(o));
+  ['opex-f-grp','dist-f-grp'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML='<option value="">All groups</option>'+groups.map(g=>`<option>${g}</option>`).join('');});
+  ['opex-f-own','dist-f-own'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML='<option value="">All owners</option>'+owners.map(o=>`<option>${o}</option>`).join('');});
+}
+
+function renderOPEX(){
+  const fGrp=document.getElementById('opex-f-grp')?.value||'';
+  const fOwn=document.getElementById('opex-f-own')?.value||'';
+  let items=yearItems('opex').filter(r=>canSeeOwner(r.owner));
+  if(fGrp) items=items.filter(r=>r.group===fGrp);
+  if(fOwn) items=items.filter(r=>r.owner===fOwn);
+  document.getElementById('t-opex').innerHTML=items.length?items.map(r=>{
+    const fs=getFixedSum(r);
+    return`<tr><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
+      <td><span class="badge b-gr">${r.year}</span></td><td>${r.owner}</td>
+      <td style="font-size:11px">${r.ctype}</td><td><strong>${r.group}</strong></td><td>${r.sub}</td>
+      <td style="max-width:180px;font-size:12px">${r.activity}</td>
+      <td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td>
+      <td>${methodBadge(r)}</td>
+      <td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td>
+      <td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td>
+      <td style="text-align:right;color:var(--am)">${fs>0?'&#x20B9;'+fmt(fs):'—'}</td>
+      <td><div style="display:flex;gap:3px">
+        ${canSeeOwner(r.owner)?`<button class="btn btn-e" onclick="editItem('opex',${r.id})">✎</button>
+        <button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="openOverride(${r.id})">Overrides</button>
+        <button class="btn btn-d" onclick="delItem('opex',${r.id})">🗑</button>`:''}
+      </div></td></tr>`;
+  }).join(''):'<tr><td colspan="13"><div class="empty">No OPEX items for this year</div></td></tr>';
+}
+
+function renderCAPEX(){
+  let items=yearItems('capex').filter(r=>canSeeOwner(r.owner));
+  document.getElementById('t-capex').innerHTML=items.length?items.map(r=>`<tr>
+    <td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
+    <td><span class="badge b-gr">${r.year}</span></td><td>${r.owner}</td>
+    <td><strong>${r.group}</strong></td><td>${r.sub}</td><td>${r.activity}</td>
+    <td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td>
+    <td><span class="badge b-p">${r.method}</span></td>
+    <td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td>
+    <td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td>
+    <td>${canSeeOwner(r.owner)?`<button class="btn btn-e" onclick="editItem('capex',${r.id})">✎</button> <button class="btn btn-d" onclick="delItem('capex',${r.id})">🗑</button>`:''}</td>
+  </tr>`).join(''):'<tr><td colspan="11"><div class="empty">No CAPEX items</div></td></tr>';
+}
+
+function renderDist(){
+  const ents=activeEntities();
+  let items=yearItems('opex').filter(r=>canSeeOwner(r.owner));
+  const fOwn=document.getElementById('dist-f-own')?.value||'';
+  const fGrp=document.getElementById('dist-f-grp')?.value||'';
+  if(fOwn) items=items.filter(r=>r.owner===fOwn);
+  if(fGrp) items=items.filter(r=>r.group===fGrp);
+  if(!items.length){document.getElementById('dist-table').innerHTML='<div class="empty">No items</div>';return}
+  let h=`<table><thead><tr><th style="min-width:140px">Activity</th><th>Method</th><th>Total</th>`;
+  ents.forEach(e=>h+=`<th style="min-width:110px">${e.name}</th>`);
+  h+=`</tr></thead><tbody>`;
+  items.forEach(r=>{
+    h+=`<tr><td style="font-weight:500;font-size:11px">${r.activity}</td><td>${methodBadge(r)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td>`;
+    ents.forEach(e=>{
+      const isF=(r.overrides||{}).hasOwnProperty(String(e.id));
+      h+=`<td class="${isF?'fixed-cell':'dist-cell'}" style="text-align:right">&#x20B9;${fmt(getEffectiveValue(r,e.id))}</td>`;
+    });
+    h+=`</tr>`;
+  });
+  h+=`<tr style="background:var(--bll);font-weight:700"><td colspan="2">TOTAL</td><td style="text-align:right">&#x20B9;${fmt(items.reduce((a,r)=>a+r.curBudget,0))}</td>`;
+  ents.forEach(e=>{ h+=`<td class="total-cell" style="text-align:right">&#x20B9;${fmt(items.reduce((a,r)=>a+getEffectiveValue(r,e.id),0))}</td>`; });
+  h+=`</tr></tbody></table>`;
+  document.getElementById('dist-table').innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════════════
+//  ENTITY EDIT
+// ═══════════════════════════════════════════════════════
+function populateEditSelectors(){
+  const ownerSel=document.getElementById('sel-own');
+  const mo=myOwner();
+  if(isAdmin()){
+    const owners=[...new Set(STATE.opex.map(r=>r.owner))];
+    ownerSel.innerHTML='<option value="">— select —</option>'+owners.map(o=>`<option>${o}</option>`).join('');
+    ownerSel.disabled=false;
+  } else if(mo) {
+    ownerSel.innerHTML=`<option value="${mo}">${mo}</option>`;
+    ownerSel.disabled=true;
+    onOwnerChange();
+  }
+}
+function onOwnerChange(){
+  const owner=document.getElementById('sel-own').value;
+  const actSel=document.getElementById('sel-act');
+  actSel.innerHTML='<option value="">— select —</option>';
+  actSel.disabled=!owner;
+  document.getElementById('sel-ent').disabled=true;
+  document.getElementById('edit-result').classList.remove('show');
+  if(!owner) return;
+  const items=yearItems('opex').filter(r=>r.owner===owner&&canSeeOwner(r.owner));
+  items.forEach(r=>actSel.innerHTML+=`<option value="${r.id}">${r.activity}</option>`);
+  if(!items.length){actSel.innerHTML='<option>— no items this year —</option>';actSel.disabled=true;}
+}
+function onActChange(){
+  const id=parseInt(document.getElementById('sel-act').value);
+  const entSel=document.getElementById('sel-ent');
+  entSel.innerHTML='<option value="">— select —</option>';
+  entSel.disabled=!id;
+  document.getElementById('edit-result').classList.remove('show');
+  if(!id) return;
+  activeEntities().forEach(e=>entSel.innerHTML+=`<option value="${e.id}">${e.name}</option>`);
+}
+function onEntChange(){
+  const id=parseInt(document.getElementById('sel-act').value);
+  const eid=parseInt(document.getElementById('sel-ent').value);
+  const res=document.getElementById('edit-result');
+  if(!id||isNaN(eid)){res.classList.remove('show');return}
+  const item=STATE.opex.find(r=>r.id===id);
+  const ent=entById(eid);
+  if(!item||!ent){res.classList.remove('show');return}
+  const autoVal=getAutoValue(item,eid);
+  const fixedSum=getFixedSum(item);
+  const isFixed=(item.overrides||{}).hasOwnProperty(String(eid));
+  const existing=STATE.edits.find(e=>e.budgetId===item.budgetId&&e.entityId===eid&&e.status!=='Rejected');
+  res.classList.add('show');
+  document.getElementById('er-kpis').innerHTML=`
+    <div class="kpi-item"><div class="kl">Budget ID</div><div class="kv" style="font-size:12px">${item.budgetId||'—'}</div></div>
+    <div class="kpi-item"><div class="kl">Total budget (&#x20B9;L)</div><div class="kv">&#x20B9;${fmt(item.curBudget)}</div></div>
+    <div class="kpi-item"><div class="kl">Fixed across entities</div><div class="kv" style="color:var(--am)">&#x20B9;${fmt(fixedSum)}</div></div>
+    <div class="kpi-item"><div class="kl">Residual to distribute</div><div class="kv" style="color:var(--gn)">&#x20B9;${fmt(item.curBudget-fixedSum)}</div></div>
+    <div class="kpi-item"><div class="kl">${ent.name} — ${isFixed?'Fixed':'Auto '+item.method}</div><div class="kv">&#x20B9;${fmt(autoVal)}</div></div>`;
+  document.getElementById('edit-revised').value = existing?existing.revised:'';
+  document.getElementById('edit-just').value = existing?existing.justification:'';
+  calcVar();
+}
+function calcVar(){
+  const id=parseInt(document.getElementById('sel-act').value);
+  const eid=parseInt(document.getElementById('sel-ent').value);
+  if(!id||isNaN(eid)) return;
+  const item=STATE.opex.find(r=>r.id===id);if(!item)return;
+  const auto=getAutoValue(item,eid);
+  const revised=parseFloat(document.getElementById('edit-revised').value);
+  const div=document.getElementById('edit-var');
+  if(isNaN(revised)){div.innerHTML='';return}
+  const v=revised-auto;
+  const cls=v>0?'var-p':v<0?'var-n':'var-z';
+  div.innerHTML=`<span class="var-badge ${cls}">${v>=0?'+':''}&#x20B9;${fmt(Math.abs(v))}L vs auto value of &#x20B9;${fmt(auto)}L</span>`;
+}
+async function submitEdit(){
+  const owner=document.getElementById('sel-own').value;
+  const id=parseInt(document.getElementById('sel-act').value);
+  const eid=parseInt(document.getElementById('sel-ent').value);
+  const revised=parseFloat(document.getElementById('edit-revised').value);
+  const just=document.getElementById('edit-just').value.trim();
+  if(!owner||!id||isNaN(eid)){showToast('Complete all selections.');return}
+  if(isNaN(revised)||revised<0){showToast('Enter a valid amount.');return}
+  if(!just){showToast('Justification is required.');return}
+  if(!canSeeOwner(owner)){showToast('You can only edit your own activities.');return}
+  const item=STATE.opex.find(r=>r.id===id&&r.owner===owner);if(!item)return;
+  const ent=entById(eid);if(!ent)return;
+  const auto=getAutoValue(item,eid);
+  setSyncing();
+  try {
+    await spPost(SP_CONFIG.lists.edits, {
+      BudgetID: item.budgetId||'', OPEXItemID: item.id,
+      ITOwner: owner, ActivityName: item.activity,
+      EntityID: eid, EntityName: ent.name,
+      AutoValue: auto, RevisedValue: revised,
+      Justification: just, EditStatus: 'Submitted',
+      SubmittedBy: CU.email, BudgetYear: item.year
+    });
+    await loadAllData();
+    showToast('Edit submitted for approval.');
+    renderAll();
+  } catch(e){ setSyncErr(); showToast('Error: '+e.message); }
+}
+function renderEditList(){
+  const edits=(STATE.edits||[]).filter(e=>isAdmin()||e.submittedBy===CU.email);
+  const el=document.getElementById('edit-list');
+  document.getElementById('edit-count').innerHTML=edits.length?`<span class="badge b-b">${edits.length} edit${edits.length>1?'s':''}</span>`:'';
+  if(!edits.length){el.innerHTML='<div class="empty">No edits submitted yet</div>';return}
+  el.innerHTML=`<div class="audit-row audit-hdr"><div>Date</div><div>Details</div><div>Auto</div><div>Revised</div><div>Variance</div><div>Status</div><div>${isAdmin()?'Actions':''}</div></div>`+
+    [...edits].reverse().map(e=>auditRow(e)).join('');
+}
+function auditRow(e){
+  const v=e.revised-e.auto;
+  const vc=v>0?'var-p':v<0?'var-n':'var-z';
+  const sc=e.status==='Submitted'?'sp-sub':e.status==='Approved'?'sp-app':'sp-rej';
+  return`<div class="audit-row">
+    <div style="font-size:10px;color:var(--tx2)">${(e.created||e.submittedAt||'').split('T')[0]}</div>
+    <div><div style="font-weight:500;font-size:12px">${e.owner}</div><div style="font-size:11px;color:var(--tx2)">${e.activity}</div><div style="font-size:11px;color:var(--bl)">${e.entityName}</div></div>
+    <div style="text-align:right">&#x20B9;${fmt(e.auto)}</div>
+    <div style="text-align:right;font-weight:600">&#x20B9;${fmt(e.revised)}</div>
+    <div><span class="var-badge ${vc}" style="font-size:10px">${v>=0?'+':''}&#x20B9;${fmt(Math.abs(v))}</span></div>
+    <div><span class="sp-pill ${sc}">${e.status}</span>${e.approvedBy?`<div style="font-size:10px;color:var(--tx3)">By: ${e.approvedBy}</div>`:''}</div>
+    <div>${isAdmin()&&e.status==='Submitted'?`<button class="btn btn-c" style="font-size:10px;padding:3px 6px" onclick="approveEdit(${e.id})">✓ Approve</button> <button class="btn btn-d" style="font-size:10px;padding:3px 6px" onclick="rejectEdit(${e.id})">✕ Reject</button>`:''}</div>
+  </div>`;
+}
+async function approveEdit(id){
+  setSyncing();
+  try{
+    await spPatch(SP_CONFIG.lists.edits,id,{EditStatus:'Approved',ApprovedBy:CU.email});
+    await loadAllData();renderAll();showToast('Approved.');
+  }catch(e){setSyncErr();showToast('Error: '+e.message);}
+}
+async function rejectEdit(id){
+  setSyncing();
+  try{
+    await spPatch(SP_CONFIG.lists.edits,id,{EditStatus:'Rejected',ApprovedBy:CU.email});
+    await loadAllData();renderAll();showToast('Rejected.');
+  }catch(e){setSyncErr();showToast('Error: '+e.message);}
+}
+function renderAudit(){
+  const filter=document.getElementById('audit-f')?.value||'';
+  let edits=STATE.edits;
+  if(!isAdmin()) edits=edits.filter(e=>e.submittedBy===CU.email);
+  if(filter) edits=edits.filter(e=>e.status===filter);
+  const al=document.getElementById('audit-list');
+  al.innerHTML=[...edits].reverse().map(e=>auditRow(e)).join('')||'<div class="empty">No audit entries</div>';
+}
+
+// ═══════════════════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════════════════
+let CM=null,CEid=null;
+const GROUPS=['Application','Network','End User Support','Datacentre'];
+const CTYPES=['Prof & Consulting','Annual Subscription','Repair & Maint','Software License','Software Expenses'];
+const METHODS=['SAP','HR','FIXED'];
+const PAYERS=['IT','Business'];
+function req(l){return `${l}<span class="req">*</span>`}
+function selOpts(arr,sel){return arr.map(v=>`<option value="${v}"${v===sel?' selected':''}>${v}</option>`).join('')}
+function yearOpts(sel){return STATE.budgetYears.map(y=>`<option${y===sel?' selected':''}>${y}</option>`).join('')}
+function ownerField(sel){
+  if(isAdmin()) return `<select id="f-owner" required><option value="" disabled>— select —</option>${['Kirit Mehta','Prajesh Desai','Mukesh Jhanwar','Advait','Anil Patel','Mishal/Shailesh'].map(o=>`<option${o===sel?' selected':''}>${o}</option>`).join('')}</select>`;
+  return `<select id="f-owner" disabled><option selected>${myOwner()||sel||''}</option></select>`;
+}
+const FORMS={
+  entity:(d={})=>`<div class="fgrid">
+    <div class="fg"><label>${req('Entity name')}</label><input id="f-name" value="${d.name||''}" placeholder="e.g. Arvind Ltd" required></div>
+    <div class="fg"><label>${req('Cost center')}</label><select id="f-cc"><option${d.costCenter==='IT CC'?' selected':''}>IT CC</option><option${d.costCenter==='Business CC'?' selected':''}>Business CC</option></select></div>
+    <div class="fg"><label>${req('Total HR users')}</label><input type="number" id="f-hr" min="0" value="${d.hr!=null?d.hr:''}" placeholder="Enter HR user count" required></div>
+    <div class="fg"><label>${req('SAP users')}</label><input type="number" id="f-sap" min="0" value="${d.sap!=null?d.sap:''}" placeholder="Enter SAP user count" required></div>
+    <div class="fg"><label>${req('Payer')}</label><select id="f-payer"><option${d.payer==='IT'?' selected':''}>IT</option><option${d.payer==='Business'?' selected':''}>Business</option></select></div>
+    <div class="fg"><label>Active</label><select id="f-active"><option value="true"${d.active!==false?' selected':''}>Yes</option><option value="false"${d.active===false?' selected':''}>No</option></select></div>
+  </div>`,
+  opex:(d={})=>`<div class="fgrid">
+    <div class="fg"><label>Budget ID</label><input id="f-bid" value="${d.budgetId||''}" placeholder="Auto-assigned if blank"></div>
+    <div class="fg"><label>${req('Budget year')}</label><select id="f-year" required>${yearOpts(d.year||STATE.activeYear)}</select></div>
+    <div class="fg"><label>${req('IT Owner')}</label>${ownerField(d.owner)}</div>
+    <div class="fg"><label>${req('Functional cost type')}</label><select id="f-ctype" required><option value="" disabled${!d.ctype?' selected':''}>— select —</option>${selOpts(CTYPES,d.ctype)}</select></div>
+    <div class="fg"><label>${req('Group')}</label><select id="f-grp" required><option value="" disabled${!d.group?' selected':''}>— select —</option>${selOpts(GROUPS,d.group)}</select></div>
+    <div class="fg"><label>${req('Sub-group')}</label><input id="f-sub" value="${d.sub||''}" placeholder="e.g. SAP, O365" required></div>
+    <div class="fg" style="grid-column:1/-1"><label>${req('Activity name')}</label><input id="f-act" value="${d.activity||''}" placeholder="e.g. SAP AMC Renewal" required></div>
+    <div class="fg"><label>${req('Payer')}</label><select id="f-payer" required><option value="" disabled${!d.payer?' selected':''}>— select —</option>${selOpts(PAYERS,d.payer)}</select></div>
+    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method" required><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
+    <div class="fg"><label>${req('Previous FY budget (&#x20B9;L)')}</label><input type="number" id="f-prev" step="0.01" min="0" value="${d.prevBudget!=null?d.prevBudget:''}" placeholder="Enter previous budget" required></div>
+    <div class="fg"><label>${req('Current FY budget (&#x20B9;L)')}</label><input type="number" id="f-cur" step="0.01" min="0" value="${d.curBudget!=null?d.curBudget:''}" placeholder="Enter current budget" required></div>
+  </div>`,
+  capex:(d={})=>`<div class="fgrid">
+    <div class="fg"><label>Budget ID</label><input id="f-bid" value="${d.budgetId||''}" placeholder="Auto-assigned if blank"></div>
+    <div class="fg"><label>${req('Budget year')}</label><select id="f-year" required>${yearOpts(d.year||STATE.activeYear)}</select></div>
+    <div class="fg"><label>${req('IT Owner')}</label>${ownerField(d.owner)}</div>
+    <div class="fg"><label>${req('Group')}</label><select id="f-grp" required><option value="" disabled${!d.group?' selected':''}>— select —</option>${selOpts(GROUPS,d.group)}</select></div>
+    <div class="fg"><label>${req('Sub-group')}</label><input id="f-sub" value="${d.sub||''}" placeholder="e.g. SAP, Servers" required></div>
+    <div class="fg" style="grid-column:1/-1"><label>${req('Activity name')}</label><input id="f-act" value="${d.activity||''}" placeholder="e.g. SAP Upgrade" required></div>
+    <div class="fg"><label>${req('Payer')}</label><select id="f-payer" required><option value="" disabled${!d.payer?' selected':''}>— select —</option>${selOpts(PAYERS,d.payer)}</select></div>
+    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method" required><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
+    <div class="fg"><label>${req('Previous FY budget (&#x20B9;L)')}</label><input type="number" id="f-prev" step="0.01" min="0" value="${d.prevBudget!=null?d.prevBudget:''}" placeholder="Enter previous budget" required></div>
+    <div class="fg"><label>${req('Current FY budget (&#x20B9;L)')}</label><input type="number" id="f-cur" step="0.01" min="0" value="${d.curBudget!=null?d.curBudget:''}" placeholder="Enter current budget" required></div>
+  </div>`,
+};
+
+function openModal(type,data={}){
+  CM=type;CEid=data.id||null;
+  document.getElementById('modal-box').className='modal'+(type==='override'?' modal-lg':'');
+  document.getElementById('m-title').textContent={entity:data.id?'Edit entity':'Add entity',opex:data.id?'Edit OPEX item':'Add OPEX item',capex:data.id?'Edit CAPEX item':'Add CAPEX item',override:'Edit fixed overrides'}[type]||'Edit';
+  document.getElementById('m-body').innerHTML=(FORMS[type]||(()=>''))(data);
+  document.getElementById('ov').classList.add('open');
+}
+function closeModal(){document.getElementById('ov').classList.remove('open');CM=null;CEid=null;}
+
+function validate(fields){
+  let ok=true;
+  fields.forEach(({id})=>{const el=document.getElementById(id);if(!el)return;const v=el.value.trim();if(!v){el.classList.add('err');ok=false;}else el.classList.remove('err');});
+  if(!ok) showToast('Please fill all required fields.');
+  return ok;
+}
+
+async function saveModal(){
+  const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():''};
+  const gn=id=>{const el=document.getElementById(id);return el&&el.value.trim()!==''?parseFloat(el.value):null};
+  setSyncing();
+  try {
+    if(CM==='entity'){
+      if(!validate([{id:'f-name'},{id:'f-hr'},{id:'f-sap'}])) return;
+      const data={EntityName:gv('f-name'),HRUsers:gn('f-hr')||0,SAPUsers:gn('f-sap')||0,CostCenter:gv('f-cc'),Payer:gv('f-payer'),IsActive:gv('f-active')!=='false'};
+      if(CEid) await spPatch(SP_CONFIG.lists.entities,CEid,data);
+      else await spPost(SP_CONFIG.lists.entities,data);
+      document.getElementById('recalc-banner').style.display='flex';
+    } else if(CM==='opex'){
+      if(!validate([{id:'f-ctype'},{id:'f-grp'},{id:'f-sub'},{id:'f-act'},{id:'f-payer'},{id:'f-method'}])) return;
+      if(gn('f-prev')===null||gn('f-cur')===null){showToast('Budget amounts are required.');return;}
+      const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
+      const data={BudgetID:gv('f-bid')||null,BudgetYear:gv('f-year'),ITOwner:owner,FunctionalCost:gv('f-ctype'),GroupName:gv('f-grp'),SubGroup:gv('f-sub'),ActivityName:gv('f-act'),Payer:gv('f-payer'),DistMethod:gv('f-method'),PrevBudget:gn('f-prev'),CurBudget:gn('f-cur'),Overrides:'{}'};
+      if(CEid){const existing=STATE.opex.find(r=>r.id===CEid);if(existing)data.Overrides=JSON.stringify(existing.overrides);await spPatch(SP_CONFIG.lists.opex,CEid,data);}
+      else await spPost(SP_CONFIG.lists.opex,data);
+    } else if(CM==='capex'){
+      if(!validate([{id:'f-grp'},{id:'f-sub'},{id:'f-act'},{id:'f-payer'},{id:'f-method'}])) return;
+      if(gn('f-prev')===null||gn('f-cur')===null){showToast('Budget amounts are required.');return;}
+      const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
+      const data={BudgetID:gv('f-bid')||null,BudgetYear:gv('f-year'),ITOwner:owner,GroupName:gv('f-grp'),SubGroup:gv('f-sub'),ActivityName:gv('f-act'),Payer:gv('f-payer'),DistMethod:gv('f-method'),PrevBudget:gn('f-prev'),CurBudget:gn('f-cur')};
+      if(CEid) await spPatch(SP_CONFIG.lists.capex,CEid,data);
+      else await spPost(SP_CONFIG.lists.capex,data);
+    } else if(CM==='override'){
+      const item=STATE.opex.find(r=>r.id===CEid);if(!item)return;
+      const ents=activeEntities();
+      const newOv={};
+      ents.forEach(e=>{const el=document.getElementById('ov-'+e.id);const v=el?parseFloat(el.value):NaN;if(!isNaN(v)&&v>0)newOv[String(e.id)]=v;});
+      await spPatch(SP_CONFIG.lists.opex,CEid,{Overrides:JSON.stringify(newOv)});
+      showToast('Overrides saved.');closeModal();await loadAllData();renderAll();setSynced();return;
+    }
+    closeModal();await loadAllData();renderAll();setSynced();showToast('Saved to SharePoint.');
+    populateFilters();
+  } catch(err){ setSyncErr(); showToast('Error saving: '+err.message); }
+}
+
+function openOverride(id){
+  const item=STATE.opex.find(r=>r.id===id);if(!item)return;
+  const ents=activeEntities();const ov=item.overrides||{};
+  CM='override';CEid=id;
+  document.getElementById('m-title').textContent='Fixed overrides — '+item.activity;
+  document.getElementById('modal-box').className='modal modal-lg';
+  document.getElementById('m-body').innerHTML=`
+    <div class="info-box" style="margin-bottom:14px">Enter a fixed &#x20B9; amount for ring-fenced entities. Leave <strong>0</strong> for entities that share the residual by ${item.method} ratio. Residual = Total (&#x20B9;${fmt(item.curBudget)}L) &minus; sum of fixed amounts.</div>
+    <div class="fgrid3">
+    ${ents.map(e=>`<div class="fg"><label>${e.name} <span style="font-size:10px;color:var(--tx3)">(HR:${e.hr} SAP:${e.sap})</span></label>
+      <input type="number" id="ov-${e.id}" min="0" step="0.01" placeholder="0" value="${ov[String(e.id)]||''}" oninput="updOvSumm('${id}')">
+    </div>`).join('')}
+    </div>
+    <div style="margin-top:12px;padding:10px;background:var(--sf2);border-radius:var(--r);font-size:12px;display:flex;gap:24px">
+      <span>Total: <strong>&#x20B9;${fmt(item.curBudget)}L</strong></span>
+      <span>Fixed: <strong id="ov-sum">&#x20B9;0.00L</strong></span>
+      <span>Residual: <strong id="ov-res">&#x20B9;${fmt(item.curBudget)}L</strong></span>
+    </div>`;
+  document.getElementById('ov').classList.add('open');
+  updOvSumm(id);
+}
+function updOvSumm(id){
+  const item=STATE.opex.find(r=>r.id===parseInt(id));if(!item)return;
+  const ents=activeEntities();
+  let s=0;ents.forEach(e=>{s+=parseFloat(document.getElementById('ov-'+e.id)?.value||0)||0;});
+  document.getElementById('ov-sum').textContent='₹'+fmt(s)+'L';
+  document.getElementById('ov-res').textContent='₹'+fmt(item.curBudget-s)+'L';
+}
+
+async function editEntity(id){const e=STATE.entities.find(x=>x.id===id);if(e)openModal('entity',e);}
+async function editItem(type,id){const r=STATE[type].find(x=>x.id===id);if(r)openModal(type,r);}
+async function delItem(type,id){
+  if(!confirm('Delete this entry from SharePoint?')) return;
+  setSyncing();
+  try{await spDelete(SP_CONFIG.lists[type],id);await loadAllData();renderAll();setSynced();showToast('Deleted.');}
+  catch(e){setSyncErr();showToast('Error: '+e.message);}
+}
+async function toggleEntity(id){
+  const e=STATE.entities.find(x=>x.id===id);if(!e)return;
+  setSyncing();
+  try{await spPatch(SP_CONFIG.lists.entities,id,{IsActive:!e.active});await loadAllData();renderAll();setSynced();}
+  catch(err){setSyncErr();showToast('Error: '+err.message);}
+}
+function recalculate(){document.getElementById('recalc-banner').style.display='none';renderAll();showToast('Distribution recalculated.');}
+
+function clearSel(){
+  document.getElementById('sel-own').value='';
+  const actSel=document.getElementById('sel-act');actSel.innerHTML='<option value="">— select —</option>';actSel.disabled=true;
+  const entSel=document.getElementById('sel-ent');entSel.innerHTML='<option value="">— select —</option>';entSel.disabled=true;
+  document.getElementById('edit-result').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAV & UTILS
+// ═══════════════════════════════════════════════════════
+const PG={dash:'Dashboard',entities:'Entities & HR/SAP users',opex:'OPEX budget',capex:'CAPEX budget',dist:'Distribution table',edit:'Entity budget edit',audit:'Audit log'};
+function go(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  document.getElementById('pg-title').textContent=PG[id]||id;
+  if(el)el.classList.add('on');
+  if(id==='edit'){
+    const mo=myOwner();
+    const b=document.getElementById('edit-banner');
+    b.innerHTML=isAdmin()?'<strong>IT Head view:</strong> You can view and approve entity edits from all IT owners.':`<strong>Your scope: ${mo||CU.name}</strong> — Select your activity and a business entity, enter the revised budget amount, and submit for IT Head approval.`;
+    populateEditSelectors();renderEditList();
+  }
+  if(id==='audit') renderAudit();
+  if(id==='dist') renderDist();
+}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+document.getElementById('ov').addEventListener('click',function(e){if(e.target===this)closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+// Boot on load — handle MSAL redirect response first
+async function initMSAL() {
+  try {
+    // Handle redirect response (if returning from login)
+    await msalInstance.handleRedirectPromise();
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length === 0) {
+      // No logged in user — trigger login
+      setLoading('Redirecting to Microsoft 365 login...');
+      await msalInstance.loginRedirect({
+        scopes: SCOPES,
+        prompt: 'select_account'
+      });
+      return; // Page will redirect
+    }
+    // User is logged in — boot the app
+    boot();
+  } catch(err) {
+    showLoadError(err);
+  }
+}
+initMSAL();
+</script>
+</body>
+</html>
