@@ -150,6 +150,7 @@ tbody tr:hover{background:#f8fafc}
     <div class="nav" onclick="go('dist',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Distribution table</div>
     <div class="nav" onclick="go('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Entity edit</div>
     <div class="sec">Admin</div>
+    <div class="nav" id="nav-users" style="display:none" onclick="go('users',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>User Management</div>
     <div class="nav" onclick="go('audit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Audit log</div>
     <div class="sb-foot">
       <div class="sync-bar" style="margin-bottom:8px">
@@ -268,6 +269,63 @@ tbody tr:hover{background:#f8fafc}
         </div>
       </div>
 
+
+      <!-- USER MANAGEMENT -->
+      <div class="page" id="page-users">
+        <div class="info-box" style="margin-bottom:12px">
+          Manage IT team members and their access scope. Each user's <strong>Owner Name</strong> must match exactly how their name appears in OPEX/CAPEX budget items. Users can only see and edit items assigned to their owner name.
+        </div>
+        <div class="ph" style="margin-bottom:12px">
+          <div style="font-size:13px;font-weight:600">Authorised Users</div>
+          <button class="btn btn-p" onclick="openUserModal()">+ Add user</button>
+        </div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Owner Name (in budget)</th><th>Access Scope</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="t-users"></tbody>
+          </table>
+        </div>
+        <div class="warn-box" style="margin-top:12px">
+          <strong>Note:</strong> Users are authenticated via Microsoft 365. Adding a user here grants them role-based access when they sign in with their Arvind email. Users not listed here will be treated as <strong>Viewer</strong> (read-only).
+        </div>
+      </div>
+
+      <!-- USER MODAL -->
+      <div class="ov" id="user-ov" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;align-items:center;justify-content:center">
+        <div class="modal" style="width:520px">
+          <h4 id="user-modal-title">Add User</h4>
+          <div class="fgrid">
+            <div class="fg"><label>Full Name <span class="req">*</span></label><input id="u-name" placeholder="e.g. Advait Shah"></div>
+            <div class="fg"><label>Arvind Email <span class="req">*</span></label><input id="u-email" type="email" placeholder="advait@arvind.in"></div>
+            <div class="fg"><label>Role <span class="req">*</span></label>
+              <select id="u-role">
+                <option value="IT Head">IT Head (Full access)</option>
+                <option value="Network Lead">Network Lead</option>
+                <option value="EUS Lead">End User Support Lead</option>
+                <option value="DC Lead">Data Center Lead</option>
+                <option value="App Lead">Application Lead</option>
+                <option value="CAB Manager">CAB Manager</option>
+                <option value="Finance">Finance (View only)</option>
+                <option value="Viewer">Viewer (Read only)</option>
+              </select>
+            </div>
+            <div class="fg"><label>Owner Name in Budget <span class="req">*</span></label><input id="u-owner" placeholder="Must match ITOwner field in OPEX/CAPEX exactly"></div>
+            <div class="fg" style="grid-column:1/-1"><label>Access Scope</label>
+              <select id="u-scope">
+                <option value="All">All groups</option>
+                <option value="Network">Network only</option>
+                <option value="End User Support">End User Support only</option>
+                <option value="Datacentre">Datacentre only</option>
+                <option value="Application">Application only</option>
+              </select>
+            </div>
+          </div>
+          <div class="ma">
+            <button class="btn" onclick="closeUserModal()">Cancel</button>
+            <button class="btn btn-p" onclick="saveUser()">Save user</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -286,7 +344,8 @@ const SP_CONFIG = {
     opex:        'ITB_OPEX',
     capex:       'ITB_CAPEX',
     edits:       'ITB_EntityEdits',
-    config:      'ITB_Config'
+    config:      'ITB_Config',
+    users:       'ITB_Users'
   }
 };
 
@@ -524,6 +583,8 @@ function startApp(){
   document.getElementById('sb-name').textContent = CU.name;
   document.getElementById('sb-role').textContent = CU.spRole + ' · ' + CU.email;
   document.getElementById('sb-av').textContent = CU.initials;
+  if(isAdmin()) document.getElementById('nav-users').style.display='flex';
+  await buildDynamicRoleMap();
   buildYearSelector();
   populateFilters();
   populateEditSelectors();
@@ -1084,7 +1145,7 @@ function clearSel(){
 // ═══════════════════════════════════════════════════════
 //  NAV & UTILS
 // ═══════════════════════════════════════════════════════
-const PG={dash:'Dashboard',entities:'Entities & HR/SAP users',opex:'OPEX budget',capex:'CAPEX budget',dist:'Distribution table',edit:'Entity budget edit',audit:'Audit log'};
+const PG={dash:'Dashboard',users:'User Management',entities:'Entities & HR/SAP users',opex:'OPEX budget',capex:'CAPEX budget',dist:'Distribution table',edit:'Entity budget edit',audit:'Audit log'};
 function go(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
@@ -1098,11 +1159,119 @@ function go(id,el){
     populateEditSelectors();renderEditList();
   }
   if(id==='audit') renderAudit();
+  if(id==='users') renderUsers();
   if(id==='dist') renderDist();
 }
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 document.getElementById('ov').addEventListener('click',function(e){if(e.target===this)closeModal()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+
+// ═══════════════════════════════════════════════════════
+//  USER MANAGEMENT
+// ═══════════════════════════════════════════════════════
+let editUserId = null;
+
+async function loadUsers(){
+  try {
+    const items = await spGet(SP_CONFIG.lists.users);
+    return items.map(u=>({
+      id: u.Id, name: u.UserName, email: u.UserEmail.toLowerCase(),
+      role: u.UserRole, ownerName: u.OwnerName, scope: u.AccessScope||'All', active: u.IsActive!==false
+    }));
+  } catch(e) {
+    // List may not exist yet — return empty
+    return [];
+  }
+}
+
+async function renderUsers(){
+  const users = await loadUsers();
+  const tbody = document.getElementById('t-users');
+  if(!tbody) return;
+  if(!users.length){
+    tbody.innerHTML='<tr><td colspan="7"><div class="empty">No users added yet. Click "+ Add user" to get started.</div></td></tr>';
+    return;
+  }
+  const scopeColors = {'All':'b-b','Network':'b-p','End User Support':'b-g','Datacentre':'b-a','Application':'b-c'};
+  tbody.innerHTML = users.map(u=>`<tr>
+    <td style="font-weight:600">${u.name}</td>
+    <td style="font-size:11px;color:var(--tx2)">${u.email}</td>
+    <td><span class="badge ${u.role==='IT Head'?'b-b':u.role==='Viewer'||u.role==='Finance'?'b-gr':'b-g'}">${u.role}</span></td>
+    <td><code style="font-size:11px;background:var(--sf2);padding:2px 6px;border-radius:4px">${u.ownerName||'—'}</code></td>
+    <td><span class="badge ${scopeColors[u.scope]||'b-gr'}">${u.scope}</span></td>
+    <td><span class="badge ${u.active?'b-g':'b-r'}">${u.active?'Active':'Inactive'}</span></td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn btn-e" onclick="editUser(${u.id})">✎</button>
+      <button class="btn btn-d" onclick="toggleUser(${u.id},${!u.active})">${u.active?'Deactivate':'Activate'}</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function openUserModal(id=null){
+  editUserId=id;
+  document.getElementById('user-modal-title').textContent = id ? 'Edit User' : 'Add User';
+  if(!id){
+    ['u-name','u-email','u-owner'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('u-role').value='Network Lead';
+    document.getElementById('u-scope').value='All';
+  }
+  document.getElementById('user-ov').style.display='flex';
+}
+function closeUserModal(){ document.getElementById('user-ov').style.display='none'; editUserId=null; }
+
+async function editUser(id){
+  const users = await loadUsers();
+  const u = users.find(x=>x.id===id); if(!u) return;
+  document.getElementById('u-name').value=u.name;
+  document.getElementById('u-email').value=u.email;
+  document.getElementById('u-role').value=u.role;
+  document.getElementById('u-owner').value=u.ownerName||'';
+  document.getElementById('u-scope').value=u.scope||'All';
+  openUserModal(id);
+}
+
+async function saveUser(){
+  const name=document.getElementById('u-name').value.trim();
+  const email=document.getElementById('u-email').value.trim().toLowerCase();
+  const role=document.getElementById('u-role').value;
+  const owner=document.getElementById('u-owner').value.trim();
+  const scope=document.getElementById('u-scope').value;
+  if(!name||!email||!owner){showToast('Name, email and owner name are required.');return}
+  setSyncing();
+  try {
+    const data={UserName:name,UserEmail:email,UserRole:role,OwnerName:owner,AccessScope:scope,IsActive:true};
+    if(editUserId) await spPatch(SP_CONFIG.lists.users,editUserId,data);
+    else await spPost(SP_CONFIG.lists.users,data);
+    closeUserModal();
+    await renderUsers();
+    setSynced();
+    showToast(editUserId?'User updated.':'User added successfully.');
+    // Reload dynamic role map
+    await buildDynamicRoleMap();
+  } catch(e){ setSyncErr(); showToast('Error: '+e.message); }
+}
+
+async function toggleUser(id, active){
+  setSyncing();
+  try {
+    await spPatch(SP_CONFIG.lists.users,id,{IsActive:active});
+    await renderUsers();
+    setSynced();
+    showToast(active?'User activated.':'User deactivated.');
+  } catch(e){ setSyncErr(); showToast('Error: '+e.message); }
+}
+
+// Build dynamic role map from SharePoint ITB_Users list
+// Falls back to hardcoded ROLE_MAP if list is empty
+async function buildDynamicRoleMap(){
+  const users = await loadUsers();
+  if(!users.length) return; // use hardcoded ROLE_MAP
+  users.filter(u=>u.active).forEach(u=>{
+    const prefix = u.email.split('@')[0].toLowerCase();
+    ROLE_MAP[prefix] = { role: u.role, ownerName: u.ownerName, scope: u.scope };
+  });
+}
 
 // Boot on load — handle MSAL redirect response first
 async function initMSAL() {
