@@ -121,11 +121,12 @@ tbody tr:hover{background:#f8fafc}
 .tab{padding:8px 16px;font-size:12px;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-1px}
 .tab.on{color:var(--bl);border-bottom-color:var(--bl);font-weight:600}
 </style>
-<!-- Microsoft Authentication Library -->
-<script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
 </head>
 <body>
-
+<script>
+// Load MSAL synchronously before anything else
+document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"><\/scr'+'ipt>');
+</script>
 <div class="loading-screen" id="loading">
   <div class="spinner"></div>
   <div class="loading-text">Connecting to SharePoint...</div>
@@ -1294,7 +1295,14 @@ async function initMSAL() {
     showLoadError(err);
   }
 }
-initMSAL();
+// Ensure MSAL is loaded before initializing
+window.addEventListener('load', function() {
+  if (typeof msal === 'undefined') {
+    document.getElementById('loading').innerHTML = '<div style="text-align:center;padding:40px"><div style="font-size:24px;margin-bottom:12px">⚠️</div><div style="font-size:15px;font-weight:500">Failed to load authentication library</div><div style="font-size:12px;color:#64748b;margin-top:8px">Please check your internet connection and refresh the page.</div><button onclick="location.reload()" style="margin-top:16px;padding:10px 20px;background:#1e40af;color:#fff;border:none;border-radius:8px;cursor:pointer">Refresh</button></div>';
+    return;
+  }
+  initMSAL();
+});
 </script>
 </body>
 </html>
