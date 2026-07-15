@@ -578,7 +578,7 @@ async function loadAllData(){
 // ═══════════════════════════════════════════════════════
 //  START APP (post-auth)
 // ═══════════════════════════════════════════════════════
-function startApp(){
+async function startApp(){
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   document.getElementById('sb-name').textContent = CU.name;
