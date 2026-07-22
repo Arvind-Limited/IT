@@ -287,7 +287,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
           </table>
         </div>
         <div class="warn-box" style="margin-top:12px">
-          <strong>Note:</strong> Users are authenticated via Microsoft 365. Adding a user here grants them role-based access when they sign in with their Arvind email. Users not listed here will be treated as <strong>Viewer</strong> (read-only).
+          <strong>Note:</strong> Users are authenticated via Microsoft 365. Adding a user here grants them role-based access when they sign in with their Arvind email. Users not listed here will be <strong>denied access</strong>.
         </div>
       </div>
 
@@ -478,7 +478,7 @@ const ROLE_MAP = {
 };
 function getUserRole(email){
   const prefix = (email||'').split('@')[0].toLowerCase();
-  return ROLE_MAP[prefix] || { role:'Viewer', ownerName: email };
+  return ROLE_MAP[prefix] || null;
 }
 function isAdmin(){ return CU && CU.spRole==='IT Head'; }
 function myOwner(){ return CU ? CU.ownerName : null; }
@@ -491,7 +491,13 @@ async function boot(){
   setLoading('Checking Microsoft 365 authentication...');
   try {
     const spUser = await getCurrentUser();
+    setLoading('Checking access...');
+    await buildDynamicRoleMap();
     const roleInfo = getUserRole(spUser.Email);
+    if(!roleInfo){
+      showAccessDenied(spUser);
+      return;
+    }
     CU = {
       name: spUser.Title,
       email: spUser.Email,
@@ -524,6 +530,17 @@ function showLoadError(err){
         &bull; You don't have access to the ITBudgetPlanner site<br><br>
         Open <a href="https://arvindgroup.sharepoint.com/sites/ITBudget-ITBudgetChannel" target="_blank" style="color:#1e40af">the SharePoint site</a> to check access.
       </div>
+    </div>`;
+}
+
+function showAccessDenied(spUser){
+  document.getElementById('loading').innerHTML = `
+    <div style="text-align:center;padding:40px;max-width:440px">
+      <div style="font-size:24px;margin-bottom:12px">&#x1F512;</div>
+      <div style="font-size:15px;font-weight:500;margin-bottom:8px">Access restricted</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:16px">${spUser.Title} (${spUser.Email}) is not an authorised user of the IT Budget Planner.</div>
+      <div style="font-size:12px;color:#94a3b8;background:#f1f5f9;padding:12px;border-radius:8px;text-align:left">Ask your IT Head to add you under <strong>Admin &rarr; User Management</strong> before you can sign in.</div>
+      <button onclick="signOut()" style="margin-top:16px;padding:10px 20px;background:#1e40af;color:#fff;border:none;border-radius:8px;cursor:pointer">Sign out</button>
     </div>`;
 }
 
