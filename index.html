@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>IT Budget Planner — Arvind Limited | FY 2026-27</title>
+<title>Group Budget Planner — Arvind Limited | FY 2026-27</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -120,6 +120,16 @@ tbody tr:hover{background:#f8fafc}
 .tab-row{display:flex;border-bottom:1px solid var(--bd);margin-bottom:14px}
 .tab{padding:8px 16px;font-size:12px;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-1px}
 .tab.on{color:var(--bl);border-bottom-color:var(--bl);font-weight:600}
+/* GROUP: approval workflow */
+.st{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.st-draft{background:#f1f5f9;color:#475569}.st-bu{background:var(--aml);color:var(--am)}.st-cfo{background:var(--bll);color:var(--bl)}
+.st-ok{background:var(--gnl);color:var(--gn)}.st-ret{background:var(--rdl);color:var(--rd)}
+.nav .cnt{margin-left:auto;background:var(--rd);color:#fff;border-radius:20px;font-size:10px;padding:0 6px;line-height:16px}
+.nav .cnt:empty{display:none}
+.dept-tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#eef2ff;color:#3730a3;white-space:nowrap}
+.hist{border-left:2px solid var(--bd);margin-left:4px;padding-left:12px;display:flex;flex-direction:column;gap:8px}
+.hist div{font-size:12px}.hist small{color:var(--tx3)}
+.hist .note{background:var(--sf2);border-radius:6px;padding:4px 8px;margin-top:2px;font-size:11px}
 </style>
 </head>
 <body>
@@ -135,7 +145,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
 
 <div class="app" id="app" style="display:none">
   <div class="sidebar">
-    <div class="sb-logo"><h2>IT Budget Planner</h2><span id="sb-year">Arvind Limited</span></div>
+    <div class="sb-logo"><h2>Group Budget Planner</h2><span id="sb-year">Arvind Limited</span></div>
     <div class="user-pill">
       <div class="av" id="sb-av">?</div>
       <div style="min-width:0"><div class="uname" id="sb-name">Loading...</div><div class="urole" id="sb-role"></div></div>
@@ -147,11 +157,13 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
     <div class="sec">Budget</div>
     <div class="nav" onclick="go('opex',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>OPEX</div>
     <div class="nav" onclick="go('capex',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>CAPEX</div>
+    <div class="nav" id="nav-appr" onclick="go('approvals',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Approvals<span class="cnt" id="appr-cnt"></span></div>
     <div class="sec">Distribution</div>
     <div class="nav" onclick="go('dist',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Distribution table</div>
     <div class="nav" onclick="go('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Entity edit</div>
     <div class="sec">Admin</div>
     <div class="nav" id="nav-users" style="display:none" onclick="go('users',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>User Management</div>
+    <div class="nav" id="nav-depts" style="display:none" onclick="go('depts',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg>Departments</div>
     <div class="nav" onclick="go('audit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Audit log</div>
     <div class="sb-foot">
       <div class="sync-bar" style="margin-bottom:8px">
@@ -166,6 +178,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
     <div class="topbar">
       <h3 id="pg-title">Dashboard</h3>
       <div style="display:flex;align-items:center;gap:10px">
+        <select id="dept-sel" onchange="onDeptFilter()" style="padding:5px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px;display:none" aria-label="Department"></select>
         <select id="year-sel" onchange="onYearChange()" style="padding:5px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
         <button id="btn-add-year" class="btn btn-p" style="padding:5px 10px;font-size:11px" onclick="addYear()">+ Year</button>
         <div id="pg-sub" style="font-size:11px;color:var(--tx2)"></div>
@@ -177,11 +190,13 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
       <div class="page on" id="page-dash">
         <div class="metrics" id="dash-metrics"></div>
         <div class="tab-row">
-          <div class="tab on" onclick="switchTab('group',this)">Group</div>
+          <div class="tab on" onclick="switchTab('dept',this)">Department</div>
+          <div class="tab" onclick="switchTab('group',this)">Group</div>
           <div class="tab" onclick="switchTab('functional',this)">Functional cost type</div>
           <div class="tab" onclick="switchTab('subgroup',this)">Sub-group</div>
-          <div class="tab" onclick="switchTab('itbiz',this)">IT vs Business</div>
+          <div class="tab" onclick="switchTab('itbiz',this)">Payer</div>
           <div class="tab" onclick="switchTab('entity',this)">Entity-wise</div>
+          <div class="tab" onclick="switchTab('status',this)">Approval status</div>
         </div>
         <div id="summary-table"></div>
         <div class="card"><div class="ct" id="pending-title">Pending entity edits</div><div id="dash-pending"></div></div>
@@ -193,7 +208,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
           <div class="info-box" style="flex:1;margin-right:12px">Add entities and their HR / SAP user counts. These drive the automatic cost distribution. After any change click <strong>Recalculate</strong> to recompute the full budget.</div>
           <button class="btn btn-p" onclick="openModal('entity')">+ Add entity</button>
         </div>
-        <div class="tw"><table><thead><tr><th>#</th><th>Entity</th><th>HR users</th><th>SAP users</th><th>HR%</th><th>SAP%</th><th>Cost center</th><th>Payer</th><th>Active</th><th>Actions</th></tr></thead><tbody id="t-ent"></tbody><tfoot id="t-ent-foot"></tfoot></table></div>
+        <div class="tw"><table><thead><tr><th>#</th><th>Entity</th><th>HR users</th><th>SAP users</th><th>HR%</th><th>SAP%</th><th>Cost center</th><th>Payer</th><th>BU head (approver)</th><th>Active</th><th>Actions</th></tr></thead><tbody id="t-ent"></tbody><tfoot id="t-ent-foot"></tfoot></table></div>
         <div class="warn-box" id="recalc-banner" style="display:none">Entity counts changed. <button class="btn btn-p" style="margin-left:12px;padding:5px 10px;font-size:11px" onclick="recalculate()">Recalculate now</button></div>
       </div>
 
@@ -203,16 +218,17 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
           <div style="display:flex;gap:8px">
             <select id="opex-f-grp" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
             <select id="opex-f-own" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
+            <select id="opex-f-st" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"><option value="">All statuses</option><option>Draft</option><option>Pending BU Head</option><option>Pending CFO</option><option>Approved</option><option>Returned</option></select>
           </div>
           <button class="btn btn-p" id="btn-opex" onclick="openModal('opex')">+ Add OPEX item</button>
         </div>
-        <div class="tw"><table><thead><tr><th>Budget ID</th><th>Year</th><th>Owner</th><th>Cost type</th><th>Group</th><th>Sub-group</th><th>Activity</th><th>Payer</th><th>Method</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Fixed total</th><th>Actions</th></tr></thead><tbody id="t-opex"></tbody></table></div>
+        <div class="tw"><table><thead><tr><th>Budget ID</th><th>Department</th><th>Entity</th><th>Owner</th><th>Cost type</th><th>Group</th><th>Sub-group</th><th>Activity</th><th>Payer</th><th>Method</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Fixed total</th><th>Status</th><th>Actions</th></tr></thead><tbody id="t-opex"></tbody></table></div>
       </div>
 
       <!-- CAPEX -->
       <div class="page" id="page-capex">
         <div class="ph"><div></div><button class="btn btn-p" id="btn-capex" onclick="openModal('capex')">+ Add CAPEX item</button></div>
-        <div class="tw"><table><thead><tr><th>Budget ID</th><th>Year</th><th>Owner</th><th>Group</th><th>Sub-group</th><th>Activity</th><th>Payer</th><th>Method</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Actions</th></tr></thead><tbody id="t-capex"></tbody></table></div>
+        <div class="tw"><table><thead><tr><th>Budget ID</th><th>Department</th><th>Entity</th><th>Owner</th><th>Group</th><th>Sub-group</th><th>Activity</th><th>Payer</th><th>Method</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Status</th><th>Actions</th></tr></thead><tbody id="t-capex"></tbody></table></div>
       </div>
 
       <!-- DISTRIBUTION -->
@@ -256,6 +272,30 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
         </div>
       </div>
 
+      <!-- APPROVALS -->
+      <div class="page" id="page-approvals">
+        <div class="info-box" id="appr-banner"></div>
+        <div class="card" id="appr-mine-card">
+          <div class="ph" style="margin-bottom:10px"><div class="ct" style="margin:0" id="appr-mine-title">Awaiting your approval</div>
+            <div style="display:flex;gap:6px"><button class="btn btn-g" id="appr-bulk-ok" onclick="bulkApprove()">&#x2713; Approve all shown</button></div></div>
+          <div class="tw"><table><thead><tr><th>Type</th><th>Budget ID</th><th>Department</th><th>Entity</th><th>Owner</th><th>Activity</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Change</th><th>Status</th><th>Actions</th></tr></thead><tbody id="t-appr"></tbody></table></div>
+        </div>
+        <div class="card" id="appr-own-card">
+          <div class="ph" style="margin-bottom:10px"><div class="ct" style="margin:0">Your drafts &amp; returned lines</div>
+            <button class="btn btn-p" id="btn-submit-all" onclick="submitAllDrafts()">Submit all drafts</button></div>
+          <div class="tw"><table><thead><tr><th>Type</th><th>Budget ID</th><th>Department</th><th>Entity</th><th>Activity</th><th>Current (&#x20B9;L)</th><th>Status</th><th>Latest comment</th><th>Actions</th></tr></thead><tbody id="t-own"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- DEPARTMENTS -->
+      <div class="page" id="page-depts">
+        <div class="ph">
+          <div class="info-box" style="flex:1;margin-right:12px">Departments that plan budgets. <strong>Dept head</strong> is the first approver for lines not tied to a single entity (shared lines). Turn <strong>Approval required</strong> off to let a department save lines as approved straight away, which is how IT works today.</div>
+          <button class="btn btn-p" onclick="openModal('dept')">+ Add department</button>
+        </div>
+        <div class="tw"><table><thead><tr><th>Department</th><th>Dept head (email)</th><th>Approval required</th><th>Cost groups</th><th>Active</th><th>Actions</th></tr></thead><tbody id="t-depts"></tbody></table></div>
+      </div>
+
       <!-- AUDIT -->
       <div class="page" id="page-audit">
         <div class="ph" style="margin-bottom:10px">
@@ -274,7 +314,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
       <!-- USER MANAGEMENT -->
       <div class="page" id="page-users">
         <div class="info-box" style="margin-bottom:12px">
-          Manage IT team members and their access scope. Each user's <strong>Owner Name</strong> must match exactly how their name appears in OPEX/CAPEX budget items. Users can only see and edit items assigned to their owner name.
+          Manage users across departments and their access scope. BU heads approve lines for their entity; the Group CFO gives final approval. Each user's <strong>Owner Name</strong> must match exactly how their name appears in OPEX/CAPEX budget items. Users can only see and edit items assigned to their owner name.
         </div>
         <div class="ph" style="margin-bottom:12px">
           <div style="font-size:13px;font-weight:600">Authorised Users</div>
@@ -282,7 +322,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
         </div>
         <div class="tw">
           <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Owner Name (in budget)</th><th>Access Scope</th><th>Status</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Entity</th><th>Owner Name (in budget)</th><th>Access Scope</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody id="t-users"></tbody>
           </table>
         </div>
@@ -301,6 +341,10 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
             <div class="fg"><label>Role <span class="req">*</span></label>
               <select id="u-role">
                 <option value="IT Head">IT Head (Full access)</option>
+                <option value="Admin">Budget Admin (Full access)</option>
+                <option value="Group CFO">Group CFO (Final approver)</option>
+                <option value="BU Head">BU Head (Entity approver)</option>
+                <option value="Dept Owner">Department Owner</option>
                 <option value="Network Lead">Network Lead</option>
                 <option value="EUS Lead">End User Support Lead</option>
                 <option value="DC Lead">Data Center Lead</option>
@@ -310,7 +354,9 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
                 <option value="Viewer">Viewer (Read only)</option>
               </select>
             </div>
-            <div class="fg"><label>Owner Name in Budget <span class="req">*</span></label><input id="u-owner" placeholder="Must match ITOwner field in OPEX/CAPEX exactly"></div>
+            <div class="fg"><label>Owner Name in Budget</label><input id="u-owner" placeholder="Required for owners; matches the Owner on budget lines"></div>
+            <div class="fg"><label>Department</label><select id="u-dept"></select></div>
+            <div class="fg"><label>Entity (BU heads only)</label><select id="u-entity"></select></div>
             <div class="fg" style="grid-column:1/-1"><label>Access Scope</label>
               <select id="u-scope">
                 <option value="All">All groups</option>
@@ -332,6 +378,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
 </div>
 
 <div class="ov" id="ov"><div class="modal" id="modal-box"><h4 id="m-title"></h4><div id="m-body"></div><div class="ma"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-p" onclick="saveModal()">Save</button></div></div></div>
+<div class="ov" id="act-ov"><div class="modal"><h4 id="act-title"></h4><div id="act-body"></div><div class="ma" id="act-foot"></div></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -346,7 +393,9 @@ const SP_CONFIG = {
     capex:       'ITB_CAPEX',
     edits:       'ITB_EntityEdits',
     config:      'ITB_Config',
-    users:       'ITB_Users'
+    users:       'ITB_Users',
+    depts:       'ITB_Departments',
+    log:         'ITB_ApprovalLog'
   }
 };
 
@@ -461,7 +510,7 @@ async function getCurrentUser(){
 // ═══════════════════════════════════════════════════════
 let CU = null;        // current SharePoint user
 let STATE = {
-  entities: [], opex: [], capex: [], edits: [], config: [],
+  entities: [], opex: [], capex: [], edits: [], config: [], depts: [], log: [], users: [], deptFilter: '',
   activeYear: 'FY 2026-27', budgetYears: ['FY 2025-26','FY 2026-27']
 };
 const fmt = v => Number(v||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -480,9 +529,12 @@ function getUserRole(email){
   const prefix = (email||'').split('@')[0].toLowerCase();
   return ROLE_MAP[prefix] || null;
 }
-function isAdmin(){ return CU && CU.spRole==='IT Head'; }
+function isAdmin(){ return CU && (CU.spRole==='IT Head' || CU.spRole==='Admin'); }
+function isCFO(){ return CU && CU.spRole==='Group CFO'; }
+function isBUHead(){ return CU && CU.spRole==='BU Head'; }
+function myDept(){ return (CU && CU.dept) || 'IT'; }
 function myOwner(){ return CU ? CU.ownerName : null; }
-function canSeeOwner(o){ return isAdmin() || myOwner()===null || myOwner()===o; }
+function canSeeOwner(o){ return isAdmin() || isCFO() || myOwner()===null || myOwner()===o; }
 
 // ═══════════════════════════════════════════════════════
 //  BOOT — authenticate via SharePoint current user
@@ -504,7 +556,9 @@ async function boot(){
       loginName: spUser.LoginName,
       initials: spUser.Title.trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2),
       spRole: roleInfo.role,
-      ownerName: roleInfo.ownerName
+      ownerName: roleInfo.ownerName,
+      dept: roleInfo.dept || 'IT',
+      entity: roleInfo.entity || ''
     };
     setLoading('Loading budget data from SharePoint...');
     await loadAllData();
@@ -538,8 +592,8 @@ function showAccessDenied(spUser){
     <div style="text-align:center;padding:40px;max-width:440px">
       <div style="font-size:24px;margin-bottom:12px">&#x1F512;</div>
       <div style="font-size:15px;font-weight:500;margin-bottom:8px">Access restricted</div>
-      <div style="font-size:13px;color:#64748b;margin-bottom:16px">${spUser.Title} (${spUser.Email}) is not an authorised user of the IT Budget Planner.</div>
-      <div style="font-size:12px;color:#94a3b8;background:#f1f5f9;padding:12px;border-radius:8px;text-align:left">Ask your IT Head to add you under <strong>Admin &rarr; User Management</strong> before you can sign in.</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:16px">${spUser.Title} (${spUser.Email}) is not an authorised user of the Group Budget Planner.</div>
+      <div style="font-size:12px;color:#94a3b8;background:#f1f5f9;padding:12px;border-radius:8px;text-align:left">Ask the budget administrator to add you under <strong>Admin &rarr; User Management</strong> before you can sign in.</div>
       <button onclick="signOut()" style="margin-top:16px;padding:10px 20px;background:#1e40af;color:#fff;border:none;border-radius:8px;cursor:pointer">Sign out</button>
     </div>`;
 }
@@ -554,9 +608,23 @@ async function loadAllData(){
     spGet(SP_CONFIG.lists.config)
   ]);
 
+  const [depts, log] = await Promise.all([
+    spGet(SP_CONFIG.lists.depts).catch(()=>null),
+    spGet(SP_CONFIG.lists.log).catch(()=>[])
+  ]);
+  STATE.deptsListMissing = depts===null;
+  STATE.depts = (depts||[]).map(d=>({
+    id: d.Id, name: d.DeptName, head: (d.DeptHeadEmail||'').toLowerCase(),
+    approval: d.RequiresApproval!==false, groups: (d.CostGroups||'').split(/[,;\n]/).map(s=>s.trim()).filter(Boolean),
+    active: d.IsActive!==false
+  }));
+  if(!STATE.depts.some(d=>d.name==='IT')) STATE.depts.unshift({id:null,name:'IT',head:'',approval:false,groups:IT_GROUPS.slice(),active:true});
+  STATE.log = (log||[]).map(l=>({id:l.Id, type:l.LineType, lineId:Number(l.LineID||0), action:l.Action, actor:l.Actor, comment:l.Comment, at:l.Created}));
+
   STATE.entities = entities.map(e=>({
     id: e.Id, name: e.EntityName, hr: Number(e.HRUsers||0), sap: Number(e.SAPUsers||0),
-    costCenter: e.CostCenter, payer: e.Payer, active: e.IsActive!==false
+    costCenter: e.CostCenter, payer: e.Payer, active: e.IsActive!==false,
+    buHead: (e.BUHeadEmail||'').toLowerCase()
   }));
 
   STATE.opex = opex.map(r=>({
@@ -564,14 +632,16 @@ async function loadAllData(){
     ctype: r.FunctionalCost, group: r.GroupName, sub: r.SubGroup,
     activity: r.ActivityName, payer: r.Payer, method: r.DistMethod,
     prevBudget: Number(r.PrevBudget||0), curBudget: Number(r.CurBudget||0),
-    overrides: r.Overrides ? JSON.parse(r.Overrides) : {}
+    overrides: r.Overrides ? JSON.parse(r.Overrides) : {},
+    ...wfFields(r)
   }));
 
   STATE.capex = capex.map(r=>({
     id: r.Id, budgetId: r.BudgetID, year: r.BudgetYear, owner: r.ITOwner,
     group: r.GroupName, sub: r.SubGroup, activity: r.ActivityName,
     payer: r.Payer, method: r.DistMethod,
-    prevBudget: Number(r.PrevBudget||0), curBudget: Number(r.CurBudget||0)
+    prevBudget: Number(r.PrevBudget||0), curBudget: Number(r.CurBudget||0),
+    ...wfFields(r)
   }));
 
   STATE.edits = edits.map(e=>({
@@ -601,7 +671,9 @@ async function startApp(){
   document.getElementById('sb-name').textContent = CU.name;
   document.getElementById('sb-role').textContent = CU.spRole + ' · ' + CU.email;
   document.getElementById('sb-av').textContent = CU.initials;
-  if(isAdmin()) document.getElementById('nav-users').style.display='flex';
+  if(isAdmin()){ document.getElementById('nav-users').style.display='flex'; document.getElementById('nav-depts').style.display='flex'; }
+  buildDeptFilter();
+  if(isCFO()||isBUHead()){ ['btn-opex','btn-capex'].forEach(id=>{const b=document.getElementById(id); if(b) b.style.display='none';}); }
   await buildDynamicRoleMap();
   buildYearSelector();
   populateFilters();
@@ -666,6 +738,7 @@ function totSAP(){ return activeEntities().reduce((a,e)=>a+e.sap,0); }
 function entById(id){ return STATE.entities.find(e=>e.id===Number(id)); }
 
 function getAutoValue(item, eid){
+  if(item.entity){ const e=entById(eid); return e && e.name===item.entity ? Number(item.curBudget) : 0; }
   const ov = item.overrides||{};
   const fixedSum = Object.values(ov).reduce((a,v)=>a+Number(v),0);
   const residual = Number(item.curBudget)-fixedSum;
@@ -691,6 +764,7 @@ function getFixedSum(item){ return Object.values(item.overrides||{}).reduce((a,v
 function isHybrid(item){ return Object.keys(item.overrides||{}).length>0 && item.method!=='FIXED'; }
 function methodBadge(item){
   if(isHybrid(item)) return '<span class="badge b-b" style="background:var(--cyl);color:var(--cy)">HYBRID</span>';
+  if(item.entity) return '<span class="badge b-gr">DIRECT</span>';
   return `<span class="badge ${item.method==='SAP'?'b-p':item.method==='HR'?'b-g':'b-a'}">${item.method}</span>`;
 }
 function yearItems(type){ return (STATE[type]||[]).filter(r=>r.year===STATE.activeYear); }
@@ -706,10 +780,12 @@ function renderAll(){
   renderDist();
   renderEditList();
   renderAudit();
+  renderApprovals();
+  renderDepts();
 }
 
 function renderDash(){
-  const opex=yearItems('opex'), capex=yearItems('capex'), edits=STATE.edits;
+  const opex=visibleItems('opex'), capex=visibleItems('capex'), edits=STATE.edits;
   const opexT=opex.reduce((a,r)=>a+r.curBudget,0);
   const capexT=capex.reduce((a,r)=>a+r.curBudget,0);
   const pending=edits.filter(e=>e.status==='Submitted').length;
@@ -717,8 +793,10 @@ function renderDash(){
     <div class="mc"><div class="lbl">OPEX budget (${STATE.activeYear})</div><div class="val v-b">&#x20B9;${fmt(opexT)}L</div><div class="sub">${opex.length} items</div></div>
     <div class="mc"><div class="lbl">CAPEX budget</div><div class="val v-b" style="color:var(--pu)">&#x20B9;${fmt(capexT)}L</div><div class="sub">${capex.length} items</div></div>
     <div class="mc"><div class="lbl">Active entities</div><div class="val v-g">${activeEntities().length}</div><div class="sub">HR: ${totHR().toLocaleString()} · SAP: ${totSAP().toLocaleString()}</div></div>
-    <div class="mc"><div class="lbl">Edits pending</div><div class="val ${pending>0?'v-a':'v-g'}">${pending}</div><div class="sub">Awaiting approval</div></div>`;
-  switchTab('group');
+    <div class="mc"><div class="lbl">Approved so far</div><div class="val v-g">${pct([...opex,...capex].filter(r=>r.status==='Approved').reduce((a,r)=>a+r.curBudget,0),opexT+capexT)}</div><div class="sub">of OPEX + CAPEX value</div></div>
+    <div class="mc" style="cursor:pointer" onclick="go('approvals',document.getElementById('nav-appr'))"><div class="lbl">Awaiting your action</div><div class="val ${myQueue().length?'v-a':'v-g'}">${myQueue().length}</div><div class="sub">Line approvals · ${pending} entity edits pending</div></div>`;
+  document.getElementById('dash-metrics').style.gridTemplateColumns='repeat(5,1fr)';
+  switchTab(currentTab);
   const myP = isAdmin() ? edits.filter(e=>e.status==='Submitted') : edits.filter(e=>e.status==='Submitted'&&e.submittedBy===CU.email);
   document.getElementById('pending-title').textContent = isAdmin() ? 'Pending edits — awaiting your approval' : 'Your submitted edits';
   document.getElementById('dash-pending').innerHTML = myP.length ?
@@ -726,19 +804,31 @@ function renderDash(){
     : '<div class="empty" style="padding:14px">No pending edits</div>';
 }
 
-let currentTab='group';
+let currentTab='dept';
 function switchTab(tab, el){
   currentTab=tab;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  if(el) el.classList.add('on');
-  const opex=yearItems('opex');
+  if(el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); }
+  const opex=visibleItems('opex');
+  if(tab==='dept'||tab==='status'){
+    const all=[...opex.map(r=>({...r,_t:'OPEX'})),...visibleItems('capex').map(r=>({...r,_t:'CAPEX'}))];
+    const key=tab==='dept'?(r=>r.dept):(r=>r.status);
+    const map={};all.forEach(r=>{const k=key(r);if(!map[k])map[k]={op:0,cp:0,prev:0,n:0};map[k][r._t==='OPEX'?'op':'cp']+=r.curBudget;map[k].prev+=r.prevBudget;map[k].n++;});
+    const grand=all.reduce((a,r)=>a+r.curBudget,0);
+    const rows=Object.entries(map).sort((a,b)=>(b[1].op+b[1].cp)-(a[1].op+a[1].cp));
+    const lbl=tab==='dept'?'Department':'Status';
+    document.getElementById('summary-table').innerHTML=`<div class="tw"><table><thead><tr><th>${lbl}</th><th>OPEX (&#x20B9;L)</th><th>CAPEX (&#x20B9;L)</th><th>Total (&#x20B9;L)</th><th>Prev FY (&#x20B9;L)</th><th>Change</th><th>% of budget</th><th>Lines</th></tr></thead><tbody>
+      ${rows.length?rows.map(([k,v])=>{const t=v.op+v.cp;return `<tr><td style="font-weight:500">${tab==='dept'?`<span class="dept-tag">${esc(k)}</span>`:stBadge(k)}</td><td style="text-align:right">&#x20B9;${fmt(v.op)}</td><td style="text-align:right">&#x20B9;${fmt(v.cp)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(t)}</td><td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(v.prev)}</td><td>${chg(t,v.prev)}</td><td>${pct(t,grand)}</td><td>${v.n}</td></tr>`}).join(''):'<tr><td colspan="8"><div class="empty">No budget lines for this year</div></td></tr>'}
+      <tr style="background:var(--bll)"><td><strong>TOTAL</strong></td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(opex.reduce((a,r)=>a+r.curBudget,0))}</td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(visibleItems('capex').reduce((a,r)=>a+r.curBudget,0))}</td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(grand)}</td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(all.reduce((a,r)=>a+r.prevBudget,0))}</td><td>${chg(grand,all.reduce((a,r)=>a+r.prevBudget,0))}</td><td>100%</td><td>${all.length}</td></tr>
+    </tbody></table></div>`;
+    return;
+  }
   const el2=document.getElementById('summary-table');
   if(tab==='itbiz'){
-    const it=opex.filter(r=>r.payer==='IT').reduce((a,r)=>a+r.curBudget,0);
+    const it=opex.filter(r=>r.payer!=='Business').reduce((a,r)=>a+r.curBudget,0);
     const biz=opex.filter(r=>r.payer==='Business').reduce((a,r)=>a+r.curBudget,0);
     const tot=it+biz;
     el2.innerHTML=`<div class="tw"><table><thead><tr><th>Payer</th><th>Budget (&#x20B9;L)</th><th>% of total</th><th>Items</th></tr></thead><tbody>
-      <tr><td><span class="badge b-it">IT</span></td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(it)}</td><td>${pct(it,tot)}</td><td>${opex.filter(r=>r.payer==='IT').length}</td></tr>
+      <tr><td><span class="badge b-it">IT / Corporate</span></td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(it)}</td><td>${pct(it,tot)}</td><td>${opex.filter(r=>r.payer!=='Business').length}</td></tr>
       <tr><td><span class="badge b-biz">Business</span></td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(biz)}</td><td>${pct(biz,tot)}</td><td>${opex.filter(r=>r.payer==='Business').length}</td></tr>
       <tr style="background:var(--bll)"><td><strong>TOTAL</strong></td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(tot)}</td><td>100%</td><td>${opex.length}</td></tr>
     </tbody></table></div>`;
@@ -758,12 +848,12 @@ function switchTab(tab, el){
     const keyFn={group:r=>r.group,functional:r=>r.ctype,subgroup:r=>r.sub||'(none)'}[tab];
     const labelMap={group:'Group',functional:'Functional cost type',subgroup:'Sub-group'};
     const map={};
-    opex.forEach(r=>{const k=keyFn(r);if(!map[k])map[k]={it:0,biz:0,tot:0,n:0};map[k].tot+=r.curBudget;map[k].n++;r.payer==='IT'?map[k].it+=r.curBudget:map[k].biz+=r.curBudget;});
+    opex.forEach(r=>{const k=keyFn(r);if(!map[k])map[k]={it:0,biz:0,tot:0,n:0};map[k].tot+=r.curBudget;map[k].n++;r.payer!=='Business'?map[k].it+=r.curBudget:map[k].biz+=r.curBudget;});
     const grand=opex.reduce((a,r)=>a+r.curBudget,0);
     const rows=Object.entries(map).sort((a,b)=>b[1].tot-a[1].tot);
-    el2.innerHTML=`<div class="tw"><table><thead><tr><th>${labelMap[tab]}</th><th>IT cost (&#x20B9;L)</th><th>Business cost (&#x20B9;L)</th><th>Total (&#x20B9;L)</th><th>% of budget</th><th>Items</th></tr></thead><tbody>
+    el2.innerHTML=`<div class="tw"><table><thead><tr><th>${labelMap[tab]}</th><th>IT / Corporate cost (&#x20B9;L)</th><th>Business cost (&#x20B9;L)</th><th>Total (&#x20B9;L)</th><th>% of budget</th><th>Items</th></tr></thead><tbody>
       ${rows.map(([k,v])=>`<tr><td style="font-weight:500">${k}</td><td style="text-align:right;color:var(--bl)">&#x20B9;${fmt(v.it)}</td><td style="text-align:right;color:var(--pu)">&#x20B9;${fmt(v.biz)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(v.tot)}</td><td>${pct(v.tot,grand)}</td><td>${v.n}</td></tr>`).join('')}
-      <tr style="background:var(--bll)"><td><strong>TOTAL</strong></td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(opex.filter(r=>r.payer==='IT').reduce((a,r)=>a+r.curBudget,0))}</td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(opex.filter(r=>r.payer==='Business').reduce((a,r)=>a+r.curBudget,0))}</td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(grand)}</td><td>100%</td><td>${opex.length}</td></tr>
+      <tr style="background:var(--bll)"><td><strong>TOTAL</strong></td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(opex.filter(r=>r.payer!=='Business').reduce((a,r)=>a+r.curBudget,0))}</td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(opex.filter(r=>r.payer==='Business').reduce((a,r)=>a+r.curBudget,0))}</td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(grand)}</td><td>100%</td><td>${opex.length}</td></tr>
     </tbody></table></div>`;
   }
 }
@@ -777,16 +867,17 @@ function renderEntities(){
     <td style="text-align:right">${tH>0?((e.hr/tH)*100).toFixed(2)+'%':'—'}</td>
     <td style="text-align:right">${tS>0?((e.sap/tS)*100).toFixed(2)+'%':'—'}</td>
     <td>${e.costCenter}</td><td><span class="badge ${e.payer==='IT'?'b-it':'b-biz'}">${e.payer}</span></td>
+    <td style="font-size:11px">${e.buHead?esc(e.buHead):'<span style="color:var(--rd)">Not set</span>'}</td>
     <td><span class="badge ${e.active?'b-g':'b-r'}">${e.active?'Yes':'No'}</span></td>
     <td><div style="display:flex;gap:4px">
       ${isAdmin()?`<button class="btn btn-e" onclick="editEntity(${e.id})">✎</button>
       <button class="btn btn-d" onclick="toggleEntity(${e.id})">${e.active?'Deactivate':'Activate'}</button>`:''}
     </div></td></tr>`).join('');
-  document.getElementById('t-ent-foot').innerHTML=`<tr style="background:var(--bll);font-weight:700"><td colspan="2">TOTAL</td><td style="text-align:right">${tH.toLocaleString()}</td><td style="text-align:right">${tS.toLocaleString()}</td><td>100%</td><td>100%</td><td colspan="4"></td></tr>`;
+  document.getElementById('t-ent-foot').innerHTML=`<tr style="background:var(--bll);font-weight:700"><td colspan="2">TOTAL</td><td style="text-align:right">${tH.toLocaleString()}</td><td style="text-align:right">${tS.toLocaleString()}</td><td>100%</td><td>100%</td><td colspan="5"></td></tr>`;
 }
 
 function populateFilters(){
-  const opex=STATE.opex;
+  const opex=STATE.opex.filter(canSeeLine);
   const groups=[...new Set(opex.map(r=>r.group))];
   const owners=[...new Set(opex.map(r=>r.owner))].filter(o=>canSeeOwner(o));
   ['opex-f-grp','dist-f-grp'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML='<option value="">All groups</option>'+groups.map(g=>`<option>${g}</option>`).join('');});
@@ -796,13 +887,15 @@ function populateFilters(){
 function renderOPEX(){
   const fGrp=document.getElementById('opex-f-grp')?.value||'';
   const fOwn=document.getElementById('opex-f-own')?.value||'';
-  let items=yearItems('opex').filter(r=>canSeeOwner(r.owner));
+  const fSt=document.getElementById('opex-f-st')?.value||'';
+  let items=visibleItems('opex');
   if(fGrp) items=items.filter(r=>r.group===fGrp);
   if(fOwn) items=items.filter(r=>r.owner===fOwn);
+  if(fSt) items=items.filter(r=>r.status===fSt);
   document.getElementById('t-opex').innerHTML=items.length?items.map(r=>{
     const fs=getFixedSum(r);
     return`<tr><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
-      <td><span class="badge b-gr">${r.year}</span></td><td>${r.owner}</td>
+      <td><span class="dept-tag">${esc(r.dept)}</span></td><td style="font-size:11px">${entLabel(r)}</td><td>${r.owner}</td>
       <td style="font-size:11px">${r.ctype}</td><td><strong>${r.group}</strong></td><td>${r.sub}</td>
       <td style="max-width:180px;font-size:12px">${r.activity}</td>
       <td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td>
@@ -810,31 +903,32 @@ function renderOPEX(){
       <td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td>
       <td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td>
       <td style="text-align:right;color:var(--am)">${fs>0?'&#x20B9;'+fmt(fs):'—'}</td>
+      <td>${stBadge(r.status)}</td>
       <td><div style="display:flex;gap:3px">
-        ${canSeeOwner(r.owner)?`<button class="btn btn-e" onclick="editItem('opex',${r.id})">✎</button>
-        <button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="openOverride(${r.id})">Overrides</button>
-        <button class="btn btn-d" onclick="delItem('opex',${r.id})">🗑</button>`:''}
+        ${lineActions('opex',r)}
+        ${canEditLine(r)&&!r.entity?`<button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="openOverride(${r.id})">Overrides</button>`:''}
       </div></td></tr>`;
-  }).join(''):'<tr><td colspan="13"><div class="empty">No OPEX items for this year</div></td></tr>';
+  }).join(''):'<tr><td colspan="15"><div class="empty">No OPEX items for this year</div></td></tr>';
 }
 
 function renderCAPEX(){
-  let items=yearItems('capex').filter(r=>canSeeOwner(r.owner));
+  let items=visibleItems('capex');
   document.getElementById('t-capex').innerHTML=items.length?items.map(r=>`<tr>
     <td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
-    <td><span class="badge b-gr">${r.year}</span></td><td>${r.owner}</td>
+    <td><span class="dept-tag">${esc(r.dept)}</span></td><td style="font-size:11px">${entLabel(r)}</td><td>${r.owner}</td>
     <td><strong>${r.group}</strong></td><td>${r.sub}</td><td>${r.activity}</td>
     <td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td>
-    <td><span class="badge b-p">${r.method}</span></td>
+    <td>${r.entity?'<span class="badge b-gr">DIRECT</span>':`<span class="badge b-p">${r.method}</span>`}</td>
     <td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td>
     <td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td>
-    <td>${canSeeOwner(r.owner)?`<button class="btn btn-e" onclick="editItem('capex',${r.id})">✎</button> <button class="btn btn-d" onclick="delItem('capex',${r.id})">🗑</button>`:''}</td>
-  </tr>`).join(''):'<tr><td colspan="11"><div class="empty">No CAPEX items</div></td></tr>';
+    <td>${stBadge(r.status)}</td>
+    <td><div style="display:flex;gap:3px">${lineActions('capex',r)}</div></td>
+  </tr>`).join(''):'<tr><td colspan="13"><div class="empty">No CAPEX items</div></td></tr>';
 }
 
 function renderDist(){
   const ents=activeEntities();
-  let items=yearItems('opex').filter(r=>canSeeOwner(r.owner));
+  let items=visibleItems('opex');
   const fOwn=document.getElementById('dist-f-own')?.value||'';
   const fGrp=document.getElementById('dist-f-grp')?.value||'';
   if(fOwn) items=items.filter(r=>r.owner===fOwn);
@@ -1007,16 +1101,43 @@ function renderAudit(){
 //  MODALS
 // ═══════════════════════════════════════════════════════
 let CM=null,CEid=null;
-const GROUPS=['Application','Network','End User Support','Datacentre'];
-const CTYPES=['Prof & Consulting','Annual Subscription','Repair & Maint','Software License','Software Expenses'];
+const IT_GROUPS=['Application','Network','End User Support','Datacentre'];
+const GROUPS=IT_GROUPS;
+const CTYPES=['Prof & Consulting','Annual Subscription','Repair & Maint','Software License','Software Expenses','Manpower','Rent & Utilities','Travel & Conveyance','Training','Marketing & Promotion','Insurance','Communication','Capital Asset','Other'];
 const METHODS=['SAP','HR','FIXED'];
 const PAYERS=['IT','Business'];
 function req(l){return `${l}<span class="req">*</span>`}
 function selOpts(arr,sel){return arr.map(v=>`<option value="${v}"${v===sel?' selected':''}>${v}</option>`).join('')}
 function yearOpts(sel){return STATE.budgetYears.map(y=>`<option${y===sel?' selected':''}>${y}</option>`).join('')}
 function ownerField(sel){
-  if(isAdmin()) return `<select id="f-owner" required><option value="" disabled>— select —</option>${['Kirit Mehta','Prajesh Desai','Mukesh Jhanwar','Advait','Anil Patel','Mishal/Shailesh'].map(o=>`<option${o===sel?' selected':''}>${o}</option>`).join('')}</select>`;
-  return `<select id="f-owner" disabled><option selected>${myOwner()||sel||''}</option></select>`;
+  if(isAdmin()){
+    const known=[...new Set(['Kirit Mehta','Prajesh Desai','Mukesh Jhanwar','Advait','Anil Patel','Mishal/Shailesh',...STATE.users.map(u=>u.ownerName).filter(Boolean),...STATE.opex.map(r=>r.owner),...STATE.capex.map(r=>r.owner)].filter(Boolean))];
+    return `<input id="f-owner" list="owner-list" value="${esc(sel||'')}" placeholder="Type or pick an owner" required><datalist id="owner-list">${known.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`;
+  }
+  return `<select id="f-owner" disabled><option selected>${esc(myOwner()||sel||'')}</option></select>`;
+}
+function deptField(sel){
+  const d=sel||myDept();
+  if(isAdmin()) return `<select id="f-dept" onchange="onFormDeptChange()">${activeDepts().map(x=>`<option${x.name===d?' selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
+  return `<select id="f-dept" disabled><option selected>${esc(d)}</option></select>`;
+}
+function entityField(sel){
+  return `<select id="f-entity" onchange="onFormEntityChange()"><option value="">All entities — shared, distributed</option>${activeEntities().map(e=>`<option${e.name===sel?' selected':''}>${esc(e.name)}</option>`).join('')}</select>`;
+}
+function groupOpts(dept,sel){
+  const g=deptGroups(dept);
+  const list=sel&&!g.includes(sel)?[...g,sel]:g;
+  return `<option value="" disabled${!sel?' selected':''}>— select —</option>`+selOpts(list,sel);
+}
+function payerOpts(dept,sel){ return selOpts(dept==='IT'?PAYERS:['Corporate','Business'],sel); }
+function onFormDeptChange(){
+  const d=document.getElementById('f-dept').value;
+  const g=document.getElementById('f-grp'); if(g) g.innerHTML=groupOpts(d,'');
+  const p=document.getElementById('f-payer'); if(p) p.innerHTML='<option value="" disabled selected>— select —</option>'+payerOpts(d,'');
+}
+function onFormEntityChange(){
+  const shared=!document.getElementById('f-entity').value;
+  const m=document.getElementById('f-method'); if(m){ m.disabled=!shared; if(!shared) m.value=''; }
 }
 const FORMS={
   entity:(d={})=>`<div class="fgrid">
@@ -1026,38 +1147,54 @@ const FORMS={
     <div class="fg"><label>${req('SAP users')}</label><input type="number" id="f-sap" min="0" value="${d.sap!=null?d.sap:''}" placeholder="Enter SAP user count" required></div>
     <div class="fg"><label>${req('Payer')}</label><select id="f-payer"><option${d.payer==='IT'?' selected':''}>IT</option><option${d.payer==='Business'?' selected':''}>Business</option></select></div>
     <div class="fg"><label>Active</label><select id="f-active"><option value="true"${d.active!==false?' selected':''}>Yes</option><option value="false"${d.active===false?' selected':''}>No</option></select></div>
+    <div class="fg" style="grid-column:1/-1"><label>BU head email (approves this entity's lines)</label><input id="f-buhead" type="email" value="${esc(d.buHead||'')}" placeholder="name@arvind.in"></div>
+  </div>`,
+  dept:(d={})=>`<div class="fgrid">
+    <div class="fg"><label>${req('Department name')}</label><input id="f-dname" value="${esc(d.name||'')}" placeholder="e.g. HR" ${d.name==='IT'?'readonly':''}></div>
+    <div class="fg"><label>Dept head email</label><input id="f-dhead" type="email" value="${esc(d.head||'')}" placeholder="name@arvind.in"></div>
+    <div class="fg"><label>Approval required</label><select id="f-dappr"><option value="true"${d.approval!==false?' selected':''}>Yes — Dept → BU head → CFO</option><option value="false"${d.approval===false?' selected':''}>No — lines are approved on save</option></select></div>
+    <div class="fg"><label>Active</label><select id="f-dact"><option value="true"${d.active!==false?' selected':''}>Yes</option><option value="false"${d.active===false?' selected':''}>No</option></select></div>
+    <div class="fg" style="grid-column:1/-1"><label>Cost groups (comma separated)</label><textarea id="f-dgroups" rows="2" placeholder="e.g. Manpower, Training, Recruitment">${esc((d.groups||[]).join(', '))}</textarea></div>
   </div>`,
   opex:(d={})=>`<div class="fgrid">
     <div class="fg"><label>Budget ID</label><input id="f-bid" value="${d.budgetId||''}" placeholder="Auto-assigned if blank"></div>
     <div class="fg"><label>${req('Budget year')}</label><select id="f-year" required>${yearOpts(d.year||STATE.activeYear)}</select></div>
-    <div class="fg"><label>${req('IT Owner')}</label>${ownerField(d.owner)}</div>
+    <div class="fg"><label>${req('Department')}</label>${deptField(d.dept)}</div>
+    <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
+    <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
     <div class="fg"><label>${req('Functional cost type')}</label><select id="f-ctype" required><option value="" disabled${!d.ctype?' selected':''}>— select —</option>${selOpts(CTYPES,d.ctype)}</select></div>
-    <div class="fg"><label>${req('Group')}</label><select id="f-grp" required><option value="" disabled${!d.group?' selected':''}>— select —</option>${selOpts(GROUPS,d.group)}</select></div>
+    <div class="fg"><label>${req('Group')}</label><select id="f-grp" required>${groupOpts(d.dept||myDept(),d.group)}</select></div>
     <div class="fg"><label>${req('Sub-group')}</label><input id="f-sub" value="${d.sub||''}" placeholder="e.g. SAP, O365" required></div>
     <div class="fg" style="grid-column:1/-1"><label>${req('Activity name')}</label><input id="f-act" value="${d.activity||''}" placeholder="e.g. SAP AMC Renewal" required></div>
-    <div class="fg"><label>${req('Payer')}</label><select id="f-payer" required><option value="" disabled${!d.payer?' selected':''}>— select —</option>${selOpts(PAYERS,d.payer)}</select></div>
-    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method" required><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
+    <div class="fg"><label>${req('Payer')}</label><select id="f-payer" required><option value="" disabled${!d.payer?' selected':''}>— select —</option>${payerOpts(d.dept||myDept(),d.payer)}</select></div>
+    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method" required${d.entity?' disabled':''}><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
     <div class="fg"><label>${req('Previous FY budget (&#x20B9;L)')}</label><input type="number" id="f-prev" step="0.01" min="0" value="${d.prevBudget!=null?d.prevBudget:''}" placeholder="Enter previous budget" required></div>
     <div class="fg"><label>${req('Current FY budget (&#x20B9;L)')}</label><input type="number" id="f-cur" step="0.01" min="0" value="${d.curBudget!=null?d.curBudget:''}" placeholder="Enter current budget" required></div>
+    <div class="fg" style="grid-column:1/-1"><label>Justification</label><textarea id="f-just" rows="2" placeholder="Needed when the line is new or more than 10% above last year">${esc(d.just||'')}</textarea></div>
+    ${statusNote(d)}
   </div>`,
   capex:(d={})=>`<div class="fgrid">
     <div class="fg"><label>Budget ID</label><input id="f-bid" value="${d.budgetId||''}" placeholder="Auto-assigned if blank"></div>
     <div class="fg"><label>${req('Budget year')}</label><select id="f-year" required>${yearOpts(d.year||STATE.activeYear)}</select></div>
-    <div class="fg"><label>${req('IT Owner')}</label>${ownerField(d.owner)}</div>
-    <div class="fg"><label>${req('Group')}</label><select id="f-grp" required><option value="" disabled${!d.group?' selected':''}>— select —</option>${selOpts(GROUPS,d.group)}</select></div>
+    <div class="fg"><label>${req('Department')}</label>${deptField(d.dept)}</div>
+    <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
+    <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
+    <div class="fg"><label>${req('Group')}</label><select id="f-grp" required>${groupOpts(d.dept||myDept(),d.group)}</select></div>
     <div class="fg"><label>${req('Sub-group')}</label><input id="f-sub" value="${d.sub||''}" placeholder="e.g. SAP, Servers" required></div>
     <div class="fg" style="grid-column:1/-1"><label>${req('Activity name')}</label><input id="f-act" value="${d.activity||''}" placeholder="e.g. SAP Upgrade" required></div>
-    <div class="fg"><label>${req('Payer')}</label><select id="f-payer" required><option value="" disabled${!d.payer?' selected':''}>— select —</option>${selOpts(PAYERS,d.payer)}</select></div>
-    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method" required><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
+    <div class="fg"><label>${req('Payer')}</label><select id="f-payer" required><option value="" disabled${!d.payer?' selected':''}>— select —</option>${payerOpts(d.dept||myDept(),d.payer)}</select></div>
+    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method" required${d.entity?' disabled':''}><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
     <div class="fg"><label>${req('Previous FY budget (&#x20B9;L)')}</label><input type="number" id="f-prev" step="0.01" min="0" value="${d.prevBudget!=null?d.prevBudget:''}" placeholder="Enter previous budget" required></div>
     <div class="fg"><label>${req('Current FY budget (&#x20B9;L)')}</label><input type="number" id="f-cur" step="0.01" min="0" value="${d.curBudget!=null?d.curBudget:''}" placeholder="Enter current budget" required></div>
+    <div class="fg" style="grid-column:1/-1"><label>Justification</label><textarea id="f-just" rows="2" placeholder="Needed when the line is new or more than 10% above last year">${esc(d.just||'')}</textarea></div>
+    ${statusNote(d)}
   </div>`,
 };
 
 function openModal(type,data={}){
   CM=type;CEid=data.id||null;
   document.getElementById('modal-box').className='modal'+(type==='override'?' modal-lg':'');
-  document.getElementById('m-title').textContent={entity:data.id?'Edit entity':'Add entity',opex:data.id?'Edit OPEX item':'Add OPEX item',capex:data.id?'Edit CAPEX item':'Add CAPEX item',override:'Edit fixed overrides'}[type]||'Edit';
+  document.getElementById('m-title').textContent={dept:data.name?'Edit department':'Add department',entity:data.id?'Edit entity':'Add entity',opex:data.id?'Edit OPEX item':'Add OPEX item',capex:data.id?'Edit CAPEX item':'Add CAPEX item',override:'Edit fixed overrides'}[type]||'Edit';
   document.getElementById('m-body').innerHTML=(FORMS[type]||(()=>''))(data);
   document.getElementById('ov').classList.add('open');
 }
@@ -1078,23 +1215,32 @@ async function saveModal(){
     if(CM==='entity'){
       if(!validate([{id:'f-name'},{id:'f-hr'},{id:'f-sap'}])) return;
       const data={EntityName:gv('f-name'),HRUsers:gn('f-hr')||0,SAPUsers:gn('f-sap')||0,CostCenter:gv('f-cc'),Payer:gv('f-payer'),IsActive:gv('f-active')!=='false'};
+      if(!STATE.entCols_missing) data.BUHeadEmail=gv('f-buhead').toLowerCase();
       if(CEid) await spPatch(SP_CONFIG.lists.entities,CEid,data);
       else await spPost(SP_CONFIG.lists.entities,data);
       document.getElementById('recalc-banner').style.display='flex';
+    } else if(CM==='dept'){
+      if(!validate([{id:'f-dname'}])) return;
+      const data={DeptName:gv('f-dname'),DeptHeadEmail:gv('f-dhead').toLowerCase(),RequiresApproval:gv('f-dappr')==='true',CostGroups:gv('f-dgroups'),IsActive:gv('f-dact')==='true'};
+      if(STATE.deptsListMissing){showToast('Create the ITB_Departments list first (run the setup script).');setSyncErr();return;}
+      if(CEid) await spPatch(SP_CONFIG.lists.depts,CEid,data);
+      else await spPost(SP_CONFIG.lists.depts,data);
     } else if(CM==='opex'){
-      if(!validate([{id:'f-ctype'},{id:'f-grp'},{id:'f-sub'},{id:'f-act'},{id:'f-payer'},{id:'f-method'}])) return;
+      if(!validate([{id:'f-ctype'},{id:'f-grp'},{id:'f-sub'},{id:'f-act'},{id:'f-payer'},...(gv('f-entity')?[]:[{id:'f-method'}])])) return;
       if(gn('f-prev')===null||gn('f-cur')===null){showToast('Budget amounts are required.');return;}
       const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
-      const data={BudgetID:gv('f-bid')||null,BudgetYear:gv('f-year'),ITOwner:owner,FunctionalCost:gv('f-ctype'),GroupName:gv('f-grp'),SubGroup:gv('f-sub'),ActivityName:gv('f-act'),Payer:gv('f-payer'),DistMethod:gv('f-method'),PrevBudget:gn('f-prev'),CurBudget:gn('f-cur'),Overrides:'{}'};
-      if(CEid){const existing=STATE.opex.find(r=>r.id===CEid);if(existing)data.Overrides=JSON.stringify(existing.overrides);await spPatch(SP_CONFIG.lists.opex,CEid,data);}
-      else await spPost(SP_CONFIG.lists.opex,data);
+      if(!owner){showToast('Owner is required.');return;}
+      const data={BudgetID:gv('f-bid')||null,BudgetYear:gv('f-year'),ITOwner:owner,FunctionalCost:gv('f-ctype'),GroupName:gv('f-grp'),SubGroup:gv('f-sub'),ActivityName:gv('f-act'),Payer:gv('f-payer'),DistMethod:gv('f-entity')?'FIXED':gv('f-method'),PrevBudget:gn('f-prev'),CurBudget:gn('f-cur'),Overrides:'{}',...wfSaveFields('opex',CEid)};
+      if(CEid){const existing=STATE.opex.find(r=>r.id===CEid);if(existing)data.Overrides=JSON.stringify(data.Entity?{}:existing.overrides);await spPatch(SP_CONFIG.lists.opex,CEid,data);await logAfterSave('opex',CEid,existing,data);}
+      else { const res=await spPost(SP_CONFIG.lists.opex,data); await logAction('opex',res.Id||res.ID,'Created',''); }
     } else if(CM==='capex'){
-      if(!validate([{id:'f-grp'},{id:'f-sub'},{id:'f-act'},{id:'f-payer'},{id:'f-method'}])) return;
+      if(!validate([{id:'f-grp'},{id:'f-sub'},{id:'f-act'},{id:'f-payer'},...(gv('f-entity')?[]:[{id:'f-method'}])])) return;
       if(gn('f-prev')===null||gn('f-cur')===null){showToast('Budget amounts are required.');return;}
       const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
-      const data={BudgetID:gv('f-bid')||null,BudgetYear:gv('f-year'),ITOwner:owner,GroupName:gv('f-grp'),SubGroup:gv('f-sub'),ActivityName:gv('f-act'),Payer:gv('f-payer'),DistMethod:gv('f-method'),PrevBudget:gn('f-prev'),CurBudget:gn('f-cur')};
-      if(CEid) await spPatch(SP_CONFIG.lists.capex,CEid,data);
-      else await spPost(SP_CONFIG.lists.capex,data);
+      if(!owner){showToast('Owner is required.');return;}
+      const data={BudgetID:gv('f-bid')||null,BudgetYear:gv('f-year'),ITOwner:owner,GroupName:gv('f-grp'),SubGroup:gv('f-sub'),ActivityName:gv('f-act'),Payer:gv('f-payer'),DistMethod:gv('f-entity')?'FIXED':gv('f-method'),PrevBudget:gn('f-prev'),CurBudget:gn('f-cur'),...wfSaveFields('capex',CEid)};
+      if(CEid){const existing=STATE.capex.find(r=>r.id===CEid);await spPatch(SP_CONFIG.lists.capex,CEid,data);await logAfterSave('capex',CEid,existing,data);}
+      else { const res=await spPost(SP_CONFIG.lists.capex,data); await logAction('capex',res.Id||res.ID,'Created',''); }
     } else if(CM==='override'){
       const item=STATE.opex.find(r=>r.id===CEid);if(!item)return;
       const ents=activeEntities();
@@ -1139,6 +1285,7 @@ function updOvSumm(id){
 
 async function editEntity(id){const e=STATE.entities.find(x=>x.id===id);if(e)openModal('entity',e);}
 async function editItem(type,id){const r=STATE[type].find(x=>x.id===id);if(r)openModal(type,r);}
+function editDept(name){const d=STATE.depts.find(x=>x.name===name);if(d){openModal('dept',d);CEid=d.id;}}
 async function delItem(type,id){
   if(!confirm('Delete this entry from SharePoint?')) return;
   setSyncing();
@@ -1163,12 +1310,13 @@ function clearSel(){
 // ═══════════════════════════════════════════════════════
 //  NAV & UTILS
 // ═══════════════════════════════════════════════════════
-const PG={dash:'Dashboard',users:'User Management',entities:'Entities & HR/SAP users',opex:'OPEX budget',capex:'CAPEX budget',dist:'Distribution table',edit:'Entity budget edit',audit:'Audit log'};
+const PG={approvals:'Approvals',depts:'Departments',dash:'Dashboard',users:'User Management',entities:'Entities & HR/SAP users',opex:'OPEX budget',capex:'CAPEX budget',dist:'Distribution table',edit:'Entity budget edit',audit:'Audit log'};
 function go(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
   document.getElementById('page-'+id).classList.add('on');
   document.getElementById('pg-title').textContent=PG[id]||id;
+  if(!el) el=[...document.querySelectorAll('.nav')].find(n=>(n.getAttribute('onclick')||'').includes(`'${id}'`));
   if(el)el.classList.add('on');
   if(id==='edit'){
     const mo=myOwner();
@@ -1178,12 +1326,249 @@ function go(id,el){
   }
   if(id==='audit') renderAudit();
   if(id==='users') renderUsers();
+  if(id==='approvals') renderApprovals();
+  if(id==='depts') renderDepts();
   if(id==='dist') renderDist();
 }
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 document.getElementById('ov').addEventListener('click',function(e){if(e.target===this)closeModal()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeAct();}});
 
+
+// ═══════════════════════════════════════════════════════
+//  GROUP: DEPARTMENTS & APPROVAL WORKFLOW
+// ═══════════════════════════════════════════════════════
+const ST={draft:'Draft',bu:'Pending BU Head',cfo:'Pending CFO',ok:'Approved',ret:'Returned'};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function wfFields(r){
+  return { dept: r.Department||'IT', entity: r.EntityName||'', status: r.LineStatus||ST.ok,
+    just: r.Justification||'', retComment: r.ReturnComment||'',
+    buBy: r.BUApprovedBy||'', cfoBy: r.CFOApprovedBy||'' };
+}
+function stBadge(s){
+  const c={[ST.draft]:'st-draft',[ST.bu]:'st-bu',[ST.cfo]:'st-cfo',[ST.ok]:'st-ok',[ST.ret]:'st-ret'}[s]||'st-draft';
+  return `<span class="st ${c}">${esc(s)}</span>`;
+}
+function chg(cur,prev){
+  if(!prev) return cur?'<span class="var-badge var-z" style="margin:0">new</span>':'—';
+  const p=(cur-prev)/prev*100;
+  return `<span class="var-badge ${p>0?'var-n':p<0?'var-p':'var-z'}" style="margin:0">${p>0?'+':''}${p.toFixed(1)}%</span>`;
+}
+function entLabel(r){ return r.entity?esc(r.entity):'<span style="color:var(--tx3)">Shared</span>'; }
+function activeDepts(){ return STATE.depts.filter(d=>d.active!==false); }
+function deptByName(n){ return STATE.depts.find(d=>d.name===n); }
+function deptGroups(n){ const d=deptByName(n); return d&&d.groups&&d.groups.length?d.groups:(n==='IT'?IT_GROUPS:['General']); }
+function needsApproval(dept){ const d=deptByName(dept); return d ? d.approval!==false : dept!=='IT'; }
+function statusNote(d){
+  if(!d.id) return `<div class="info-box" style="grid-column:1/-1;font-size:11px;padding:6px 10px">New lines are saved as <strong>Draft</strong> when the department needs approval. Submit them from the table or the Approvals page.</div>`;
+  if(d.status===ST.ok && needsApproval(d.dept) && !isAdmin()) return `<div class="warn-box" style="grid-column:1/-1;font-size:11px;padding:6px 10px">This line is approved. Saving a change sends it back to <strong>Draft</strong> for re-approval.</div>`;
+  if(d.status===ST.ret && d.retComment) return `<div class="warn-box" style="grid-column:1/-1;font-size:11px;padding:6px 10px"><strong>Returned:</strong> ${esc(d.retComment)}</div>`;
+  return '';
+}
+// who can see a line
+function canSeeLine(r){
+  if(isAdmin()||isCFO()) return true;
+  if(isBUHead()) return r.entity===CU.entity || (!r.entity && false);
+  return r.dept===myDept() && canSeeOwner(r.owner);
+}
+function visibleItems(type){
+  return yearItems(type).filter(canSeeLine).filter(r=>!STATE.deptFilter||r.dept===STATE.deptFilter);
+}
+function l1Approver(r){
+  if(r.entity){ const e=STATE.entities.find(x=>x.name===r.entity); return e?e.buHead:''; }
+  const d=deptByName(r.dept); return d?d.head:'';
+}
+function canEditLine(r){
+  if(isAdmin()) return true;
+  if(isCFO()||isBUHead()) return false;
+  if(r.dept!==myDept()||!canSeeOwner(r.owner)) return false;
+  if(!needsApproval(r.dept)) return true;
+  return [ST.draft,ST.ret,ST.ok].includes(r.status);
+}
+function canSubmit(r){
+  return needsApproval(r.dept) && [ST.draft,ST.ret].includes(r.status) && (isAdmin() || (r.dept===myDept()&&canSeeOwner(r.owner)&&!isCFO()&&!isBUHead()));
+}
+function canApprove(r){
+  if(!CU) return false;
+  const me=(CU.email||'').toLowerCase();
+  if(r.status===ST.bu){
+    const a=l1Approver(r);
+    if(a) return a===me;
+    if(isBUHead()&&r.entity&&r.entity===CU.entity) return true;
+    return isAdmin(); // no approver configured: admin can act
+  }
+  if(r.status===ST.cfo) return isCFO();
+  return false;
+}
+function myQueue(){
+  const all=[...yearItems('opex').map(r=>['opex',r]),...yearItems('capex').map(r=>['capex',r])];
+  return all.filter(([t,r])=>canApprove(r));
+}
+function myOwn(){
+  const all=[...yearItems('opex').map(r=>['opex',r]),...yearItems('capex').map(r=>['capex',r])];
+  return all.filter(([t,r])=>canSubmit(r));
+}
+function lineActions(type,r){
+  let h='';
+  if(canEditLine(r)) h+=`<button class="btn btn-e" title="Edit" onclick="editItem('${type}',${r.id})">✎</button>`;
+  if(canSubmit(r)) h+=`<button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="submitLine('${type}',${r.id})">Submit</button>`;
+  if(canApprove(r)) h+=`<button class="btn btn-g" style="font-size:10px;padding:3px 7px" onclick="approveLine('${type}',${r.id})">✓</button><button class="btn btn-d" title="Return" onclick="openReturn('${type}',${r.id})">↩</button>`;
+  h+=`<button class="btn" style="font-size:10px;padding:3px 7px" title="History" onclick="openHistory('${type}',${r.id})">⋯</button>`;
+  if(canEditLine(r)&&(isAdmin()||r.status!==ST.ok||!needsApproval(r.dept))) h+=`<button class="btn btn-d" title="Delete" onclick="delItem('${type}',${r.id})">🗑</button>`;
+  return h;
+}
+// fields written on save
+function wfSaveFields(type,id){
+  const gv=i=>{const el=document.getElementById(i);return el?el.value.trim():''};
+  const dept=gv('f-dept')||myDept();
+  const existing=id?STATE[type].find(r=>r.id===id):null;
+  let status;
+  if(!needsApproval(dept)) status=ST.ok;
+  else if(!existing) status=ST.draft;
+  else if(isAdmin()) status=existing.status;
+  else status=existing.status===ST.ret?ST.ret:ST.draft;
+  return { Department:dept, EntityName:gv('f-entity')||null, Justification:gv('f-just'), LineStatus:status };
+}
+async function logAction(type,id,action,comment){
+  try{ await spPost(SP_CONFIG.lists.log,{LineType:type.toUpperCase(),LineID:id,Action:action,Actor:CU.email,Comment:comment||'',BudgetYear:STATE.activeYear}); }
+  catch(e){ console.warn('Approval log not written (create ITB_ApprovalLog):',e.message); }
+}
+async function logAfterSave(type,id,before,data){
+  const reset=before&&before.status===ST.ok&&data.LineStatus===ST.draft;
+  await logAction(type,id,reset?'Edited — back to Draft':'Edited','');
+}
+function needJust(r){ return (!r.prevBudget || r.curBudget>r.prevBudget*1.1) && !r.just; }
+async function submitLine(type,id,silent){
+  const r=STATE[type].find(x=>x.id===id); if(!r||!canSubmit(r)) return false;
+  if(needJust(r)){ if(!silent) showToast('Add a justification first: this line is new or more than 10% above last year.'); if(!silent) editItem(type,id); return false; }
+  setSyncing();
+  try{
+    await spPatch(SP_CONFIG.lists[type],id,{LineStatus:ST.bu,ReturnComment:''});
+    await logAction(type,id,'Submitted','');
+    if(!silent){ await loadAllData(); renderAll(); showToast('Submitted to '+(l1Approver(r)||'the BU head')+'.'); }
+    return true;
+  }catch(e){ setSyncErr(); showToast('Error: '+e.message); return false; }
+}
+async function submitAllDrafts(){
+  const list=myOwn().filter(([t,r])=>r.status===ST.draft);
+  let ok=0,skip=0;
+  for(const [t,r] of list){ (await submitLine(t,r.id,true))?ok++:skip++; }
+  await loadAllData(); renderAll();
+  showToast(`${ok} line${ok===1?'':'s'} submitted`+(skip?` · ${skip} need a justification first`:''));
+}
+async function approveLine(type,id,silent){
+  const r=STATE[type].find(x=>x.id===id); if(!r||!canApprove(r)) return false;
+  const now=new Date().toISOString();
+  const data=r.status===ST.bu?{LineStatus:ST.cfo,BUApprovedBy:CU.email,BUApprovedOn:now}:{LineStatus:ST.ok,CFOApprovedBy:CU.email,CFOApprovedOn:now};
+  setSyncing();
+  try{
+    await spPatch(SP_CONFIG.lists[type],id,data);
+    await logAction(type,id,r.status===ST.bu?'Approved (BU)':'Approved (CFO)','');
+    if(!silent){ await loadAllData(); renderAll(); showToast(r.status===ST.bu?'Approved and sent to Group CFO.':'Final approval given.'); }
+    return true;
+  }catch(e){ setSyncErr(); showToast('Error: '+e.message); return false; }
+}
+async function bulkApprove(){
+  const q=myQueue(); if(!q.length) return;
+  closeAct();
+  let n=0; for(const [t,r] of q){ if(await approveLine(t,r.id,true)) n++; }
+  await loadAllData(); renderAll(); showToast(`${n} line${n===1?'':'s'} approved.`);
+}
+function confirmBulk(){
+  const q=myQueue();
+  openAct('Approve '+q.length+' lines?',`<div style="font-size:13px">Total ₹${fmt(q.reduce((a,[t,r])=>a+r.curBudget,0))}L across ${q.length} lines.</div>`,
+    `<button class="btn" onclick="closeAct()">Cancel</button><button class="btn btn-p" onclick="bulkApprove()">Approve ${q.length}</button>`);
+}
+function openReturn(type,id){
+  const r=STATE[type].find(x=>x.id===id); if(!r) return;
+  openAct('Return '+(r.budgetId||r.activity),`<div style="font-size:12px;margin-bottom:8px">${esc(r.dept)} · ${esc(r.activity)} · ₹${fmt(r.curBudget)}L</div>
+    <div class="fg"><label>${req('Comment for the owner')}</label><textarea id="ret-note" rows="3" placeholder="What should change before it is resubmitted?"></textarea></div>`,
+    `<button class="btn" onclick="closeAct()">Cancel</button><button class="btn btn-d" style="padding:7px 13px;font-size:12px" onclick="returnLine('${type}',${id})">Return to owner</button>`);
+  setTimeout(()=>document.getElementById('ret-note')?.focus(),50);
+}
+async function returnLine(type,id){
+  const note=(document.getElementById('ret-note')?.value||'').trim();
+  if(!note){ document.getElementById('ret-note').classList.add('err'); showToast('Add a comment so the owner knows what to change.'); return; }
+  const r=STATE[type].find(x=>x.id===id); if(!r||!canApprove(r)) return;
+  setSyncing();
+  try{
+    await spPatch(SP_CONFIG.lists[type],id,{LineStatus:ST.ret,ReturnComment:note});
+    await logAction(type,id,'Returned',note);
+    closeAct(); await loadAllData(); renderAll(); showToast('Returned to '+r.owner+'.');
+  }catch(e){ setSyncErr(); showToast('Error: '+e.message); }
+}
+function openHistory(type,id){
+  const r=STATE[type].find(x=>x.id===id); if(!r) return;
+  const ev=STATE.log.filter(l=>l.type===type.toUpperCase()&&l.lineId===id).sort((a,b)=>(b.at||'').localeCompare(a.at||''));
+  const a1=l1Approver(r);
+  openAct(`${r.budgetId||type.toUpperCase()+' #'+id} · ${r.activity}`,
+   `<div style="display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:12px;margin-bottom:12px">
+     <span style="color:var(--tx2)">Department</span><span>${esc(r.dept)}</span>
+     <span style="color:var(--tx2)">Entity</span><span>${r.entity?esc(r.entity):'Shared — distributed by '+esc(r.method)}</span>
+     <span style="color:var(--tx2)">Budget</span><span>₹${fmt(r.curBudget)}L (prev ₹${fmt(r.prevBudget)}L) ${chg(r.curBudget,r.prevBudget)}</span>
+     <span style="color:var(--tx2)">Status</span><span>${stBadge(r.status)}</span>
+     <span style="color:var(--tx2)">First approver</span><span>${needsApproval(r.dept)?(a1?esc(a1):'<span style="color:var(--rd)">Not configured — set BU head / dept head</span>'):'Not required'}</span>
+     <span style="color:var(--tx2)">Justification</span><span>${esc(r.just)||'—'}</span>
+   </div>
+   <div class="ct">History</div>
+   ${ev.length?`<div class="hist">${ev.map(e=>`<div><strong>${esc(e.action)}</strong> · ${esc(e.actor)} <small>${(e.at||'').replace('T',' ').slice(0,16)}</small>${e.comment?`<div class="note">${esc(e.comment)}</div>`:''}</div>`).join('')}</div>`:'<div class="empty" style="padding:10px">No actions logged yet.</div>'}`,
+   `<button class="btn" onclick="closeAct()">Close</button>`);
+}
+function openAct(title,body,foot){
+  document.getElementById('act-title').textContent=title;
+  document.getElementById('act-body').innerHTML=body;
+  document.getElementById('act-foot').innerHTML=foot;
+  document.getElementById('act-ov').classList.add('open');
+}
+function closeAct(){ document.getElementById('act-ov').classList.remove('open'); }
+document.getElementById('act-ov').addEventListener('click',function(e){if(e.target===this)closeAct()});
+
+function renderApprovals(){
+  if(!CU) return;
+  const q=myQueue(), own=myOwn();
+  const cnt=document.getElementById('appr-cnt'); if(cnt) cnt.textContent=(q.length+own.filter(([t,r])=>r.status===ST.ret).length)||'';
+  const isApprover=isCFO()||isBUHead()||q.length>0||isAdmin()||STATE.entities.some(e=>e.buHead===(CU.email||'').toLowerCase())||STATE.depts.some(d=>d.head===(CU.email||'').toLowerCase());
+  const banner=document.getElementById('appr-banner');
+  banner.innerHTML=isCFO()?'<strong>Group CFO:</strong> lines approved by BU heads wait here for final approval.'
+    :isBUHead()?`<strong>BU head · ${esc(CU.entity)}:</strong> lines submitted for ${esc(CU.entity)} wait here. Approving sends them to the Group CFO.`
+    :'Flow: owner submits → BU head (or department head for shared lines) approves → Group CFO gives final approval. Either approver can return a line with a comment.';
+  document.getElementById('appr-mine-card').style.display=isApprover?'block':'none';
+  document.getElementById('appr-own-card').style.display=(isCFO()||isBUHead())?'none':'block';
+  document.getElementById('appr-bulk-ok').style.display=q.length>1?'inline-flex':'none';
+  document.getElementById('appr-bulk-ok').setAttribute('onclick','confirmBulk()');
+  document.getElementById('t-appr').innerHTML=q.length?q.map(([t,r])=>`<tr>
+    <td><span class="badge ${t==='opex'?'b-b':'b-p'}">${t.toUpperCase()}</span></td><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
+    <td><span class="dept-tag">${esc(r.dept)}</span></td><td style="font-size:11px">${entLabel(r)}</td><td>${esc(r.owner)}</td><td>${esc(r.activity)}</td>
+    <td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td><td>${chg(r.curBudget,r.prevBudget)}</td><td>${stBadge(r.status)}</td>
+    <td><div style="display:flex;gap:3px"><button class="btn btn-g" style="font-size:10px;padding:3px 7px" onclick="approveLine('${t}',${r.id})">✓ Approve</button><button class="btn btn-d" onclick="openReturn('${t}',${r.id})">↩ Return</button><button class="btn" style="font-size:10px;padding:3px 7px" onclick="openHistory('${t}',${r.id})">⋯</button></div></td></tr>`).join('')
+    :'<tr><td colspan="11"><div class="empty">Nothing waiting for you.</div></td></tr>';
+  const drafts=own.filter(([t,r])=>r.status===ST.draft).length;
+  const sb=document.getElementById('btn-submit-all'); sb.disabled=!drafts; sb.textContent=drafts?`Submit ${drafts} draft${drafts===1?'':'s'}`:'No drafts to submit';
+  document.getElementById('t-own').innerHTML=own.length?own.map(([t,r])=>`<tr>
+    <td><span class="badge ${t==='opex'?'b-b':'b-p'}">${t.toUpperCase()}</span></td><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
+    <td><span class="dept-tag">${esc(r.dept)}</span></td><td style="font-size:11px">${entLabel(r)}</td><td>${esc(r.activity)}</td>
+    <td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td><td>${stBadge(r.status)}</td><td style="font-size:11px;max-width:240px">${esc(r.retComment)||'—'}</td>
+    <td><div style="display:flex;gap:3px">${lineActions(t,r)}</div></td></tr>`).join('')
+    :'<tr><td colspan="9"><div class="empty">No drafts or returned lines.</div></td></tr>';
+}
+function renderDepts(){
+  const tb=document.getElementById('t-depts'); if(!tb||!CU) return;
+  tb.innerHTML=STATE.depts.map(d=>`<tr style="${d.active===false?'opacity:.5':''}">
+    <td><span class="dept-tag">${esc(d.name)}</span></td><td style="font-size:11px">${d.head?esc(d.head):'<span style="color:var(--rd)">Not set</span>'}</td>
+    <td><span class="badge ${d.approval!==false?'b-a':'b-gr'}">${d.approval!==false?'Yes':'No'}</span></td>
+    <td style="font-size:11px">${esc(deptGroups(d.name).join(', '))}</td>
+    <td><span class="badge ${d.active!==false?'b-g':'b-r'}">${d.active!==false?'Yes':'No'}</span></td>
+    <td>${isAdmin()?`<button class="btn btn-e" onclick="editDept('${esc(d.name)}')">✎</button>`:''}</td></tr>`).join('')+
+    (STATE.deptsListMissing?'<tr><td colspan="6"><div class="warn-box">ITB_Departments list not found. Run Setup-GroupBudget-Extension.ps1 to create it; until then only IT is available.</div></td></tr>':'');
+}
+function buildDeptFilter(){
+  const sel=document.getElementById('dept-sel');
+  const show=isAdmin()||isCFO()||isBUHead();
+  sel.style.display=show?'':'none';
+  sel.innerHTML='<option value="">All departments</option>'+activeDepts().map(d=>`<option>${esc(d.name)}</option>`).join('');
+  sel.value=STATE.deptFilter||'';
+}
+function onDeptFilter(){ STATE.deptFilter=document.getElementById('dept-sel').value; populateFilters(); renderAll(); }
 
 // ═══════════════════════════════════════════════════════
 //  USER MANAGEMENT
@@ -1195,7 +1580,8 @@ async function loadUsers(){
     const items = await spGet(SP_CONFIG.lists.users);
     return items.map(u=>({
       id: u.Id, name: u.UserName, email: u.UserEmail.toLowerCase(),
-      role: u.UserRole, ownerName: u.OwnerName, scope: u.AccessScope||'All', active: u.IsActive!==false
+      role: u.UserRole, ownerName: u.OwnerName, scope: u.AccessScope||'All', active: u.IsActive!==false,
+      dept: u.Department||'IT', entity: u.EntityName||''
     }));
   } catch(e) {
     // List may not exist yet — return empty
@@ -1208,14 +1594,15 @@ async function renderUsers(){
   const tbody = document.getElementById('t-users');
   if(!tbody) return;
   if(!users.length){
-    tbody.innerHTML='<tr><td colspan="7"><div class="empty">No users added yet. Click "+ Add user" to get started.</div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="9"><div class="empty">No users added yet. Click "+ Add user" to get started.</div></td></tr>';
     return;
   }
   const scopeColors = {'All':'b-b','Network':'b-p','End User Support':'b-g','Datacentre':'b-a','Application':'b-c'};
   tbody.innerHTML = users.map(u=>`<tr>
     <td style="font-weight:600">${u.name}</td>
     <td style="font-size:11px;color:var(--tx2)">${u.email}</td>
-    <td><span class="badge ${u.role==='IT Head'?'b-b':u.role==='Viewer'||u.role==='Finance'?'b-gr':'b-g'}">${u.role}</span></td>
+    <td><span class="badge ${u.role==='IT Head'||u.role==='Admin'||u.role==='Group CFO'?'b-b':u.role==='BU Head'?'b-a':u.role==='Viewer'||u.role==='Finance'?'b-gr':'b-g'}">${u.role}</span></td>
+    <td><span class="dept-tag">${esc(u.dept)}</span></td><td style="font-size:11px">${esc(u.entity)||'—'}</td>
     <td><code style="font-size:11px;background:var(--sf2);padding:2px 6px;border-radius:4px">${u.ownerName||'—'}</code></td>
     <td><span class="badge ${scopeColors[u.scope]||'b-gr'}">${u.scope}</span></td>
     <td><span class="badge ${u.active?'b-g':'b-r'}">${u.active?'Active':'Inactive'}</span></td>
@@ -1231,9 +1618,14 @@ function openUserModal(id=null){
   document.getElementById('user-modal-title').textContent = id ? 'Edit User' : 'Add User';
   if(!id){
     ['u-name','u-email','u-owner'].forEach(i=>document.getElementById(i).value='');
-    document.getElementById('u-role').value='Network Lead';
+    document.getElementById('u-role').value='Dept Owner';
     document.getElementById('u-scope').value='All';
   }
+  const dsel=document.getElementById('u-dept'), esel=document.getElementById('u-entity');
+  const dv=dsel.value, ev=esel.value;
+  dsel.innerHTML=activeDepts().map(d=>`<option>${esc(d.name)}</option>`).join('');
+  esel.innerHTML='<option value="">— none —</option>'+activeEntities().map(e=>`<option>${esc(e.name)}</option>`).join('');
+  if(id){ dsel.value=dv||'IT'; esel.value=ev||''; } else { dsel.value=myDept(); esel.value=''; }
   document.getElementById('user-ov').style.display='flex';
 }
 function closeUserModal(){ document.getElementById('user-ov').style.display='none'; editUserId=null; }
@@ -1246,6 +1638,8 @@ async function editUser(id){
   document.getElementById('u-role').value=u.role;
   document.getElementById('u-owner').value=u.ownerName||'';
   document.getElementById('u-scope').value=u.scope||'All';
+  document.getElementById('u-dept').innerHTML=`<option>${esc(u.dept)}</option>`; document.getElementById('u-dept').value=u.dept;
+  document.getElementById('u-entity').innerHTML=`<option>${esc(u.entity)}</option>`; document.getElementById('u-entity').value=u.entity;
   openUserModal(id);
 }
 
@@ -1255,10 +1649,14 @@ async function saveUser(){
   const role=document.getElementById('u-role').value;
   const owner=document.getElementById('u-owner').value.trim();
   const scope=document.getElementById('u-scope').value;
-  if(!name||!email||!owner){showToast('Name, email and owner name are required.');return}
+  const dept=document.getElementById('u-dept').value;
+  const entity=document.getElementById('u-entity').value;
+  const needsOwner=!['Group CFO','BU Head','Admin','IT Head','Finance','Viewer'].includes(role);
+  if(!name||!email||(needsOwner&&!owner)){showToast(needsOwner?'Name, email and owner name are required.':'Name and email are required.');return}
+  if(role==='BU Head'&&!entity){showToast('Pick the entity this BU head approves for.');return}
   setSyncing();
   try {
-    const data={UserName:name,UserEmail:email,UserRole:role,OwnerName:owner,AccessScope:scope,IsActive:true};
+    const data={UserName:name,UserEmail:email,UserRole:role,OwnerName:owner||null,AccessScope:scope,IsActive:true,Department:dept,EntityName:entity||null};
     if(editUserId) await spPatch(SP_CONFIG.lists.users,editUserId,data);
     else await spPost(SP_CONFIG.lists.users,data);
     closeUserModal();
@@ -1284,10 +1682,12 @@ async function toggleUser(id, active){
 // Falls back to hardcoded ROLE_MAP if list is empty
 async function buildDynamicRoleMap(){
   const users = await loadUsers();
+  STATE.users = users;
   if(!users.length) return; // use hardcoded ROLE_MAP
   users.filter(u=>u.active).forEach(u=>{
     const prefix = u.email.split('@')[0].toLowerCase();
-    ROLE_MAP[prefix] = { role: u.role, ownerName: u.ownerName, scope: u.scope };
+    const isOwnerRole=!['Group CFO','BU Head','Admin','IT Head','Finance','Viewer'].includes(u.role);
+    ROLE_MAP[prefix] = { role: u.role, ownerName: isOwnerRole ? (u.ownerName||null) : null, scope: u.scope, dept: u.dept, entity: u.entity };
   });
 }
 
