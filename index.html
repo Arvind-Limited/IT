@@ -130,6 +130,26 @@ tbody tr:hover{background:#f8fafc}
 .hist{border-left:2px solid var(--bd);margin-left:4px;padding-left:12px;display:flex;flex-direction:column;gap:8px}
 .hist div{font-size:12px}.hist small{color:var(--tx3)}
 .hist .note{background:var(--sf2);border-radius:6px;padding:4px 8px;margin-top:2px;font-size:11px}
+/* GROUP: masters, qty x rate grid, audit */
+.upd{font-size:10.5px;color:var(--tx2);white-space:nowrap;line-height:1.3}.upd b{display:block;font-weight:500;color:var(--tx)}
+.gl{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--tx2)}
+.qgrid{border:1px solid var(--bd);border-radius:var(--r);overflow:auto;margin-bottom:10px}
+.qgrid table th{background:var(--sf2);font-size:10px}
+.qgrid td{padding:5px 8px}
+.qgrid input{width:100%;min-width:70px;padding:5px 7px;border:1px solid var(--bd2);border-radius:6px;font-size:12px;text-align:right}
+.qgrid input[readonly]{background:var(--sf2);border-color:transparent;color:var(--tx2)}
+.qgrid .amt{text-align:right;font-weight:600;white-space:nowrap}
+.qgrid tfoot td{background:var(--bll);font-weight:700}
+.qall{display:flex;align-items:center;gap:10px;background:var(--aml);border:1px solid #fcd34d;border-radius:var(--r);padding:8px 12px;margin-bottom:8px;font-size:12px;color:var(--am);font-weight:600}
+.qall input{width:110px;padding:6px 9px;border:1px solid #f59e0b;border-radius:6px;font-size:13px;font-weight:700;text-align:right}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar select,.toolbar input[type=search]{padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px}
+.imp-sum{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.imp-sum span{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.imp-tbl{max-height:320px;overflow:auto;border:1px solid var(--bd);border-radius:var(--r)}
+.imp-tbl td,.imp-tbl th{font-size:11px;padding:5px 8px}
+.row-err td{background:var(--rdl)}
+.modal-xl{width:1000px}
 </style>
 </head>
 <body>
@@ -153,6 +173,9 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
     <div class="sec">Overview</div>
     <div class="nav on" onclick="go('dash',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
     <div class="sec">Master Data</div>
+    <div class="nav" id="nav-dm" onclick="go('depts',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg>Departments</div>
+    <div class="nav" id="nav-em" onclick="go('master',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>Expense master</div>
+    <div class="nav" id="nav-rt" onclick="go('rates',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 8h6M9 12h6M11 8c3 0 3 4 0 4l4 4"/></svg>Rates &amp; units</div>
     <div class="nav" id="nav-ent" onclick="go('entities',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Entities &amp; Users</div>
     <div class="sec">Budget</div>
     <div class="nav" onclick="go('opex',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>OPEX</div>
@@ -163,7 +186,6 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
     <div class="nav" onclick="go('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Entity edit</div>
     <div class="sec">Admin</div>
     <div class="nav" id="nav-users" style="display:none" onclick="go('users',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>User Management</div>
-    <div class="nav" id="nav-depts" style="display:none" onclick="go('depts',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg>Departments</div>
     <div class="nav" onclick="go('audit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Audit log</div>
     <div class="sb-foot">
       <div class="sync-bar" style="margin-bottom:8px">
@@ -191,8 +213,9 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
         <div class="metrics" id="dash-metrics"></div>
         <div class="tab-row">
           <div class="tab on" onclick="switchTab('dept',this)">Department</div>
-          <div class="tab" onclick="switchTab('group',this)">Group</div>
-          <div class="tab" onclick="switchTab('functional',this)">Functional cost type</div>
+          <div class="tab" onclick="switchTab('group',this)">Expense type</div>
+          <div class="tab" onclick="switchTab('item',this)">Budget item</div>
+          <div class="tab" onclick="switchTab('gl',this)">GL code</div>
           <div class="tab" onclick="switchTab('subgroup',this)">Sub-group</div>
           <div class="tab" onclick="switchTab('itbiz',this)">Payer</div>
           <div class="tab" onclick="switchTab('entity',this)">Entity-wise</div>
@@ -208,7 +231,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
           <div class="info-box" style="flex:1;margin-right:12px">Add entities and their HR / SAP user counts. These drive the automatic cost distribution. After any change click <strong>Recalculate</strong> to recompute the full budget.</div>
           <button class="btn btn-p" onclick="openModal('entity')">+ Add entity</button>
         </div>
-        <div class="tw"><table><thead><tr><th>#</th><th>Entity</th><th>HR users</th><th>SAP users</th><th>HR%</th><th>SAP%</th><th>Cost center</th><th>Payer</th><th>BU head (approver)</th><th>Active</th><th>Actions</th></tr></thead><tbody id="t-ent"></tbody><tfoot id="t-ent-foot"></tfoot></table></div>
+        <div class="tw"><table><thead><tr><th>#</th><th>Entity</th><th>HR users</th><th>SAP users</th><th>HR%</th><th>SAP%</th><th>Cost center</th><th>Payer</th><th>BU head (approver)</th><th>Active</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-ent"></tbody><tfoot id="t-ent-foot"></tfoot></table></div>
         <div class="warn-box" id="recalc-banner" style="display:none">Entity counts changed. <button class="btn btn-p" style="margin-left:12px;padding:5px 10px;font-size:11px" onclick="recalculate()">Recalculate now</button></div>
       </div>
 
@@ -220,15 +243,15 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
             <select id="opex-f-own" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
             <select id="opex-f-st" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"><option value="">All statuses</option><option>Draft</option><option>Pending BU Head</option><option>Pending CFO</option><option>Approved</option><option>Returned</option></select>
           </div>
-          <button class="btn btn-p" id="btn-opex" onclick="openModal('opex')">+ Add OPEX item</button>
+          <div style="display:flex;gap:6px"><button class="btn" onclick="exportLines('opex')">&#x2B07; Export to Excel</button><button class="btn btn-p" id="btn-opex" onclick="openModal('opex')">+ Add OPEX items</button></div>
         </div>
-        <div class="tw"><table><thead><tr><th>Budget ID</th><th>Department</th><th>Entity</th><th>Owner</th><th>Cost type</th><th>Group</th><th>Sub-group</th><th>Activity</th><th>Payer</th><th>Method</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Fixed total</th><th>Status</th><th>Actions</th></tr></thead><tbody id="t-opex"></tbody></table></div>
+        <div class="tw"><table><thead><tr><th>Budget ID</th><th>Department</th><th>Entity</th><th>Owner</th><th>Expense type</th><th>Sub-group</th><th>Budget item</th><th>Qty &times; Rate</th><th>Payer</th><th>Method</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Fixed total</th><th>Status</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-opex"></tbody></table></div>
       </div>
 
       <!-- CAPEX -->
       <div class="page" id="page-capex">
-        <div class="ph"><div></div><button class="btn btn-p" id="btn-capex" onclick="openModal('capex')">+ Add CAPEX item</button></div>
-        <div class="tw"><table><thead><tr><th>Budget ID</th><th>Department</th><th>Entity</th><th>Owner</th><th>Group</th><th>Sub-group</th><th>Activity</th><th>Payer</th><th>Method</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Status</th><th>Actions</th></tr></thead><tbody id="t-capex"></tbody></table></div>
+        <div class="ph"><div></div><div style="display:flex;gap:6px"><button class="btn" onclick="exportLines('capex')">&#x2B07; Export to Excel</button><button class="btn btn-p" id="btn-capex" onclick="openModal('capex')">+ Add CAPEX items</button></div></div>
+        <div class="tw"><table><thead><tr><th>Budget ID</th><th>Department</th><th>Entity</th><th>Owner</th><th>Expense type</th><th>Sub-group</th><th>Budget item</th><th>Qty &times; Rate</th><th>Payer</th><th>Method</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Status</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-capex"></tbody></table></div>
       </div>
 
       <!-- DISTRIBUTION -->
@@ -290,11 +313,55 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
       <!-- DEPARTMENTS -->
       <div class="page" id="page-depts">
         <div class="ph">
-          <div class="info-box" style="flex:1;margin-right:12px">Departments that plan budgets. <strong>Dept head</strong> is the first approver for lines not tied to a single entity (shared lines). Turn <strong>Approval required</strong> off to let a department save lines as approved straight away, which is how IT works today.</div>
-          <button class="btn btn-p" onclick="openModal('dept')">+ Add department</button>
+          <div class="info-box" style="flex:1;margin-right:12px">Department master. The <strong>HOD</strong> is the first approver for shared lines (not tied to one entity). Turn <strong>Approval required</strong> off to approve lines on save, as IT does today.</div>
+          <div class="toolbar adm">
+            <button class="btn" onclick="xlTemplate('dept')">&#x2B07; Template</button>
+            <button class="btn" onclick="xlPick('dept')">&#x2B06; Upload Excel</button>
+            <button class="btn" onclick="xlExport('dept')">Export</button>
+            <button class="btn btn-p" onclick="openModal('dept')">+ Add department</button>
+          </div>
         </div>
-        <div class="tw"><table><thead><tr><th>Department</th><th>Dept head (email)</th><th>Approval required</th><th>Cost groups</th><th>Active</th><th>Actions</th></tr></thead><tbody id="t-depts"></tbody></table></div>
+        <div class="tw"><table><thead><tr><th>Department</th><th>HOD name</th><th>HOD email (approver)</th><th>Cost center</th><th>Approval required</th><th>Active</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-depts"></tbody></table></div>
       </div>
+
+      <!-- EXPENSE MASTER -->
+      <div class="page" id="page-master">
+        <div class="ph">
+          <div class="toolbar">
+            <select id="em-f-et" onchange="renderMaster()"></select>
+            <select id="em-f-dept" onchange="renderMaster()"></select>
+            <input type="search" id="em-f-q" placeholder="Search item, sub group or GL" oninput="renderMaster()">
+          </div>
+          <div class="toolbar adm">
+            <button class="btn" onclick="xlTemplate('master')">&#x2B07; Template</button>
+            <button class="btn" onclick="xlPick('master')">&#x2B06; Upload Excel</button>
+            <button class="btn" onclick="xlExport('master')">Export</button>
+            <button class="btn btn-p" onclick="openModal('mrow')">+ Add budget item</button>
+          </div>
+        </div>
+        <div class="info-box" style="font-size:11px">Expense Type &rarr; Sub Group &rarr; Budget Item, each with its own GL code (used in reporting only). Leave Department blank to make an item available to all departments.</div>
+        <div class="tw"><table><thead><tr><th>Expense type</th><th>GL</th><th>Sub group</th><th>GL</th><th>Budget item</th><th>GL</th><th>Department</th><th>Rate <span id="em-fy"></span></th><th>Active</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-master"></tbody></table></div>
+      </div>
+
+      <!-- RATES -->
+      <div class="page" id="page-rates">
+        <div class="ph">
+          <div class="toolbar">
+            <select id="rt-f-fy" onchange="renderRates()"></select>
+            <select id="rt-f-et" onchange="renderRates()"></select>
+            <span id="rt-missing" style="font-size:11px"></span>
+          </div>
+          <div class="toolbar adm">
+            <button class="btn" onclick="xlTemplate('rates')">&#x2B07; Template</button>
+            <button class="btn" onclick="xlPick('rates')">&#x2B06; Upload Excel</button>
+            <button class="btn" onclick="xlExport('rates')">Export</button>
+            <button class="btn btn-p" onclick="openModal('rate')">+ Add rate</button>
+          </div>
+        </div>
+        <div class="info-box" style="font-size:11px">Rate per unit for each budget item and financial year, e.g. Travel Fare = &#x20B9;15,000 per Trip. Users enter only the quantity (number of trips) and the budget is calculated. Items without a rate are entered as a lump sum.</div>
+        <div class="tw"><table><thead><tr><th>Budget year</th><th>Expense type</th><th>Sub group</th><th>Budget item</th><th>Rate unit</th><th style="text-align:right">Rate (&#x20B9;)</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-rates"></tbody></table></div>
+      </div>
+      <input type="file" id="xl-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="xlRead(this)">
 
       <!-- AUDIT -->
       <div class="page" id="page-audit">
@@ -322,7 +389,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
         </div>
         <div class="tw">
           <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Entity</th><th>Owner Name (in budget)</th><th>Access Scope</th><th>Status</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Entity</th><th>Owner Name (in budget)</th><th>Access Scope</th><th>Status</th><th>Updated by</th><th>Actions</th></tr></thead>
             <tbody id="t-users"></tbody>
           </table>
         </div>
@@ -395,7 +462,9 @@ const SP_CONFIG = {
     config:      'ITB_Config',
     users:       'ITB_Users',
     depts:       'ITB_Departments',
-    log:         'ITB_ApprovalLog'
+    log:         'ITB_ApprovalLog',
+    master:      'ITB_ExpenseMaster',
+    rates:       'ITB_Rates'
   }
 };
 
@@ -455,12 +524,17 @@ async function getDigest(){
 async function spGet(listName, filter='', select='', top=5000){
   let url = `${SP_CONFIG.siteUrl}/_api/web/lists/getbytitle('${listName}')/items?$top=${top}`;
   if(filter) url += `&$filter=${encodeURIComponent(filter)}`;
-  if(select) url += `&$select=${encodeURIComponent(select)}`;
+  url += select ? `&$select=${encodeURIComponent(select)}` : '&$select=*,Author/Title,Author/EMail,Editor/Title,Editor/EMail&$expand=Author,Editor';
   const token = await getAccessToken();
-  const r = await fetch(url, {headers:{...SP_HEADERS, 'Authorization':`Bearer ${token}`}});
-  if(!r.ok) throw new Error(`GET ${listName} failed: ${r.status} - List may not exist yet`);
-  const d = await r.json();
-  return d.value;
+  let out = [];
+  while(url){
+    const r = await fetch(url, {headers:{...SP_HEADERS, 'Authorization':`Bearer ${token}`}});
+    if(!r.ok) throw new Error(`GET ${listName} failed: ${r.status} - List may not exist yet`);
+    const d = await r.json();
+    out = out.concat(d.value||[]);
+    url = d['odata.nextLink'] || null;
+  }
+  return out;
 }
 
 async function spPost(listName, data){
@@ -510,7 +584,7 @@ async function getCurrentUser(){
 // ═══════════════════════════════════════════════════════
 let CU = null;        // current SharePoint user
 let STATE = {
-  entities: [], opex: [], capex: [], edits: [], config: [], depts: [], log: [], users: [], deptFilter: '',
+  entities: [], opex: [], capex: [], edits: [], config: [], depts: [], log: [], users: [], master: [], rates: [], deptFilter: '',
   activeYear: 'FY 2026-27', budgetYears: ['FY 2025-26','FY 2026-27']
 };
 const fmt = v => Number(v||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -608,15 +682,22 @@ async function loadAllData(){
     spGet(SP_CONFIG.lists.config)
   ]);
 
-  const [depts, log] = await Promise.all([
+  const [depts, log, master, rates] = await Promise.all([
     spGet(SP_CONFIG.lists.depts).catch(()=>null),
-    spGet(SP_CONFIG.lists.log).catch(()=>[])
+    spGet(SP_CONFIG.lists.log).catch(()=>[]),
+    spGet(SP_CONFIG.lists.master).catch(()=>null),
+    spGet(SP_CONFIG.lists.rates).catch(()=>null)
   ]);
+  STATE.masterMissing = master===null; STATE.ratesMissing = rates===null;
+  STATE.master = (master||[]).map(m=>({id:m.Id, et:(m.ExpenseType||'').trim(), etGL:m.ExpenseTypeGL||'', sg:(m.SubGroup||'').trim(), sgGL:m.SubGroupGL||'',
+    item:(m.BudgetItem||'').trim(), itemGL:m.BudgetItemGL||'', dept:(m.Department||'').trim(), active:m.IsActive!==false, ...aud(m)}));
+  STATE.rates = (rates||[]).map(x=>({id:x.Id, fy:x.BudgetYear, et:(x.ExpenseType||'').trim(), sg:(x.SubGroup||'').trim(), item:(x.BudgetItem||'').trim(),
+    unit:x.RateUnit||'', rate:Number(x.Rate||0), ...aud(x)}));
   STATE.deptsListMissing = depts===null;
   STATE.depts = (depts||[]).map(d=>({
     id: d.Id, name: d.DeptName, head: (d.DeptHeadEmail||'').toLowerCase(),
     approval: d.RequiresApproval!==false, groups: (d.CostGroups||'').split(/[,;\n]/).map(s=>s.trim()).filter(Boolean),
-    active: d.IsActive!==false
+    active: d.IsActive!==false, hodName: d.HODName||'', cc: d.CostCenter||'', ...aud(d)
   }));
   if(!STATE.depts.some(d=>d.name==='IT')) STATE.depts.unshift({id:null,name:'IT',head:'',approval:false,groups:IT_GROUPS.slice(),active:true});
   STATE.log = (log||[]).map(l=>({id:l.Id, type:l.LineType, lineId:Number(l.LineID||0), action:l.Action, actor:l.Actor, comment:l.Comment, at:l.Created}));
@@ -624,7 +705,7 @@ async function loadAllData(){
   STATE.entities = entities.map(e=>({
     id: e.Id, name: e.EntityName, hr: Number(e.HRUsers||0), sap: Number(e.SAPUsers||0),
     costCenter: e.CostCenter, payer: e.Payer, active: e.IsActive!==false,
-    buHead: (e.BUHeadEmail||'').toLowerCase()
+    buHead: (e.BUHeadEmail||'').toLowerCase(), ...aud(e)
   }));
 
   STATE.opex = opex.map(r=>({
@@ -671,7 +752,7 @@ async function startApp(){
   document.getElementById('sb-name').textContent = CU.name;
   document.getElementById('sb-role').textContent = CU.spRole + ' · ' + CU.email;
   document.getElementById('sb-av').textContent = CU.initials;
-  if(isAdmin()){ document.getElementById('nav-users').style.display='flex'; document.getElementById('nav-depts').style.display='flex'; }
+  if(isAdmin()){ document.getElementById('nav-users').style.display='flex'; }
   buildDeptFilter();
   if(isCFO()||isBUHead()){ ['btn-opex','btn-capex'].forEach(id=>{const b=document.getElementById(id); if(b) b.style.display='none';}); }
   await buildDynamicRoleMap();
@@ -782,6 +863,9 @@ function renderAll(){
   renderAudit();
   renderApprovals();
   renderDepts();
+  renderMaster();
+  renderRates();
+  document.querySelectorAll('.adm').forEach(el=>el.style.display=isAdmin()?'flex':'none');
 }
 
 function renderDash(){
@@ -845,8 +929,8 @@ function switchTab(tab, el){
       <tr style="background:var(--bll)"><td><strong>TOTAL</strong></td><td style="text-align:right;font-weight:700">${totHR().toLocaleString()}</td><td style="text-align:right;font-weight:700">${totSAP().toLocaleString()}</td><td></td><td></td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(grand)}</td><td>100%</td><td></td></tr>
     </tbody></table></div>`;
   } else {
-    const keyFn={group:r=>r.group,functional:r=>r.ctype,subgroup:r=>r.sub||'(none)'}[tab];
-    const labelMap={group:'Group',functional:'Functional cost type',subgroup:'Sub-group'};
+    const keyFn={group:r=>r.group,item:r=>r.activity,subgroup:r=>r.sub||'(none)',gl:r=>r.itemGL?`${r.itemGL} · ${r.activity}`:'(no GL)'}[tab]||(r=>r.group);
+    const labelMap={group:'Expense type',item:'Budget item',subgroup:'Sub-group',gl:'Budget item GL'};
     const map={};
     opex.forEach(r=>{const k=keyFn(r);if(!map[k])map[k]={it:0,biz:0,tot:0,n:0};map[k].tot+=r.curBudget;map[k].n++;r.payer!=='Business'?map[k].it+=r.curBudget:map[k].biz+=r.curBudget;});
     const grand=opex.reduce((a,r)=>a+r.curBudget,0);
@@ -869,18 +953,19 @@ function renderEntities(){
     <td>${e.costCenter}</td><td><span class="badge ${e.payer==='IT'?'b-it':'b-biz'}">${e.payer}</span></td>
     <td style="font-size:11px">${e.buHead?esc(e.buHead):'<span style="color:var(--rd)">Not set</span>'}</td>
     <td><span class="badge ${e.active?'b-g':'b-r'}">${e.active?'Yes':'No'}</span></td>
+    <td>${updCell(e)}</td>
     <td><div style="display:flex;gap:4px">
       ${isAdmin()?`<button class="btn btn-e" onclick="editEntity(${e.id})">✎</button>
       <button class="btn btn-d" onclick="toggleEntity(${e.id})">${e.active?'Deactivate':'Activate'}</button>`:''}
     </div></td></tr>`).join('');
-  document.getElementById('t-ent-foot').innerHTML=`<tr style="background:var(--bll);font-weight:700"><td colspan="2">TOTAL</td><td style="text-align:right">${tH.toLocaleString()}</td><td style="text-align:right">${tS.toLocaleString()}</td><td>100%</td><td>100%</td><td colspan="5"></td></tr>`;
+  document.getElementById('t-ent-foot').innerHTML=`<tr style="background:var(--bll);font-weight:700"><td colspan="2">TOTAL</td><td style="text-align:right">${tH.toLocaleString()}</td><td style="text-align:right">${tS.toLocaleString()}</td><td>100%</td><td>100%</td><td colspan="6"></td></tr>`;
 }
 
 function populateFilters(){
   const opex=STATE.opex.filter(canSeeLine);
   const groups=[...new Set(opex.map(r=>r.group))];
   const owners=[...new Set(opex.map(r=>r.owner))].filter(o=>canSeeOwner(o));
-  ['opex-f-grp','dist-f-grp'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML='<option value="">All groups</option>'+groups.map(g=>`<option>${g}</option>`).join('');});
+  ['opex-f-grp','dist-f-grp'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML='<option value="">All expense types</option>'+groups.map(g=>`<option>${g}</option>`).join('');});
   ['opex-f-own','dist-f-own'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML='<option value="">All owners</option>'+owners.map(o=>`<option>${o}</option>`).join('');});
 }
 
@@ -896,19 +981,21 @@ function renderOPEX(){
     const fs=getFixedSum(r);
     return`<tr><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
       <td><span class="dept-tag">${esc(r.dept)}</span></td><td style="font-size:11px">${entLabel(r)}</td><td>${r.owner}</td>
-      <td style="font-size:11px">${r.ctype}</td><td><strong>${r.group}</strong></td><td>${r.sub}</td>
-      <td style="max-width:180px;font-size:12px">${r.activity}</td>
+      <td><strong>${esc(r.group)}</strong></td><td>${esc(r.sub)}</td>
+      <td style="max-width:180px;font-size:12px">${esc(r.activity)}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
+      <td style="font-size:11px;white-space:nowrap">${qtyRate(r)}</td>
       <td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td>
       <td>${methodBadge(r)}</td>
       <td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td>
       <td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td>
       <td style="text-align:right;color:var(--am)">${fs>0?'&#x20B9;'+fmt(fs):'—'}</td>
       <td>${stBadge(r.status)}</td>
+      <td>${updCell(r)}</td>
       <td><div style="display:flex;gap:3px">
         ${lineActions('opex',r)}
         ${canEditLine(r)&&!r.entity?`<button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="openOverride(${r.id})">Overrides</button>`:''}
       </div></td></tr>`;
-  }).join(''):'<tr><td colspan="15"><div class="empty">No OPEX items for this year</div></td></tr>';
+  }).join(''):'<tr><td colspan="16"><div class="empty">No OPEX items for this year</div></td></tr>';
 }
 
 function renderCAPEX(){
@@ -916,14 +1003,16 @@ function renderCAPEX(){
   document.getElementById('t-capex').innerHTML=items.length?items.map(r=>`<tr>
     <td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
     <td><span class="dept-tag">${esc(r.dept)}</span></td><td style="font-size:11px">${entLabel(r)}</td><td>${r.owner}</td>
-    <td><strong>${r.group}</strong></td><td>${r.sub}</td><td>${r.activity}</td>
+    <td><strong>${esc(r.group)}</strong></td><td>${esc(r.sub)}</td><td>${esc(r.activity)}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
+    <td style="font-size:11px;white-space:nowrap">${qtyRate(r)}</td>
     <td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td>
     <td>${r.entity?'<span class="badge b-gr">DIRECT</span>':`<span class="badge b-p">${r.method}</span>`}</td>
     <td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td>
     <td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td>
     <td>${stBadge(r.status)}</td>
+    <td>${updCell(r)}</td>
     <td><div style="display:flex;gap:3px">${lineActions('capex',r)}</div></td>
-  </tr>`).join(''):'<tr><td colspan="13"><div class="empty">No CAPEX items</div></td></tr>';
+  </tr>`).join(''):'<tr><td colspan="15"><div class="empty">No CAPEX items</div></td></tr>';
 }
 
 function renderDist(){
@@ -1130,7 +1219,7 @@ function groupOpts(dept,sel){
   return `<option value="" disabled${!sel?' selected':''}>— select —</option>`+selOpts(list,sel);
 }
 function payerOpts(dept,sel){ return selOpts(dept==='IT'?PAYERS:['Corporate','Business'],sel); }
-function onFormDeptChange(){
+function onFormDeptChange_old(){
   const d=document.getElementById('f-dept').value;
   const g=document.getElementById('f-grp'); if(g) g.innerHTML=groupOpts(d,'');
   const p=document.getElementById('f-payer'); if(p) p.innerHTML='<option value="" disabled selected>— select —</option>'+payerOpts(d,'');
@@ -1151,52 +1240,42 @@ const FORMS={
   </div>`,
   dept:(d={})=>`<div class="fgrid">
     <div class="fg"><label>${req('Department name')}</label><input id="f-dname" value="${esc(d.name||'')}" placeholder="e.g. HR" ${d.name==='IT'?'readonly':''}></div>
-    <div class="fg"><label>Dept head email</label><input id="f-dhead" type="email" value="${esc(d.head||'')}" placeholder="name@arvind.in"></div>
+    <div class="fg"><label>${req('Cost center')}</label><input id="f-dcc" value="${esc(d.cc||'')}" placeholder="e.g. 1012HR001"></div>
+    <div class="fg"><label>HOD name</label><input id="f-dhname" value="${esc(d.hodName||'')}" placeholder="Head of department"></div>
+    <div class="fg"><label>HOD email (approver)</label><input id="f-dhead" type="email" value="${esc(d.head||'')}" placeholder="name@arvind.in"></div>
     <div class="fg"><label>Approval required</label><select id="f-dappr"><option value="true"${d.approval!==false?' selected':''}>Yes — Dept → BU head → CFO</option><option value="false"${d.approval===false?' selected':''}>No — lines are approved on save</option></select></div>
     <div class="fg"><label>Active</label><select id="f-dact"><option value="true"${d.active!==false?' selected':''}>Yes</option><option value="false"${d.active===false?' selected':''}>No</option></select></div>
-    <div class="fg" style="grid-column:1/-1"><label>Cost groups (comma separated)</label><textarea id="f-dgroups" rows="2" placeholder="e.g. Manpower, Training, Recruitment">${esc((d.groups||[]).join(', '))}</textarea></div>
   </div>`,
-  opex:(d={})=>`<div class="fgrid">
-    <div class="fg"><label>Budget ID</label><input id="f-bid" value="${d.budgetId||''}" placeholder="Auto-assigned if blank"></div>
-    <div class="fg"><label>${req('Budget year')}</label><select id="f-year" required>${yearOpts(d.year||STATE.activeYear)}</select></div>
-    <div class="fg"><label>${req('Department')}</label>${deptField(d.dept)}</div>
-    <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
-    <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
-    <div class="fg"><label>${req('Functional cost type')}</label><select id="f-ctype" required><option value="" disabled${!d.ctype?' selected':''}>— select —</option>${selOpts(CTYPES,d.ctype)}</select></div>
-    <div class="fg"><label>${req('Group')}</label><select id="f-grp" required>${groupOpts(d.dept||myDept(),d.group)}</select></div>
-    <div class="fg"><label>${req('Sub-group')}</label><input id="f-sub" value="${d.sub||''}" placeholder="e.g. SAP, O365" required></div>
-    <div class="fg" style="grid-column:1/-1"><label>${req('Activity name')}</label><input id="f-act" value="${d.activity||''}" placeholder="e.g. SAP AMC Renewal" required></div>
-    <div class="fg"><label>${req('Payer')}</label><select id="f-payer" required><option value="" disabled${!d.payer?' selected':''}>— select —</option>${payerOpts(d.dept||myDept(),d.payer)}</select></div>
-    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method" required${d.entity?' disabled':''}><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
-    <div class="fg"><label>${req('Previous FY budget (&#x20B9;L)')}</label><input type="number" id="f-prev" step="0.01" min="0" value="${d.prevBudget!=null?d.prevBudget:''}" placeholder="Enter previous budget" required></div>
-    <div class="fg"><label>${req('Current FY budget (&#x20B9;L)')}</label><input type="number" id="f-cur" step="0.01" min="0" value="${d.curBudget!=null?d.curBudget:''}" placeholder="Enter current budget" required></div>
-    <div class="fg" style="grid-column:1/-1"><label>Justification</label><textarea id="f-just" rows="2" placeholder="Needed when the line is new or more than 10% above last year">${esc(d.just||'')}</textarea></div>
-    ${statusNote(d)}
+  mrow:(d={})=>`<div class="fgrid3">
+    <div class="fg"><label>${req('Expense type')}</label><input id="f-et" list="dl-et" value="${esc(d.et||'')}" placeholder="e.g. Travel Expense"><datalist id="dl-et">${uniq(STATE.master.map(m=>m.et)).map(v=>`<option value="${esc(v)}">`).join('')}</datalist></div>
+    <div class="fg"><label>Expense type GL</label><input id="f-etgl" value="${esc(d.etGL||'')}"></div>
+    <div class="fg"><label>Department (blank = all)</label><select id="f-mdept"><option value="">All departments</option>${activeDepts().map(x=>`<option${x.name===d.dept?' selected':''}>${esc(x.name)}</option>`).join('')}</select></div>
+    <div class="fg"><label>${req('Sub group')}</label><input id="f-sg" list="dl-sg" value="${esc(d.sg||'')}" placeholder="e.g. Domestic"><datalist id="dl-sg">${uniq(STATE.master.map(m=>m.sg)).map(v=>`<option value="${esc(v)}">`).join('')}</datalist></div>
+    <div class="fg"><label>Sub group GL</label><input id="f-sggl" value="${esc(d.sgGL||'')}"></div>
+    <div class="fg"><label>Active</label><select id="f-mact"><option value="true"${d.active!==false?' selected':''}>Yes</option><option value="false"${d.active===false?' selected':''}>No</option></select></div>
+    <div class="fg"><label>${req('Budget item')}</label><input id="f-item" value="${esc(d.item||'')}" placeholder="e.g. Travel Fare"></div>
+    <div class="fg"><label>Budget item GL</label><input id="f-itemgl" value="${esc(d.itemGL||'')}"></div>
+    <div class="info-box" style="grid-column:1/-1;font-size:11px;padding:6px 10px">GL codes for the expense type and sub group are shared: changing them here updates every row with the same expense type / sub group.</div>
   </div>`,
-  capex:(d={})=>`<div class="fgrid">
-    <div class="fg"><label>Budget ID</label><input id="f-bid" value="${d.budgetId||''}" placeholder="Auto-assigned if blank"></div>
-    <div class="fg"><label>${req('Budget year')}</label><select id="f-year" required>${yearOpts(d.year||STATE.activeYear)}</select></div>
-    <div class="fg"><label>${req('Department')}</label>${deptField(d.dept)}</div>
-    <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
-    <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
-    <div class="fg"><label>${req('Group')}</label><select id="f-grp" required>${groupOpts(d.dept||myDept(),d.group)}</select></div>
-    <div class="fg"><label>${req('Sub-group')}</label><input id="f-sub" value="${d.sub||''}" placeholder="e.g. SAP, Servers" required></div>
-    <div class="fg" style="grid-column:1/-1"><label>${req('Activity name')}</label><input id="f-act" value="${d.activity||''}" placeholder="e.g. SAP Upgrade" required></div>
-    <div class="fg"><label>${req('Payer')}</label><select id="f-payer" required><option value="" disabled${!d.payer?' selected':''}>— select —</option>${payerOpts(d.dept||myDept(),d.payer)}</select></div>
-    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method" required${d.entity?' disabled':''}><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
-    <div class="fg"><label>${req('Previous FY budget (&#x20B9;L)')}</label><input type="number" id="f-prev" step="0.01" min="0" value="${d.prevBudget!=null?d.prevBudget:''}" placeholder="Enter previous budget" required></div>
-    <div class="fg"><label>${req('Current FY budget (&#x20B9;L)')}</label><input type="number" id="f-cur" step="0.01" min="0" value="${d.curBudget!=null?d.curBudget:''}" placeholder="Enter current budget" required></div>
-    <div class="fg" style="grid-column:1/-1"><label>Justification</label><textarea id="f-just" rows="2" placeholder="Needed when the line is new or more than 10% above last year">${esc(d.just||'')}</textarea></div>
-    ${statusNote(d)}
-  </div>`,
+  rate:(d={})=>{const fy=d.fy||STATE.activeYear;return `<div class="fgrid">
+    <div class="fg"><label>${req('Budget year')}</label><select id="f-ryear">${yearOpts(fy)}</select></div>
+    <div class="fg"><label>${req('Expense type')}</label><select id="f-ret" onchange="rateCascade('et')" ${d.id?'disabled':''}>${optList(uniq(STATE.master.map(m=>m.et)),d.et)}</select></div>
+    <div class="fg"><label>${req('Sub group')}</label><select id="f-rsg" onchange="rateCascade('sg')" ${d.id?'disabled':''}>${d.et?optList(uniq(STATE.master.filter(m=>m.et===d.et).map(m=>m.sg)),d.sg):'<option value="">— select —</option>'}</select></div>
+    <div class="fg"><label>${req('Budget item')}</label><select id="f-ritem" ${d.id?'disabled':''}>${d.sg?optList(uniq(STATE.master.filter(m=>m.et===d.et&&m.sg===d.sg).map(m=>m.item)),d.item):'<option value="">— select —</option>'}</select></div>
+    <div class="fg"><label>${req('Rate unit')}</label><input id="f-runit" list="dl-unit" value="${esc(d.unit||'')}" placeholder="e.g. Trip, Month, Person, Licence"><datalist id="dl-unit">${uniq(['Trip','Month','Person','Licence','Day','Night','Unit','Lump sum',...STATE.rates.map(r=>r.unit)]).map(v=>`<option value="${esc(v)}">`).join('')}</datalist></div>
+    <div class="fg"><label>${req('Rate per unit (&#x20B9;)')}</label><input id="f-rrate" type="number" min="0" step="0.01" value="${d.rate!=null?d.rate:''}" placeholder="e.g. 15000"></div>
+  </div>`;},
+  opex:(d={})=>lineForm('opex',d),
+  capex:(d={})=>lineForm('capex',d),
 };
 
 function openModal(type,data={}){
   CM=type;CEid=data.id||null;
-  document.getElementById('modal-box').className='modal'+(type==='override'?' modal-lg':'');
-  document.getElementById('m-title').textContent={dept:data.name?'Edit department':'Add department',entity:data.id?'Edit entity':'Add entity',opex:data.id?'Edit OPEX item':'Add OPEX item',capex:data.id?'Edit CAPEX item':'Add CAPEX item',override:'Edit fixed overrides'}[type]||'Edit';
+  document.getElementById('modal-box').className='modal'+(type==='override'||type==='mrow'?' modal-lg':'')+((type==='opex'||type==='capex')?' modal-xl':'');
+  document.getElementById('m-title').textContent={mrow:data.id?'Edit budget item':'Add budget item',rate:data.id?'Edit rate':'Add rate',dept:data.name?'Edit department':'Add department',entity:data.id?'Edit entity':'Add entity',opex:data.id?'Edit OPEX item':'Add OPEX item',capex:data.id?'Edit CAPEX item':'Add CAPEX item',override:'Edit fixed overrides'}[type]||'Edit';
   document.getElementById('m-body').innerHTML=(FORMS[type]||(()=>''))(data);
   document.getElementById('ov').classList.add('open');
+  if(type==='opex'||type==='capex') initLineForm(type,data);
 }
 function closeModal(){document.getElementById('ov').classList.remove('open');CM=null;CEid=null;}
 
@@ -1220,27 +1299,27 @@ async function saveModal(){
       else await spPost(SP_CONFIG.lists.entities,data);
       document.getElementById('recalc-banner').style.display='flex';
     } else if(CM==='dept'){
-      if(!validate([{id:'f-dname'}])) return;
-      const data={DeptName:gv('f-dname'),DeptHeadEmail:gv('f-dhead').toLowerCase(),RequiresApproval:gv('f-dappr')==='true',CostGroups:gv('f-dgroups'),IsActive:gv('f-dact')==='true'};
-      if(STATE.deptsListMissing){showToast('Create the ITB_Departments list first (run the setup script).');setSyncErr();return;}
+      if(!validate([{id:'f-dname'},{id:'f-dcc'}])) return;
+      const data={DeptName:gv('f-dname'),CostCenter:gv('f-dcc'),HODName:gv('f-dhname'),DeptHeadEmail:gv('f-dhead').toLowerCase(),RequiresApproval:gv('f-dappr')==='true',IsActive:gv('f-dact')==='true'};
+      if(STATE.deptsListMissing){showToast('The ITB_Departments list is missing.');setSyncErr();return;}
       if(CEid) await spPatch(SP_CONFIG.lists.depts,CEid,data);
       else await spPost(SP_CONFIG.lists.depts,data);
-    } else if(CM==='opex'){
-      if(!validate([{id:'f-ctype'},{id:'f-grp'},{id:'f-sub'},{id:'f-act'},{id:'f-payer'},...(gv('f-entity')?[]:[{id:'f-method'}])])) return;
-      if(gn('f-prev')===null||gn('f-cur')===null){showToast('Budget amounts are required.');return;}
-      const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
-      if(!owner){showToast('Owner is required.');return;}
-      const data={BudgetID:gv('f-bid')||null,BudgetYear:gv('f-year'),ITOwner:owner,FunctionalCost:gv('f-ctype'),GroupName:gv('f-grp'),SubGroup:gv('f-sub'),ActivityName:gv('f-act'),Payer:gv('f-payer'),DistMethod:gv('f-entity')?'FIXED':gv('f-method'),PrevBudget:gn('f-prev'),CurBudget:gn('f-cur'),Overrides:'{}',...wfSaveFields('opex',CEid)};
-      if(CEid){const existing=STATE.opex.find(r=>r.id===CEid);if(existing)data.Overrides=JSON.stringify(data.Entity?{}:existing.overrides);await spPatch(SP_CONFIG.lists.opex,CEid,data);await logAfterSave('opex',CEid,existing,data);}
-      else { const res=await spPost(SP_CONFIG.lists.opex,data); await logAction('opex',res.Id||res.ID,'Created',''); }
-    } else if(CM==='capex'){
-      if(!validate([{id:'f-grp'},{id:'f-sub'},{id:'f-act'},{id:'f-payer'},...(gv('f-entity')?[]:[{id:'f-method'}])])) return;
-      if(gn('f-prev')===null||gn('f-cur')===null){showToast('Budget amounts are required.');return;}
-      const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
-      if(!owner){showToast('Owner is required.');return;}
-      const data={BudgetID:gv('f-bid')||null,BudgetYear:gv('f-year'),ITOwner:owner,GroupName:gv('f-grp'),SubGroup:gv('f-sub'),ActivityName:gv('f-act'),Payer:gv('f-payer'),DistMethod:gv('f-entity')?'FIXED':gv('f-method'),PrevBudget:gn('f-prev'),CurBudget:gn('f-cur'),...wfSaveFields('capex',CEid)};
-      if(CEid){const existing=STATE.capex.find(r=>r.id===CEid);await spPatch(SP_CONFIG.lists.capex,CEid,data);await logAfterSave('capex',CEid,existing,data);}
-      else { const res=await spPost(SP_CONFIG.lists.capex,data); await logAction('capex',res.Id||res.ID,'Created',''); }
+    } else if(CM==='mrow'){
+      if(!validate([{id:'f-et'},{id:'f-sg'},{id:'f-item'}])) return;
+      const row={et:gv('f-et'),etGL:gv('f-etgl'),sg:gv('f-sg'),sgGL:gv('f-sggl'),item:gv('f-item'),itemGL:gv('f-itemgl'),dept:gv('f-mdept'),active:gv('f-mact')==='true'};
+      const dup=STATE.master.find(m=>m.id!==CEid&&mkey(m)===mkey(row));
+      if(dup){showToast('This budget item already exists for that expense type, sub group and department.');setSynced();return;}
+      const data=masterData(row);
+      if(CEid) await spPatch(SP_CONFIG.lists.master,CEid,data); else await spPost(SP_CONFIG.lists.master,data);
+      await syncSharedGL(row,CEid);
+    } else if(CM==='rate'){
+      if(!validate([{id:'f-ret'},{id:'f-rsg'},{id:'f-ritem'},{id:'f-runit'},{id:'f-rrate'}])) return;
+      const data={BudgetYear:gv('f-ryear'),ExpenseType:gv('f-ret'),SubGroup:gv('f-rsg'),BudgetItem:gv('f-ritem'),RateUnit:gv('f-runit'),Rate:gn('f-rrate')};
+      const dup=STATE.rates.find(r=>r.id!==CEid&&rkey({fy:data.BudgetYear,et:data.ExpenseType,sg:data.SubGroup,item:data.BudgetItem})===rkey(r));
+      if(dup){showToast('A rate for this item and year already exists. Edit that one instead.');setSynced();return;}
+      if(CEid) await spPatch(SP_CONFIG.lists.rates,CEid,data); else await spPost(SP_CONFIG.lists.rates,data);
+    } else if(CM==='opex'||CM==='capex'){
+      const ok=await saveLines(CM,CEid); if(!ok){ setSynced(); return; }
     } else if(CM==='override'){
       const item=STATE.opex.find(r=>r.id===CEid);if(!item)return;
       const ents=activeEntities();
@@ -1310,7 +1389,7 @@ function clearSel(){
 // ═══════════════════════════════════════════════════════
 //  NAV & UTILS
 // ═══════════════════════════════════════════════════════
-const PG={approvals:'Approvals',depts:'Departments',dash:'Dashboard',users:'User Management',entities:'Entities & HR/SAP users',opex:'OPEX budget',capex:'CAPEX budget',dist:'Distribution table',edit:'Entity budget edit',audit:'Audit log'};
+const PG={approvals:'Approvals',depts:'Department master',master:'Expense master',rates:'Rates & units',dash:'Dashboard',users:'User Management',entities:'Entities & HR/SAP users',opex:'OPEX budget',capex:'CAPEX budget',dist:'Distribution table',edit:'Entity budget edit',audit:'Audit log'};
 function go(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
@@ -1328,6 +1407,8 @@ function go(id,el){
   if(id==='users') renderUsers();
   if(id==='approvals') renderApprovals();
   if(id==='depts') renderDepts();
+  if(id==='master') renderMaster();
+  if(id==='rates') renderRates();
   if(id==='dist') renderDist();
 }
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
@@ -1343,7 +1424,9 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 function wfFields(r){
   return { dept: r.Department||'IT', entity: r.EntityName||'', status: r.LineStatus||ST.ok,
     just: r.Justification||'', retComment: r.ReturnComment||'',
-    buBy: r.BUApprovedBy||'', cfoBy: r.CFOApprovedBy||'' };
+    buBy: r.BUApprovedBy||'', cfoBy: r.CFOApprovedBy||'',
+    qty: r.Quantity!=null?Number(r.Quantity):null, unit: r.Unit||'', rate: r.Rate!=null?Number(r.Rate):null,
+    etGL: r.ExpenseTypeGL||'', sgGL: r.SubGroupGL||'', itemGL: r.BudgetItemGL||'', ...aud(r) };
 }
 function stBadge(s){
   const c={[ST.draft]:'st-draft',[ST.bu]:'st-bu',[ST.cfo]:'st-cfo',[ST.ok]:'st-ok',[ST.ret]:'st-ret'}[s]||'st-draft';
@@ -1360,7 +1443,7 @@ function deptByName(n){ return STATE.depts.find(d=>d.name===n); }
 function deptGroups(n){ const d=deptByName(n); return d&&d.groups&&d.groups.length?d.groups:(n==='IT'?IT_GROUPS:['General']); }
 function needsApproval(dept){ const d=deptByName(dept); return d ? d.approval!==false : dept!=='IT'; }
 function statusNote(d){
-  if(!d.id) return `<div class="info-box" style="grid-column:1/-1;font-size:11px;padding:6px 10px">New lines are saved as <strong>Draft</strong> when the department needs approval. Submit them from the table or the Approvals page.</div>`;
+  if(!d.id) return `<div class="info-box" style="grid-column:1/-1;font-size:11px;padding:6px 10px">Each budget item with a quantity becomes its own line. New lines are saved as <strong>Draft</strong> when the department needs approval. Submit them from the table or the Approvals page.</div>`;
   if(d.status===ST.ok && needsApproval(d.dept) && !isAdmin()) return `<div class="warn-box" style="grid-column:1/-1;font-size:11px;padding:6px 10px">This line is approved. Saving a change sends it back to <strong>Draft</strong> for re-approval.</div>`;
   if(d.status===ST.ret && d.retComment) return `<div class="warn-box" style="grid-column:1/-1;font-size:11px;padding:6px 10px"><strong>Returned:</strong> ${esc(d.retComment)}</div>`;
   return '';
@@ -1554,12 +1637,14 @@ function renderApprovals(){
 function renderDepts(){
   const tb=document.getElementById('t-depts'); if(!tb||!CU) return;
   tb.innerHTML=STATE.depts.map(d=>`<tr style="${d.active===false?'opacity:.5':''}">
-    <td><span class="dept-tag">${esc(d.name)}</span></td><td style="font-size:11px">${d.head?esc(d.head):'<span style="color:var(--rd)">Not set</span>'}</td>
+    <td><span class="dept-tag">${esc(d.name)}</span></td><td>${esc(d.hodName)||'—'}</td>
+    <td style="font-size:11px">${d.head?esc(d.head):'<span style="color:var(--rd)">Not set</span>'}</td>
+    <td>${d.cc?`<span class="gl">${esc(d.cc)}</span>`:'<span style="color:var(--rd);font-size:11px">Not set</span>'}</td>
     <td><span class="badge ${d.approval!==false?'b-a':'b-gr'}">${d.approval!==false?'Yes':'No'}</span></td>
-    <td style="font-size:11px">${esc(deptGroups(d.name).join(', '))}</td>
     <td><span class="badge ${d.active!==false?'b-g':'b-r'}">${d.active!==false?'Yes':'No'}</span></td>
-    <td>${isAdmin()?`<button class="btn btn-e" onclick="editDept('${esc(d.name)}')">✎</button>`:''}</td></tr>`).join('')+
-    (STATE.deptsListMissing?'<tr><td colspan="6"><div class="warn-box">ITB_Departments list not found. Run Setup-GroupBudget-Extension.ps1 to create it; until then only IT is available.</div></td></tr>':'');
+    <td>${updCell(d)}</td>
+    <td>${isAdmin()&&d.id?`<button class="btn btn-e" onclick="editDept('${esc(d.name)}')">✎</button>`:''}</td></tr>`).join('')+
+    (STATE.deptsListMissing?'<tr><td colspan="8"><div class="warn-box">ITB_Departments list not found.</div></td></tr>':'');
 }
 function buildDeptFilter(){
   const sel=document.getElementById('dept-sel');
@@ -1569,6 +1654,323 @@ function buildDeptFilter(){
   sel.value=STATE.deptFilter||'';
 }
 function onDeptFilter(){ STATE.deptFilter=document.getElementById('dept-sel').value; populateFilters(); renderAll(); }
+
+// ═══════════════════════════════════════════════════════
+//  GROUP: AUDIT, MASTERS, QTY × RATE ENTRY, EXCEL
+// ═══════════════════════════════════════════════════════
+function aud(r){ return { cBy:(r.Author&&r.Author.Title)||'', cAt:r.Created||'', uBy:(r.Editor&&r.Editor.Title)||'', uAt:r.Modified||r.Created||'' }; }
+function dt(s){ if(!s) return ''; const d=new Date(s); return isNaN(d)?'':d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'})+' '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+function updCell(x){ if(!x||!x.uBy) return '<span class="upd">—</span>'; return `<div class="upd" title="Created by ${esc(x.cBy)} on ${dt(x.cAt)}"><b>${esc(x.uBy)}</b>${dt(x.uAt)}</div>`; }
+const uniq=a=>[...new Set(a.filter(v=>v!=null&&String(v).trim()!==''))].sort((x,y)=>String(x).localeCompare(String(y)));
+const norm=s=>String(s??'').trim().toLowerCase();
+function optList(arr,sel){ return '<option value="">— select —</option>'+arr.map(v=>`<option${v===sel?' selected':''}>${esc(v)}</option>`).join(''); }
+const mkey=m=>[m.et,m.sg,m.item,m.dept||''].map(norm).join('|');
+const rkey=r=>[r.fy,r.et,r.sg,r.item].map(norm).join('|');
+function masterData(m){ return {ExpenseType:m.et,ExpenseTypeGL:m.etGL||'',SubGroup:m.sg,SubGroupGL:m.sgGL||'',BudgetItem:m.item,BudgetItemGL:m.itemGL||'',Department:m.dept||null,IsActive:m.active!==false}; }
+function masterFor(dept){ return STATE.master.filter(m=>m.active!==false&&(!m.dept||m.dept===dept)); }
+function rateFor(fy,et,sg,item){ return STATE.rates.find(r=>norm(r.fy)===norm(fy)&&norm(r.et)===norm(et)&&norm(r.sg)===norm(sg)&&norm(r.item)===norm(item)); }
+function fmtR(n){ return Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2}); }
+function qtyRate(r){ return r.qty!=null&&r.rate!=null?`${fmtR(r.qty)} ${esc(r.unit||'')} &times; &#x20B9;${fmtR(r.rate)}`:'<span style="color:var(--tx3)">Lump sum</span>'; }
+// keep expense-type / sub-group GL identical across rows
+async function syncSharedGL(row,selfId){
+  for(const m of STATE.master){
+    if(m.id===selfId) continue;
+    const patch={};
+    if(norm(m.et)===norm(row.et)&&row.etGL!==m.etGL) patch.ExpenseTypeGL=row.etGL;
+    if(norm(m.et)===norm(row.et)&&norm(m.sg)===norm(row.sg)&&row.sgGL!==m.sgGL) patch.SubGroupGL=row.sgGL;
+    if(Object.keys(patch).length) await spPatch(SP_CONFIG.lists.master,m.id,patch);
+  }
+}
+function rateCascade(level){
+  const et=document.getElementById('f-ret').value, sgSel=document.getElementById('f-rsg'), itSel=document.getElementById('f-ritem');
+  if(level==='et'){ sgSel.innerHTML=optList(uniq(STATE.master.filter(m=>m.et===et).map(m=>m.sg)),''); itSel.innerHTML='<option value="">— select —</option>'; }
+  if(level==='sg'){ const sg=sgSel.value; itSel.innerHTML=optList(uniq(STATE.master.filter(m=>m.et===et&&m.sg===sg).map(m=>m.item)),''); }
+}
+
+/* ---------- master pages ---------- */
+function renderMaster(){
+  const tb=document.getElementById('t-master'); if(!tb||!CU) return;
+  const fe=document.getElementById('em-f-et'), fd=document.getElementById('em-f-dept');
+  const ev=fe.value, dv=fd.value;
+  fe.innerHTML='<option value="">All expense types</option>'+uniq(STATE.master.map(m=>m.et)).map(v=>`<option${v===ev?' selected':''}>${esc(v)}</option>`).join('');
+  fd.innerHTML='<option value="">All departments</option><option value="__common"'+(dv==='__common'?' selected':'')+'>Common items only</option>'+activeDepts().map(d=>`<option${d.name===dv?' selected':''}>${esc(d.name)}</option>`).join('');
+  const q=norm(document.getElementById('em-f-q').value);
+  document.getElementById('em-fy').textContent='('+STATE.activeYear+')';
+  let rows=STATE.master.slice().sort((a,b)=>(a.et+a.sg+a.item).localeCompare(b.et+b.sg+b.item));
+  if(ev) rows=rows.filter(m=>m.et===ev);
+  if(dv==='__common') rows=rows.filter(m=>!m.dept); else if(dv) rows=rows.filter(m=>!m.dept||m.dept===dv);
+  if(q) rows=rows.filter(m=>norm([m.et,m.sg,m.item,m.etGL,m.sgGL,m.itemGL].join(' ')).includes(q));
+  tb.innerHTML=rows.length?rows.map(m=>{const r=rateFor(STATE.activeYear,m.et,m.sg,m.item);return `<tr style="${m.active?'':'opacity:.5'}">
+    <td><strong>${esc(m.et)}</strong></td><td class="gl">${esc(m.etGL)||'—'}</td><td>${esc(m.sg)}</td><td class="gl">${esc(m.sgGL)||'—'}</td>
+    <td>${esc(m.item)}</td><td class="gl">${esc(m.itemGL)||'—'}</td><td>${m.dept?`<span class="dept-tag">${esc(m.dept)}</span>`:'<span style="color:var(--tx3);font-size:11px">All</span>'}</td>
+    <td style="font-size:11px;white-space:nowrap">${r?`&#x20B9;${fmtR(r.rate)} / ${esc(r.unit)}`:'<span style="color:var(--am)">No rate</span>'}</td>
+    <td><span class="badge ${m.active?'b-g':'b-r'}">${m.active?'Yes':'No'}</span></td><td>${updCell(m)}</td>
+    <td>${isAdmin()?`<button class="btn btn-e" onclick="editMaster(${m.id})">✎</button>`:''}</td></tr>`;}).join('')
+    :`<tr><td colspan="11"><div class="empty">${STATE.masterMissing?'The ITB_ExpenseMaster list is missing.':'No budget items yet. Download the template, fill it in and upload it.'}</div></td></tr>`;
+}
+function editMaster(id){ const m=STATE.master.find(x=>x.id===id); if(m) openModal('mrow',m); }
+function renderRates(){
+  const tb=document.getElementById('t-rates'); if(!tb||!CU) return;
+  const fy=document.getElementById('rt-f-fy'), fe=document.getElementById('rt-f-et');
+  const fv=fy.value||STATE.activeYear, ev=fe.value;
+  fy.innerHTML=uniq([...STATE.budgetYears,...STATE.rates.map(r=>r.fy)]).map(y=>`<option${y===fv?' selected':''}>${esc(y)}</option>`).join('');
+  fe.innerHTML='<option value="">All expense types</option>'+uniq(STATE.master.map(m=>m.et)).map(v=>`<option${v===ev?' selected':''}>${esc(v)}</option>`).join('');
+  let rows=STATE.rates.filter(r=>r.fy===fv&&(!ev||r.et===ev)).sort((a,b)=>(a.et+a.sg+a.item).localeCompare(b.et+b.sg+b.item));
+  const items=uniq(STATE.master.filter(m=>m.active).map(m=>[m.et,m.sg,m.item].join('|')));
+  const missing=items.filter(k=>{const [a,b,c]=k.split('|');return !rateFor(fv,a,b,c);});
+  document.getElementById('rt-missing').innerHTML=missing.length?`<span class="badge b-a" title="${esc(missing.map(k=>k.replace(/\|/g,' › ')).join('\n'))}">${missing.length} budget item${missing.length===1?'':'s'} without a rate for ${esc(fv)}</span>`:'';
+  tb.innerHTML=rows.length?rows.map(r=>`<tr><td><span class="badge b-gr">${esc(r.fy)}</span></td><td><strong>${esc(r.et)}</strong></td><td>${esc(r.sg)}</td><td>${esc(r.item)}</td>
+    <td>${esc(r.unit)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmtR(r.rate)}</td><td>${updCell(r)}</td>
+    <td>${isAdmin()?`<button class="btn btn-e" onclick="editRate(${r.id})">✎</button> <button class="btn btn-d" onclick="delRate(${r.id})">🗑</button>`:''}</td></tr>`).join('')
+    :`<tr><td colspan="8"><div class="empty">${STATE.ratesMissing?'The ITB_Rates list is missing.':'No rates for '+esc(fv)+' yet.'}</div></td></tr>`;
+}
+function editRate(id){ const r=STATE.rates.find(x=>x.id===id); if(r) openModal('rate',r); }
+async function delRate(id){
+  const r=STATE.rates.find(x=>x.id===id); if(!r) return;
+  openAct('Delete rate?',`<div style="font-size:13px">${esc(r.fy)} · ${esc(r.item)} · &#x20B9;${fmtR(r.rate)} / ${esc(r.unit)}<br><br>Existing budget lines keep their amounts. New lines for this item will need a manual rate.</div>`,
+    `<button class="btn" onclick="closeAct()">Cancel</button><button class="btn btn-d" style="padding:7px 13px;font-size:12px" onclick="doDelRate(${id})">Delete</button>`);
+}
+async function doDelRate(id){ setSyncing(); try{ await spDelete(SP_CONFIG.lists.rates,id); closeAct(); await loadAllData(); renderAll(); setSynced(); showToast('Rate deleted.'); }catch(e){ setSyncErr(); showToast('Error: '+e.message); } }
+
+/* ---------- OPEX / CAPEX entry: Expense type → Sub group → items, qty × rate ---------- */
+function lineForm(type,d){
+  const edit=!!d.id, dept=d.dept||myDept();
+  const ets=edit?[d.group]:uniq(masterFor(dept).map(m=>m.et));
+  return `<div class="fgrid3">
+    <div class="fg"><label>${req('Budget year')}</label><select id="f-year" onchange="buildGrid()">${yearOpts(d.year||STATE.activeYear)}</select></div>
+    <div class="fg"><label>${req('Department')}</label>${deptField(d.dept)}</div>
+    <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
+    <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
+    <div class="fg"><label>${req('Payer')}</label><select id="f-payer"><option value="" disabled${!d.payer?' selected':''}>— select —</option>${payerOpts(dept,d.payer)}</select></div>
+    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method"${d.entity?' disabled':''}><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
+    <div class="fg"><label>${req('Expense type')}</label><select id="f-et" onchange="onEtChange()" ${edit?'disabled':''}>${optList(ets,d.group||'')}</select></div>
+    <div class="fg"><label>${req('Sub group')}</label><select id="f-sg" onchange="buildGrid()" ${edit?'disabled':''}>${edit?optList([d.sub],d.sub):'<option value="">— select expense type —</option>'}</select></div>
+    <div class="fg"><label>Budget ID</label><input id="f-bid" value="${esc(d.budgetId||'')}" placeholder="Optional"></div>
+  </div>
+  ${!edit&&!ets.length?`<div class="warn-box" style="margin-bottom:10px">No expense master for <strong>${esc(dept)}</strong> yet. ${isAdmin()?'Add or upload budget items under Master Data → Expense master.':'Ask the budget administrator to set up the expense master.'}</div>`:''}
+  <div id="f-gridwrap"></div>
+  <div class="fg"><label>Justification</label><textarea id="f-just" rows="2" placeholder="Needed when a line is new or more than 10% above last year">${esc(d.just||'')}</textarea></div>
+  ${statusNote(d)}`;
+}
+let LF={type:null,edit:null};
+function initLineForm(type,d){ LF={type,edit:d.id?d:null}; buildGrid(); }
+function onFormDeptChange(){
+  const d=document.getElementById('f-dept').value;
+  const p=document.getElementById('f-payer'); if(p) p.innerHTML='<option value="" disabled selected>— select —</option>'+payerOpts(d,'');
+  const et=document.getElementById('f-et'); if(et&&!LF.edit){ et.innerHTML=optList(uniq(masterFor(d).map(m=>m.et)),''); onEtChange(); }
+}
+function onEtChange(){
+  const dept=document.getElementById('f-dept').value, et=document.getElementById('f-et').value;
+  document.getElementById('f-sg').innerHTML=et?optList(uniq(masterFor(dept).filter(m=>m.et===et).map(m=>m.sg)),''):'<option value="">— select expense type —</option>';
+  buildGrid();
+}
+function buildGrid(){
+  const wrap=document.getElementById('f-gridwrap'); if(!wrap) return;
+  const fy=document.getElementById('f-year').value, et=document.getElementById('f-et').value, sg=document.getElementById('f-sg').value;
+  const dept=document.getElementById('f-dept').value;
+  let rows=[];
+  if(LF.edit){
+    const d=LF.edit, r=rateFor(fy,d.group,d.sub,d.activity), m=STATE.master.find(x=>norm(x.et)===norm(d.group)&&norm(x.sg)===norm(d.sub)&&norm(x.item)===norm(d.activity));
+    rows=[{item:d.activity,etGL:m?m.etGL:d.etGL,sgGL:m?m.sgGL:d.sgGL,itemGL:m?m.itemGL:d.itemGL,unit:r?r.unit:(d.unit||'Lump sum'),rate:r?r.rate:(d.rate!=null?d.rate:Math.round(d.curBudget*100000*100)/100),
+      fixed:!!r,qty:d.qty!=null?d.qty:1,prev:d.prevBudget}];
+  } else if(et&&sg){
+    rows=masterFor(dept).filter(m=>m.et===et&&m.sg===sg).sort((a,b)=>a.item.localeCompare(b.item)).map(m=>{const r=rateFor(fy,m.et,m.sg,m.item);
+      return {item:m.item,etGL:m.etGL,sgGL:m.sgGL,itemGL:m.itemGL,unit:r?r.unit:'Lump sum',rate:r?r.rate:'',fixed:!!r,qty:'',prev:''};});
+  }
+  // keep quantities the user already typed
+  const old={}; document.querySelectorAll('#f-grid tbody tr').forEach(tr=>{old[tr.dataset.item]={q:tr.querySelector('.g-qty').value,p:tr.querySelector('.g-prev').value,r:tr.querySelector('.g-rate').value};});
+  if(!rows.length){ wrap.innerHTML=''; return; }
+  const units=uniq(rows.filter(r=>r.fixed).map(r=>r.unit));
+  wrap.innerHTML=`${LF.edit?'':`<div class="qall">Quantity for all items <input id="f-qall" type="number" min="0" step="any" placeholder="e.g. 10" oninput="qtyAll()"> <span style="font-weight:500">${units.length===1?esc(units[0])+'s':''} · you can still change each row below</span></div>`}
+  <div class="qgrid"><table id="f-grid"><thead><tr><th>Budget item</th><th>GL</th><th>Unit</th><th style="text-align:right">Rate (&#x20B9;)</th><th style="text-align:right">Quantity</th><th style="text-align:right">Amount (&#x20B9;L)</th><th style="text-align:right">Prev FY (&#x20B9;L)</th></tr></thead>
+  <tbody>${rows.map(r=>{const o=old[r.item]||{};return `<tr data-item="${esc(r.item)}" data-unit="${esc(r.unit)}" data-etgl="${esc(r.etGL||'')}" data-sggl="${esc(r.sgGL||'')}" data-itemgl="${esc(r.itemGL||'')}">
+    <td><strong>${esc(r.item)}</strong></td><td class="gl">${esc(r.itemGL)||'—'}</td><td>${esc(r.unit)}</td>
+    <td><input class="g-rate" type="number" min="0" step="0.01" value="${r.fixed?r.rate:(o.r!=null?o.r:r.rate)}" ${r.fixed?'readonly title="Rate from the rate master"':'placeholder="Enter rate"'} oninput="calcGrid()"></td>
+    <td><input class="g-qty" type="number" min="0" step="any" value="${o.q!=null?o.q:r.qty}" oninput="calcGrid()"></td>
+    <td class="amt g-amt">—</td>
+    <td><input class="g-prev" type="number" min="0" step="0.01" value="${o.p!=null?o.p:r.prev}" placeholder="0"></td></tr>`;}).join('')}</tbody>
+  <tfoot><tr><td colspan="5">Total</td><td class="amt" id="g-total">—</td><td></td></tr></tfoot></table></div>`;
+  calcGrid();
+}
+function qtyAll(){ const v=document.getElementById('f-qall').value; document.querySelectorAll('#f-grid .g-qty').forEach(i=>i.value=v); calcGrid(); }
+function calcGrid(){
+  let t=0;
+  document.querySelectorAll('#f-grid tbody tr').forEach(tr=>{
+    const q=parseFloat(tr.querySelector('.g-qty').value), r=parseFloat(tr.querySelector('.g-rate').value);
+    const a=(!isNaN(q)&&!isNaN(r))?q*r/100000:null;
+    tr.querySelector('.g-amt').textContent=a!=null?'₹'+fmt(a):'—'; if(a) t+=a;
+  });
+  const tt=document.getElementById('g-total'); if(tt) tt.textContent='₹'+fmt(t)+'L';
+}
+async function saveLines(type,id){
+  const gv=i=>{const el=document.getElementById(i);return el?el.value.trim():''};
+  const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
+  const shared=!gv('f-entity');
+  const need=[{id:'f-et'},{id:'f-sg'},{id:'f-payer'},...(shared?[{id:'f-method'}]:[])];
+  if(!id&&!validate(need)) return false;
+  if(id&&!validate([{id:'f-payer'},...(shared?[{id:'f-method'}]:[])])) return false;
+  if(!owner){showToast('Owner is required.');return false;}
+  const lines=[]; let bad=0;
+  document.querySelectorAll('#f-grid tbody tr').forEach(tr=>{
+    const q=parseFloat(tr.querySelector('.g-qty').value), r=parseFloat(tr.querySelector('.g-rate').value), p=parseFloat(tr.querySelector('.g-prev').value);
+    if(isNaN(q)||q<=0) return;
+    if(isNaN(r)||r<0){ bad++; tr.querySelector('.g-rate').classList.add('err'); return; }
+    lines.push({item:tr.dataset.item,unit:tr.dataset.unit,etGL:tr.dataset.etgl,sgGL:tr.dataset.sggl,itemGL:tr.dataset.itemgl,qty:q,rate:r,prev:isNaN(p)?0:p});
+  });
+  if(bad){ showToast('Enter a rate for the highlighted items.'); return false; }
+  if(!lines.length){ showToast('Enter a quantity for at least one budget item.'); return false; }
+  const et=LF.edit?LF.edit.group:gv('f-et'), sg=LF.edit?LF.edit.sub:gv('f-sg');
+  const bid=gv('f-bid');
+  const common={BudgetYear:gv('f-year'),ITOwner:owner,GroupName:et,SubGroup:sg,Payer:gv('f-payer'),DistMethod:shared?gv('f-method'):'FIXED',...wfSaveFields(type,id)};
+  if(type==='opex') common.FunctionalCost=et;
+  const mk=(l,i)=>({...common,BudgetID:bid?(lines.length>1?`${bid}-${i+1}`:bid):null,ActivityName:l.item,Quantity:l.qty,Unit:l.unit,Rate:l.rate,
+    CurBudget:Math.round(l.qty*l.rate/100000*1e6)/1e6,PrevBudget:l.prev,ExpenseTypeGL:l.etGL,SubGroupGL:l.sgGL,BudgetItemGL:l.itemGL});
+  if(id){
+    const existing=STATE[type].find(r=>r.id===id); const data=mk(lines[0],0);
+    if(type==='opex') data.Overrides=JSON.stringify(data.EntityName?{}:(existing?existing.overrides:{}));
+    await spPatch(SP_CONFIG.lists[type],id,data); await logAfterSave(type,id,existing,data);
+  } else {
+    for(let i=0;i<lines.length;i++){ const data=mk(lines[i],i); if(type==='opex') data.Overrides='{}';
+      const res=await spPost(SP_CONFIG.lists[type],data); await logAction(type,res.Id||res.ID,'Created',''); }
+  }
+  if(!id&&lines.length>1) setTimeout(()=>showToast(`${lines.length} budget lines saved.`),50);
+  return true;
+}
+
+/* ---------- Excel: templates, upload with preview, export ---------- */
+async function loadXLSX(){
+  if(window.XLSX) return;
+  await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load the Excel library from cdnjs.cloudflare.com'));document.head.appendChild(s);});
+}
+const XL={
+  dept:{name:'Department Master',cols:['Department','Cost Center','HOD Name','HOD Email','Approval Required (Y/N)','Active (Y/N)'],
+    sample:[['HR','','','','Y','Y']]},
+  master:{name:'Expense Master',cols:['Expense Type','Expense Type GL','Sub Group','Sub Group GL','Budget Item','Budget Item GL','Department (blank = all)','Active (Y/N)'],
+    sample:[['Travel Expense','','Domestic','','Travel Fare','','','Y'],['Travel Expense','','Domestic','','Boarding','','','Y'],['Travel Expense','','Domestic','','Lodging','','','Y'],['Travel Expense','','Domestic','','Miscellaneous','','','Y']]},
+  rates:{name:'Rate Master',cols:['Budget Year','Expense Type','Sub Group','Budget Item','Rate Unit','Rate (Rs)'],
+    sample:[['FY 2026-27','Travel Expense','Domestic','Travel Fare','Trip',15000],['FY 2026-27','Travel Expense','Domestic','Boarding','Trip',5000],['FY 2026-27','Travel Expense','Domestic','Lodging','Trip',8000],['FY 2026-27','Travel Expense','Domestic','Miscellaneous','Trip',2000]]}
+};
+function xlSave(rows,cols,file,sheet){
+  const ws=XLSX.utils.aoa_to_sheet([cols,...rows]); ws['!cols']=cols.map(c=>({wch:Math.max(14,c.length+2)}));
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,sheet.slice(0,31)); XLSX.writeFile(wb,file);
+}
+async function xlTemplate(kind){
+  try{ await loadXLSX(); }catch(e){ showToast(e.message); return; }
+  const t=XL[kind]; const rows=kind==='master'&&STATE.master.length?[]:t.sample;
+  xlSave(rows,t.cols,`${t.name} - Upload Template.xlsx`,t.name);
+}
+async function xlExport(kind){
+  try{ await loadXLSX(); }catch(e){ showToast(e.message); return; }
+  const t=XL[kind], A=['Created By','Created On','Updated By','Updated On'];
+  const a=x=>[x.cBy,dt(x.cAt),x.uBy,dt(x.uAt)];
+  const yn=b=>b?'Y':'N';
+  let rows=[];
+  if(kind==='dept') rows=STATE.depts.filter(d=>d.id).map(d=>[d.name,d.cc,d.hodName,d.head,yn(d.approval!==false),yn(d.active!==false),...a(d)]);
+  if(kind==='master') rows=STATE.master.map(m=>[m.et,m.etGL,m.sg,m.sgGL,m.item,m.itemGL,m.dept,yn(m.active),...a(m)]);
+  if(kind==='rates') rows=STATE.rates.map(r=>[r.fy,r.et,r.sg,r.item,r.unit,r.rate,...a(r)]);
+  xlSave(rows,[...t.cols,...A],`${t.name} - Export ${new Date().toISOString().slice(0,10)}.xlsx`,t.name);
+}
+async function exportLines(type){
+  try{ await loadXLSX(); }catch(e){ showToast(e.message); return; }
+  const cols=['Budget ID','Budget Year','Department','Department Cost Center','Entity','Owner','Expense Type','Expense Type GL','Sub Group','Sub Group GL','Budget Item','Budget Item GL','Quantity','Unit','Rate (Rs)','Payer','Distribution','Prev FY (Rs L)','Current FY (Rs L)','Status','Justification','BU Approved By','CFO Approved By','Created By','Created On','Updated By','Updated On'];
+  const rows=visibleItems(type).map(r=>{const d=deptByName(r.dept)||{};return [r.budgetId||'',r.year,r.dept,d.cc||'',r.entity||'Shared',r.owner,r.group,r.etGL,r.sub,r.sgGL,r.activity,r.itemGL,r.qty,r.unit,r.rate,r.payer,r.entity?'Direct':r.method,r.prevBudget,r.curBudget,r.status,r.just,r.buBy,r.cfoBy,r.cBy,dt(r.cAt),r.uBy,dt(r.uAt)];});
+  xlSave(rows,cols,`${type.toUpperCase()} ${STATE.activeYear} - ${new Date().toISOString().slice(0,10)}.xlsx`,type.toUpperCase());
+}
+let XLKIND=null, XLPLAN=null;
+function xlPick(kind){ XLKIND=kind; const f=document.getElementById('xl-file'); f.value=''; f.click(); }
+async function xlRead(input){
+  const file=input.files&&input.files[0]; if(!file) return;
+  try{ await loadXLSX(); }catch(e){ showToast(e.message); return; }
+  try{
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const aoa=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true}).filter(r=>r.some(c=>String(c).trim()!==''));
+    if(aoa.length<2){ showToast('The file has no data rows.'); return; }
+    const t=XL[XLKIND], head=aoa[0].map(h=>norm(h).replace(/\s+/g,' '));
+    const idx=t.cols.map(c=>{const k=norm(c).replace(/\s*\(.*\)/,''); return head.findIndex(h=>h.replace(/\s*\(.*\)/,'')===k);});
+    const missing=t.cols.filter((c,i)=>idx[i]<0&&!/active|approval|department \(/i.test(c)&&!/gl$/i.test(c)&&!/hod/i.test(c));
+    if(missing.length){ showToast('Missing columns: '+missing.join(', ')+'. Use the template.'); return; }
+    const data=aoa.slice(1).map((r,n)=>({row:n+2,v:idx.map(i=>i<0?'':String(r[i]??'').trim())}));
+    XLPLAN=planImport(XLKIND,data);
+    showImportPreview(file.name);
+  }catch(e){ showToast('Could not read the file: '+e.message); }
+}
+const yesNo=(v,def)=>{const s=norm(v); if(!s) return def; return ['y','yes','true','1','active'].includes(s);};
+function planImport(kind,data){
+  const plan=[]; const seen={};
+  const push=(row,key,label,op,payload,id,err)=>{
+    if(!err&&seen[key]) err='Duplicate of row '+seen[key]+' in this file';
+    if(!err) seen[key]=row;
+    plan.push({row,label,op:err?'error':op,payload,id,err});
+  };
+  if(kind==='dept'){
+    data.forEach(({row,v})=>{const [name,cc,hod,email,appr,act]=v;
+      const ex=STATE.depts.find(d=>norm(d.name)===norm(name));
+      let err=!name?'Department is required':!cc?'Cost Center is required':(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))?'HOD Email is not a valid email':'';
+      const payload={DeptName:ex?ex.name:name,CostCenter:cc,HODName:hod,DeptHeadEmail:email.toLowerCase(),RequiresApproval:yesNo(appr,ex?ex.approval!==false:true),IsActive:yesNo(act,true)};
+      let op='new'; if(ex&&ex.id){ op=(ex.cc===cc&&ex.hodName===hod&&ex.head===payload.DeptHeadEmail&&(ex.approval!==false)===payload.RequiresApproval&&(ex.active!==false)===payload.IsActive)?'same':'update'; }
+      push(row,norm(name),`${name} · ${cc} · ${hod||'—'}`,op,payload,ex&&ex.id,err);});
+  }
+  if(kind==='master'){
+    const etGL={}, sgGL={}; const conflicts={};
+    data.forEach(({row,v})=>{const [et,eg,sg,sgg,item,ig,dept]=v;
+      if(eg){ if(etGL[norm(et)]&&etGL[norm(et)]!==eg) conflicts[row]=`Expense Type GL ${eg} differs from ${etGL[norm(et)]} on another row`; else etGL[norm(et)]=eg; }
+      if(sgg){ const k=norm(et)+'|'+norm(sg); if(sgGL[k]&&sgGL[k]!==sgg) conflicts[row]=`Sub Group GL ${sgg} differs from ${sgGL[k]} on another row`; else sgGL[k]=sgg; }});
+    data.forEach(({row,v})=>{const [et,eg,sg,sgg,item,ig,dept,act]=v;
+      const deptOk=!dept||STATE.depts.some(d=>norm(d.name)===norm(dept));
+      const dName=dept?(STATE.depts.find(d=>norm(d.name)===norm(dept))||{}).name||dept:'';
+      const m={et,etGL:etGL[norm(et)]||eg||'',sg,sgGL:sgGL[norm(et)+'|'+norm(sg)]||sgg||'',item,itemGL:ig,dept:dName,active:yesNo(act,true)};
+      const ex=STATE.master.find(x=>mkey(x)===mkey(m));
+      let err=!et?'Expense Type is required':!sg?'Sub Group is required':!item?'Budget Item is required':!deptOk?`Department "${dept}" is not in the department master`:(conflicts[row]||'');
+      let op='new'; if(ex){ op=(ex.etGL===m.etGL&&ex.sgGL===m.sgGL&&ex.itemGL===m.itemGL&&ex.active===m.active)?'same':'update'; }
+      push(row,mkey(m),`${et} › ${sg} › ${item}${dName?' ['+dName+']':''}`,op,masterData(m),ex&&ex.id,err);});
+    // existing rows not in the file but sharing an expense type / sub group GL that changed
+    STATE.master.forEach(x=>{ if(plan.some(p=>p.id===x.id)) return;
+      const ne=etGL[norm(x.et)], ns=sgGL[norm(x.et)+'|'+norm(x.sg)]; const patch={};
+      if(ne&&ne!==x.etGL) patch.ExpenseTypeGL=ne; if(ns&&ns!==x.sgGL) patch.SubGroupGL=ns;
+      if(Object.keys(patch).length) plan.push({row:'—',label:`${x.et} › ${x.sg} › ${x.item} (GL follows the file)`,op:'update',payload:patch,id:x.id});});
+  }
+  if(kind==='rates'){
+    data.forEach(({row,v})=>{let [fy,et,sg,item,unit,rate]=v; fy=fy||STATE.activeYear;
+      const m=STATE.master.find(x=>norm(x.et)===norm(et)&&norm(x.sg)===norm(sg)&&norm(x.item)===norm(item));
+      const num=parseFloat(String(rate).replace(/[,₹\s]/g,''));
+      let err=!et||!sg||!item?'Expense Type, Sub Group and Budget Item are required':!m?'Budget item not found in the expense master — upload it there first':!unit?'Rate Unit is required':(isNaN(num)||num<0)?'Rate must be a number':'';
+      const rec={fy,et:m?m.et:et,sg:m?m.sg:sg,item:m?m.item:item};
+      const ex=STATE.rates.find(r=>rkey(r)===rkey(rec));
+      const payload={BudgetYear:fy,ExpenseType:rec.et,SubGroup:rec.sg,BudgetItem:rec.item,RateUnit:unit,Rate:num};
+      let op='new'; if(ex) op=(ex.unit===unit&&ex.rate===num)?'same':'update';
+      push(row,rkey(rec),`${fy} · ${item} · ₹${isNaN(num)?rate:fmtR(num)} / ${unit}`,op,payload,ex&&ex.id,err);});
+  }
+  return plan;
+}
+function showImportPreview(fname){
+  const P=XLPLAN, c=k=>P.filter(p=>p.op===k).length;
+  const todo=P.filter(p=>p.op==='new'||p.op==='update').length;
+  const badge={new:'b-g',update:'b-b',same:'b-gr',error:'b-r'}, lbl={new:'New',update:'Update',same:'No change',error:'Error'};
+  openAct(`Import ${XL[XLKIND].name} — ${fname}`,
+   `<div class="imp-sum"><span class="badge b-g">${c('new')} new</span><span class="badge b-b">${c('update')} to update</span><span class="badge b-gr">${c('same')} unchanged</span><span class="badge b-r">${c('error')} with errors</span></div>
+   ${c('error')?'<div class="warn-box" style="margin-bottom:8px;font-size:11px">Rows with errors are skipped. Fix them in Excel and upload again, or import the valid rows now.</div>':''}
+   <div class="imp-tbl"><table><thead><tr><th>Row</th><th>Record</th><th>Action</th><th>Message</th></tr></thead><tbody>
+   ${P.map(p=>`<tr class="${p.op==='error'?'row-err':''}"><td>${p.row}</td><td>${esc(p.label)}</td><td><span class="badge ${badge[p.op]}">${lbl[p.op]}</span></td><td style="font-size:11px">${esc(p.err||'')}</td></tr>`).join('')}
+   </tbody></table></div><div id="imp-prog" style="font-size:12px;margin-top:8px;color:var(--tx2)"></div>`,
+   `<button class="btn" onclick="closeAct()">Cancel</button><button class="btn btn-p" id="imp-go" ${todo?'':'disabled'} onclick="runImport()">Import ${todo} row${todo===1?'':'s'}</button>`);
+  document.querySelector('#act-ov .modal').classList.add('modal-lg');
+}
+async function runImport(){
+  const list=SP_CONFIG.lists[{dept:'depts',master:'master',rates:'rates'}[XLKIND]];
+  const todo=XLPLAN.filter(p=>p.op==='new'||p.op==='update');
+  const btn=document.getElementById('imp-go'); btn.disabled=true;
+  const prog=document.getElementById('imp-prog'); let done=0, fail=[];
+  setSyncing();
+  for(const p of todo){
+    try{ if(p.op==='new') await spPost(list,p.payload); else await spPatch(list,p.id,p.payload); done++; }
+    catch(e){ fail.push(`Row ${p.row}: ${e.message}`); }
+    prog.textContent=`Saving ${done+fail.length} of ${todo.length}…`;
+  }
+  await loadAllData(); renderAll(); setSynced();
+  if(fail.length){ prog.innerHTML=`<span style="color:var(--rd)">${fail.length} failed:</span><br>`+fail.slice(0,10).map(esc).join('<br>'); btn.textContent='Done'; btn.disabled=false; btn.setAttribute('onclick','closeAct()'); }
+  else { closeAct(); showToast(`${done} row${done===1?'':'s'} imported.`); }
+}
 
 // ═══════════════════════════════════════════════════════
 //  USER MANAGEMENT
@@ -1581,7 +1983,7 @@ async function loadUsers(){
     return items.map(u=>({
       id: u.Id, name: u.UserName, email: u.UserEmail.toLowerCase(),
       role: u.UserRole, ownerName: u.OwnerName, scope: u.AccessScope||'All', active: u.IsActive!==false,
-      dept: u.Department||'IT', entity: u.EntityName||''
+      dept: u.Department||'IT', entity: u.EntityName||'', ...aud(u)
     }));
   } catch(e) {
     // List may not exist yet — return empty
@@ -1594,7 +1996,7 @@ async function renderUsers(){
   const tbody = document.getElementById('t-users');
   if(!tbody) return;
   if(!users.length){
-    tbody.innerHTML='<tr><td colspan="9"><div class="empty">No users added yet. Click "+ Add user" to get started.</div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="10"><div class="empty">No users added yet. Click "+ Add user" to get started.</div></td></tr>';
     return;
   }
   const scopeColors = {'All':'b-b','Network':'b-p','End User Support':'b-g','Datacentre':'b-a','Application':'b-c'};
@@ -1606,6 +2008,7 @@ async function renderUsers(){
     <td><code style="font-size:11px;background:var(--sf2);padding:2px 6px;border-radius:4px">${u.ownerName||'—'}</code></td>
     <td><span class="badge ${scopeColors[u.scope]||'b-gr'}">${u.scope}</span></td>
     <td><span class="badge ${u.active?'b-g':'b-r'}">${u.active?'Active':'Inactive'}</span></td>
+    <td>${updCell(u)}</td>
     <td><div style="display:flex;gap:4px">
       <button class="btn btn-e" onclick="editUser(${u.id})">✎</button>
       <button class="btn btn-d" onclick="toggleUser(${u.id},${!u.active})">${u.active?'Deactivate':'Activate'}</button>
