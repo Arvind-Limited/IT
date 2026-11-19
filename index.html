@@ -340,7 +340,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
             <button class="btn btn-p" onclick="openModal('mrow')">+ Add budget item</button>
           </div>
         </div>
-        <div class="info-box" style="font-size:11px">Expense Type &rarr; Sub Group &rarr; Budget Item, each with its own GL code (used in reporting only). Leave Department blank to make an item available to all departments.</div>
+        <div class="info-box" style="font-size:11px">Expense Type &rarr; Sub Group &rarr; Budget Item; each row carries a GL code at all three levels (used in reporting only). Leave Department blank to make an item available to all departments.</div>
         <div class="tw"><table><thead><tr><th>Expense type</th><th>GL</th><th>Sub group</th><th>GL</th><th>Budget item</th><th>GL</th><th>Department</th><th>Rate <span id="em-fy"></span></th><th>Active</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-master"></tbody></table></div>
       </div>
 
@@ -1258,7 +1258,7 @@ const FORMS={
     <div class="fg"><label>Active</label><select id="f-mact"><option value="true"${d.active!==false?' selected':''}>Yes</option><option value="false"${d.active===false?' selected':''}>No</option></select></div>
     <div class="fg"><label>${req('Budget item')}</label><input id="f-item" value="${esc(d.item||'')}" placeholder="e.g. Travel Fare"></div>
     <div class="fg"><label>Budget item GL</label><input id="f-itemgl" value="${esc(d.itemGL||'')}"></div>
-    <div class="info-box" style="grid-column:1/-1;font-size:11px;padding:6px 10px">GL codes for the expense type and sub group are shared: changing them here updates every row with the same expense type / sub group.</div>
+    <div class="info-box" style="grid-column:1/-1;font-size:11px;padding:6px 10px">Each row carries its own GL at all three levels; they are used in reporting only.</div>
   </div>`,
   rate:(d={})=>{const fy=d.fy||STATE.activeYear;return `<div class="fgrid">
     <div class="fg"><label>${req('Budget year')}</label><select id="f-ryear">${yearOpts(fy)}</select></div>
@@ -1315,7 +1315,6 @@ async function saveModal(){
       if(dup){showToast('This budget item already exists for that expense type, sub group and department.');setSynced();return;}
       const data=masterData(row);
       if(CEid) await spPatch(SP_CONFIG.lists.master,CEid,data); else await spPost(SP_CONFIG.lists.master,data);
-      await syncSharedGL(row,CEid);
     } else if(CM==='rate'){
       if(!validate([{id:'f-ret'},{id:'f-rsg'},{id:'f-ritem'},{id:'f-runit'},{id:'f-rrate'}])) return;
       const data={BudgetYear:gv('f-ryear'),ExpenseType:gv('f-ret'),SubGroup:gv('f-rsg'),BudgetItem:gv('f-ritem'),RateUnit:gv('f-runit'),Rate:gn('f-rrate')};
@@ -1952,23 +1951,15 @@ function planImport(kind,data){
       plan.push({row:'—',label:`${d.cc||'(no cost center)'} · ${d.name}`,op:'retire',payload:{IsActive:false},id:d.id}));
   }
   if(kind==='master'){
-    const etGL={}, sgGL={}; const conflicts={};
-    data.forEach(({row,v})=>{const [et,eg,sg,sgg,item,ig,dept]=v;
-      if(eg){ if(etGL[norm(et)]&&etGL[norm(et)]!==eg) conflicts[row]=`Expense Type GL ${eg} differs from ${etGL[norm(et)]} on another row`; else etGL[norm(et)]=eg; }
-      if(sgg){ const k=norm(et)+'|'+norm(sg); if(sgGL[k]&&sgGL[k]!==sgg) conflicts[row]=`Sub Group GL ${sgg} differs from ${sgGL[k]} on another row`; else sgGL[k]=sgg; }});
+    const conflicts={};
     data.forEach(({row,v})=>{const [et,eg,sg,sgg,item,ig,dept,act]=v;
       const deptOk=!dept||STATE.depts.some(d=>norm(d.name)===norm(dept));
       const dName=dept?(STATE.depts.find(d=>norm(d.name)===norm(dept))||{}).name||dept:'';
-      const m={et,etGL:etGL[norm(et)]||eg||'',sg,sgGL:sgGL[norm(et)+'|'+norm(sg)]||sgg||'',item,itemGL:ig,dept:dName,active:yesNo(act,true)};
+      const m={et,etGL:eg||'',sg,sgGL:sgg||'',item,itemGL:ig,dept:dName,active:yesNo(act,true)};
       const ex=STATE.master.find(x=>mkey(x)===mkey(m));
       let err=!et?'Expense Type is required':!sg?'Sub Group is required':!item?'Budget Item is required':!deptOk?`Department "${dept}" is not in the department master`:(conflicts[row]||'');
       let op='new'; if(ex){ op=(ex.etGL===m.etGL&&ex.sgGL===m.sgGL&&ex.itemGL===m.itemGL&&ex.active===m.active)?'same':'update'; }
       push(row,mkey(m),`${et} › ${sg} › ${item}${dName?' ['+dName+']':''}`,op,masterData(m),ex&&ex.id,err);});
-    // existing rows not in the file but sharing an expense type / sub group GL that changed
-    STATE.master.forEach(x=>{ if(plan.some(p=>p.id===x.id)) return;
-      const ne=etGL[norm(x.et)], ns=sgGL[norm(x.et)+'|'+norm(x.sg)]; const patch={};
-      if(ne&&ne!==x.etGL) patch.ExpenseTypeGL=ne; if(ns&&ns!==x.sgGL) patch.SubGroupGL=ns;
-      if(Object.keys(patch).length) plan.push({row:'—',label:`${x.et} › ${x.sg} › ${x.item} (GL follows the file)`,op:'update',payload:patch,id:x.id});});
   }
   if(kind==='rates'){
     data.forEach(({row,v})=>{let [fy,et,sg,item,unit,rate]=v; fy=fy||STATE.activeYear;
