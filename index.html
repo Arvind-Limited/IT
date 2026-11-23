@@ -878,7 +878,11 @@ function getEffectiveValue(item, eid){
 }
 function getFixedSum(item){ return Object.values(item.overrides||{}).reduce((a,v)=>a+Number(v),0); }
 function isHybrid(item){ return Object.keys(item.overrides||{}).length>0 && item.method!=='FIXED'; }
+// HR/SAP-user distribution across entities applies to IT only
+function usesDist(dept){ return norm(dept)==='it'; }
+function distFor(dept,shared,method){ return usesDist(dept)?(shared?method:'FIXED'):'N/A'; }
 function methodBadge(item){
+  if(!usesDist(item.dept)) return '<span style="color:var(--tx3)">—</span>';
   if(isHybrid(item)) return '<span class="badge b-b" style="background:var(--cyl);color:var(--cy)">HYBRID</span>';
   if(item.entity) return '<span class="badge b-gr">DIRECT</span>';
   return `<span class="badge ${item.method==='SAP'?'b-p':item.method==='HR'?'b-g':'b-a'}">${item.method}</span>`;
@@ -1031,7 +1035,7 @@ function renderOPEX(){
       <td>${updCell(r)}</td>
       <td><div style="display:flex;gap:3px">
         ${lineActions('opex',r)}
-        ${canEditLine(r)&&!r.entity?`<button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="openOverride(${r.id})">Overrides</button>`:''}
+        ${canEditLine(r)&&!r.entity&&usesDist(r.dept)?`<button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="openOverride(${r.id})">Overrides</button>`:''}
       </div></td></tr>`;
   }).join(''):'<tr><td colspan="16"><div class="empty">No OPEX items for this year</div></td></tr>';
 }
@@ -1055,7 +1059,7 @@ function renderCAPEX(){
 
 function renderDist(){
   const ents=activeEntities();
-  let items=visibleItems('opex');
+  let items=visibleItems('opex').filter(r=>usesDist(r.dept));
   const fOwn=document.getElementById('dist-f-own')?.value||'';
   const fGrp=document.getElementById('dist-f-grp')?.value||'';
   if(fOwn) items=items.filter(r=>r.owner===fOwn);
@@ -1640,7 +1644,7 @@ function openHistory(type,id){
   openAct(`${r.budgetId||type.toUpperCase()+' #'+id} · ${r.activity}`,
    `<div style="display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:12px;margin-bottom:12px">
      <span style="color:var(--tx2)">Department</span><span>${esc(r.dept)}${r.cc?' · cost center '+esc(r.cc):''}</span>
-     <span style="color:var(--tx2)">Entity</span><span>${r.entity?esc(r.entity):'Shared — distributed by '+esc(r.method)}</span>
+     <span style="color:var(--tx2)">Entity</span><span>${r.entity?esc(r.entity):'Shared'+(usesDist(r.dept)?' — distributed by '+esc(r.method):'')}</span>
      <span style="color:var(--tx2)">Budget</span><span>₹${fmt(r.curBudget)}L (prev ₹${fmt(r.prevBudget)}L) ${chg(r.curBudget,r.prevBudget)}</span>
      <span style="color:var(--tx2)">Status</span><span>${stBadge(r.status)}</span>
      <span style="color:var(--tx2)">First approver</span><span>${needsApproval(r.dept)?(a1?esc(a1):'<span style="color:var(--rd)">Not configured — set BU head / dept head</span>'):'Not required'}</span>
@@ -1827,7 +1831,7 @@ function lineForm(type,d){
     <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
     <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
     <div class="fg"><label>${req('Payer')}</label><select id="f-payer"><option value="" disabled${!d.payer?' selected':''}>— select —</option>${payerOpts(dept,d.payer)}</select></div>
-    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method"${d.entity?' disabled':''}><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
+    <div class="fg" id="g-method"${usesDist(dept)?'':' style="display:none"'}><label>${req('Distribution method')}</label><select id="f-method"${d.entity?' disabled':''}><option value="" disabled${!d.method||d.method==='N/A'?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
     <div class="fg"><label>${req('Expense type')}</label><select id="f-et" onchange="onEtChange()" ${edit?'disabled':''}>${optList(ets,d.group||'')}</select></div>
     <div class="fg"><label>${req('Sub group')}</label><select id="f-sg" onchange="buildGrid()" ${edit?'disabled':''}>${edit?optList([d.sub],d.sub):'<option value="">— select expense type —</option>'}</select></div>
     <div class="fg"><label>Budget ID</label><input id="f-bid" value="${esc(d.budgetId||'')}" placeholder="Optional"></div>
@@ -1842,6 +1846,7 @@ let LF={type:null,edit:null};
 function initLineForm(type,d){ LF={type,edit:d.id?d:null}; buildGrid(); }
 function onFormDeptChange(){
   const d=document.getElementById('f-dept').value;
+  const gm=document.getElementById('g-method'); if(gm){ gm.style.display=usesDist(d)?'':'none'; if(!usesDist(d)) document.getElementById('f-method').value=''; }
   const c=document.getElementById('f-cc'); if(c) c.innerHTML=ccOpts(d,'');
   const p=document.getElementById('f-payer'); if(p) p.innerHTML='<option value="" disabled selected>— select —</option>'+payerOpts(d,'');
   const et=document.getElementById('f-et'); if(et&&!LF.edit){ et.innerHTML=optList(uniq(masterFor(d).map(m=>m.et)),''); onEtChange(); }
@@ -1948,10 +1953,11 @@ async function saveLines(type,id){
   const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
   const shared=!gv('f-entity');
   const needCC=deptCCs(gv('f-dept')).length>0;
-  const need=[{id:'f-et'},{id:'f-sg'},{id:'f-payer'},...(shared?[{id:'f-method'}]:[]),...(needCC?[{id:'f-cc'}]:[])];
+  const dist=shared&&usesDist(gv('f-dept'));
+  const need=[{id:'f-et'},{id:'f-sg'},{id:'f-payer'},...(dist?[{id:'f-method'}]:[]),...(needCC?[{id:'f-cc'}]:[])];
   if(id&&needCC&&!validate([{id:'f-cc'}])) return false;
   if(!id&&!validate(need)) return false;
-  if(id&&!validate([{id:'f-payer'},...(shared?[{id:'f-method'}]:[])])) return false;
+  if(id&&!validate([{id:'f-payer'},...(dist?[{id:'f-method'}]:[])])) return false;
   if(!owner){showToast('Owner is required.');return false;}
   const lines=[]; let bad=0, ovr=0;
   document.querySelectorAll('#f-grid tbody tr').forEach(tr=>{
@@ -1971,7 +1977,7 @@ async function saveLines(type,id){
   if(!phaseOK()) return false;
   const et=LF.edit?LF.edit.group:gv('f-et'), sg=LF.edit?LF.edit.sub:gv('f-sg');
   const bid=gv('f-bid');
-  const common={BudgetYear:gv('f-year'),ITOwner:owner,GroupName:et,SubGroup:sg,Payer:gv('f-payer'),DistMethod:shared?gv('f-method'):'FIXED',CostCenter:gv('f-cc')||null,...wfSaveFields(type,id)};
+  const common={BudgetYear:gv('f-year'),ITOwner:owner,GroupName:et,SubGroup:sg,Payer:gv('f-payer'),DistMethod:distFor(gv('f-dept'),shared,gv('f-method')),CostCenter:gv('f-cc')||null,...wfSaveFields(type,id)};
   if(type==='opex') common.FunctionalCost=et;
   const mk=(l,i)=>{const cur=Math.round(l.qty*l.pers*l.fac*l.rate/100000*1e6)/1e6;
     return {...common,BudgetID:bid?(lines.length>1?`${bid}-${i+1}`:bid):null,ActivityName:l.item,Quantity:l.qty,Unit:l.unit,Rate:l.rate,
@@ -2038,7 +2044,7 @@ function hcForm(d){
     <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
     <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
     <div class="fg"><label>${req('Payer')}</label><select id="f-payer"><option value="" disabled${!d.payer?' selected':''}>— select —</option>${payerOpts(dept,d.payer)}</select></div>
-    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method"${d.entity?' disabled':''}><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
+    <div class="fg" id="g-method"${usesDist(dept)?'':' style="display:none"'}><label>${req('Distribution method')}</label><select id="f-method"${d.entity?' disabled':''}><option value="" disabled${!d.method||d.method==='N/A'?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
     <div class="fg"><label>${req('Category')}</label><select id="f-hcat" onchange="hcCalc()">${o(['Existing','New'],d.cat||'Existing')}</select></div>
     <div class="fg"><label>${req('Type')}</label><select id="f-htype" onchange="hcCalc()">${o(['Employee','Consultant','Trainee'],d.htype||'Employee')}</select></div>
     <div class="fg"><label>Band / role</label><input id="f-hband" value="${esc(d.band||'')}" placeholder="e.g. M1, Analyst"></div>
@@ -2073,12 +2079,12 @@ async function saveHC(id){
   const gv=i=>{const el=document.getElementById(i);return el?el.value.trim():''};
   const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
   const shared=!gv('f-entity'), needCC=deptCCs(gv('f-dept')).length>0;
-  if(!validate([{id:'f-payer'},{id:'f-hcnt'},{id:'f-hctc'},{id:'f-hmon'},...(shared?[{id:'f-method'}]:[]),...(needCC?[{id:'f-cc'}]:[])])) return false;
+  if(!validate([{id:'f-payer'},{id:'f-hcnt'},{id:'f-hctc'},{id:'f-hmon'},...(shared&&usesDist(gv('f-dept'))?[{id:'f-method'}]:[]),...(needCC?[{id:'f-cc'}]:[])])) return false;
   if(!owner){ showToast('Owner is required.'); return false; }
   const x=hcVals(), a=hcAmounts(x);
   if(x.hcount<=0||x.ctc<=0||x.months<=0){ showToast('Headcount, monthly amount and months must be above zero.'); return false; }
   if(!phaseOK()) return false;
-  const data={BudgetYear:gv('f-year'),ITOwner:owner,Payer:gv('f-payer'),DistMethod:shared?gv('f-method'):'FIXED',CostCenter:gv('f-cc')||null,
+  const data={BudgetYear:gv('f-year'),ITOwner:owner,Payer:gv('f-payer'),DistMethod:distFor(gv('f-dept'),shared,gv('f-method')),CostCenter:gv('f-cc')||null,
     HCCategory:x.cat,HCType:x.htype,Band:x.band||null,Headcount:x.hcount,MonthlyCTC:x.ctc,VPPercent:x.htype==='Employee'?x.vpPct:0,IncrementPercent:(x.htype==='Employee'&&x.cat==='Existing')?x.incPct:0,
     Months:x.months,SalaryAmount:a.sal,VPAmount:a.vp,CurBudget:a.total,PrevBudget:parseFloat(gv('f-hprev'))||0,
     Nature:'Salary',GroupName:x.htype==='Consultant'?'Consultant':'Salary',SubGroup:`${x.cat} ${x.htype}`,ActivityName:x.band||x.htype,
