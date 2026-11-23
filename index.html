@@ -149,7 +149,18 @@ tbody tr:hover{background:#f8fafc}
 .imp-tbl{max-height:320px;overflow:auto;border:1px solid var(--bd);border-radius:var(--r)}
 .imp-tbl td,.imp-tbl th{font-size:11px;padding:5px 8px}
 .row-err td{background:var(--rdl)}
-.modal-xl{width:1000px}
+.modal-xl{width:1180px}
+.st-fpa{background:#ede9fe;color:#5b21b6}
+.qgrid input.g-desc{text-align:left;min-width:150px}
+.qgrid input.ovr{background:#fef3c7;border-color:#f59e0b;color:#92400e;font-weight:600}
+.qgrid .dup{border:0;background:none;color:var(--bl);cursor:pointer;font-size:14px;padding:0 4px}
+.phase{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;font-size:12px}
+.phase input{width:64px;padding:5px 7px;border:1px solid var(--bd2);border-radius:6px;text-align:right}
+.phase select{padding:5px 8px;border:1px solid var(--bd2);border-radius:6px}
+.nat-h td{background:#eef2ff;font-weight:700;color:#3730a3}
+.nat-t td{background:var(--bll);font-weight:700}
+.hc-calc{background:var(--bll);border:1px solid #93c5fd;border-radius:var(--r);padding:10px 14px;display:flex;gap:28px;flex-wrap:wrap;font-size:12px;margin-bottom:10px}
+.hc-calc b{display:block;font-size:16px;color:var(--bl)}
 </style>
 </head>
 <body>
@@ -180,6 +191,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
     <div class="sec">Budget</div>
     <div class="nav" onclick="go('opex',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>OPEX</div>
     <div class="nav" onclick="go('capex',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>CAPEX</div>
+    <div class="nav" id="nav-hc" onclick="go('hc',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg>Headcount &amp; salary</div>
     <div class="nav" id="nav-appr" onclick="go('approvals',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Approvals<span class="cnt" id="appr-cnt"></span></div>
     <div class="sec">Distribution</div>
     <div class="nav" onclick="go('dist',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Distribution table</div>
@@ -212,7 +224,8 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
       <div class="page on" id="page-dash">
         <div class="metrics" id="dash-metrics"></div>
         <div class="tab-row">
-          <div class="tab on" onclick="switchTab('dept',this)">Department</div>
+          <div class="tab on" onclick="switchTab('nature',this)">Nature (A+B+C)</div>
+          <div class="tab" onclick="switchTab('dept',this)">Department</div>
           <div class="tab" onclick="switchTab('group',this)">Expense type</div>
           <div class="tab" onclick="switchTab('item',this)">Budget item</div>
           <div class="tab" onclick="switchTab('gl',this)">GL code</div>
@@ -241,7 +254,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
           <div style="display:flex;gap:8px">
             <select id="opex-f-grp" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
             <select id="opex-f-own" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
-            <select id="opex-f-st" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"><option value="">All statuses</option><option>Draft</option><option>Pending BU Head</option><option>Pending CFO</option><option>Approved</option><option>Returned</option></select>
+            <select id="opex-f-st" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"><option value="">All statuses</option><option>Draft</option><option>Pending BU Head</option><option>Pending FP&amp;A</option><option>Pending CFO</option><option>Approved</option><option>Returned</option></select>
           </div>
           <div style="display:flex;gap:6px"><button class="btn" onclick="exportLines('opex')">&#x2B07; Export to Excel</button><button class="btn btn-p" id="btn-opex" onclick="openModal('opex')">+ Add OPEX items</button></div>
         </div>
@@ -295,6 +308,15 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
         </div>
       </div>
 
+      <!-- HEADCOUNT & SALARY -->
+      <div class="page" id="page-hc">
+        <div class="ph">
+          <div class="info-box" style="flex:1;margin-right:12px;font-size:11px">Salary is budgeted from headcount, not GL by GL: headcount &times; average monthly CTC (incl. variable pay) &times; months, with the increment applied to existing employees. Variable pay is split out by its %. Consultants on payroll and trainees use their monthly fee / stipend.</div>
+          <div style="display:flex;gap:6px"><button class="btn" onclick="exportHC()">&#x2B07; Export to Excel</button><button class="btn btn-p" id="btn-hc" onclick="openModal('hc')">+ Add headcount</button></div>
+        </div>
+        <div class="tw"><table><thead><tr><th>Department</th><th>Entity</th><th>Category</th><th>Type</th><th>Band / role</th><th style="text-align:right">HC</th><th style="text-align:right">Monthly CTC (&#x20B9;)</th><th>VP %</th><th>Incr. %</th><th>Months</th><th style="text-align:right">Salary (&#x20B9;L)</th><th style="text-align:right">Variable pay (&#x20B9;L)</th><th style="text-align:right">Total (&#x20B9;L)</th><th style="text-align:right">Prev FY (&#x20B9;L)</th><th>Status</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-hc"></tbody><tfoot id="t-hc-foot"></tfoot></table></div>
+      </div>
+
       <!-- APPROVALS -->
       <div class="page" id="page-approvals">
         <div class="info-box" id="appr-banner"></div>
@@ -341,7 +363,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
           </div>
         </div>
         <div class="info-box" style="font-size:11px">Expense Type &rarr; Sub Group &rarr; Budget Item; each row carries a GL code at all three levels (used in reporting only). Leave Department blank to make an item available to all departments.</div>
-        <div class="tw"><table><thead><tr><th>Expense type</th><th>GL</th><th>Sub group</th><th>GL</th><th>Budget item</th><th>GL</th><th>Department</th><th>Rate <span id="em-fy"></span></th><th>Active</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-master"></tbody></table></div>
+        <div class="tw"><table><thead><tr><th>Nature</th><th>Expense type</th><th>GL</th><th>Sub group</th><th>GL</th><th>Budget item</th><th>GL</th><th>Department</th><th>Rate <span id="em-fy"></span></th><th>Active</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-master"></tbody></table></div>
       </div>
 
       <!-- RATES -->
@@ -411,6 +433,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
                 <option value="IT Head">IT Head (Full access)</option>
                 <option value="Admin">Budget Admin (Full access)</option>
                 <option value="Group CFO">Group CFO (Final approver)</option>
+                <option value="FP&amp;A">FP&amp;A Reviewer</option>
                 <option value="BU Head">BU Head (Entity approver)</option>
                 <option value="Dept Owner">Department Owner</option>
                 <option value="Network Lead">Network Lead</option>
@@ -465,7 +488,8 @@ const SP_CONFIG = {
     depts:       'ITB_Departments',
     log:         'ITB_ApprovalLog',
     master:      'ITB_ExpenseMaster',
-    rates:       'ITB_Rates'
+    rates:       'ITB_Rates',
+    hc:          'ITB_Headcount'
   }
 };
 
@@ -585,7 +609,7 @@ async function getCurrentUser(){
 // ═══════════════════════════════════════════════════════
 let CU = null;        // current SharePoint user
 let STATE = {
-  entities: [], opex: [], capex: [], edits: [], config: [], depts: [], ccs: [], log: [], users: [], master: [], rates: [], deptFilter: '',
+  entities: [], opex: [], capex: [], edits: [], config: [], depts: [], ccs: [], log: [], users: [], master: [], rates: [], hc: [], deptFilter: '',
   activeYear: 'FY 2026-27', budgetYears: ['FY 2025-26','FY 2026-27']
 };
 const fmt = v => Number(v||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -606,6 +630,8 @@ function getUserRole(email){
 }
 function isAdmin(){ return CU && (CU.spRole==='IT Head' || CU.spRole==='Admin'); }
 function isCFO(){ return CU && CU.spRole==='Group CFO'; }
+function isFPA(){ return CU && CU.spRole==='FP&A'; }
+function fpaOn(){ return (STATE.users||[]).some(u=>u.active&&u.role==='FP&A'); }
 function isBUHead(){ return CU && CU.spRole==='BU Head'; }
 function myDept(){ return (CU && CU.dept) || 'IT'; }
 function myOwner(){ return CU ? CU.ownerName : null; }
@@ -683,15 +709,22 @@ async function loadAllData(){
     spGet(SP_CONFIG.lists.config)
   ]);
 
-  const [depts, log, master, rates] = await Promise.all([
+  const [depts, log, master, rates, hc] = await Promise.all([
     spGet(SP_CONFIG.lists.depts).catch(()=>null),
     spGet(SP_CONFIG.lists.log).catch(()=>[]),
     spGet(SP_CONFIG.lists.master).catch(()=>null),
-    spGet(SP_CONFIG.lists.rates).catch(()=>null)
+    spGet(SP_CONFIG.lists.rates).catch(()=>null),
+    spGet(SP_CONFIG.lists.hc).catch(()=>null)
   ]);
+  STATE.hcMissing = hc===null;
+  STATE.hc = (hc||[]).map(r=>({ id:r.Id, budgetId:r.BudgetID, year:r.BudgetYear, owner:r.ITOwner, group:r.GroupName||'Salary', sub:r.SubGroup||'', activity:r.ActivityName||'',
+    payer:r.Payer, method:r.DistMethod, overrides:{}, prevBudget:Number(r.PrevBudget||0), curBudget:Number(r.CurBudget||0),
+    cat:r.HCCategory||'Existing', htype:r.HCType||'Employee', band:r.Band||'', hcount:Number(r.Headcount||0), ctc:Number(r.MonthlyCTC||0),
+    vpPct:Number(r.VPPercent||0), incPct:Number(r.IncrementPercent||0), months:Number(r.Months||12), salAmt:Number(r.SalaryAmount||0), vpAmt:Number(r.VPAmount||0),
+    ...wfFields(r) }));
   STATE.masterMissing = master===null; STATE.ratesMissing = rates===null;
   STATE.master = (master||[]).map(m=>({id:m.Id, et:(m.ExpenseType||'').trim(), etGL:m.ExpenseTypeGL||'', sg:(m.SubGroup||'').trim(), sgGL:m.SubGroupGL||'',
-    item:(m.BudgetItem||'').trim(), itemGL:m.BudgetItemGL||'', dept:(m.Department||'').trim(), active:m.IsActive!==false, ...aud(m)}));
+    item:(m.BudgetItem||'').trim(), itemGL:m.BudgetItemGL||'', dept:(m.Department||'').trim(), active:m.IsActive!==false, nature:(m.Nature||'').trim(), ...aud(m)}));
   STATE.rates = (rates||[]).map(x=>({id:x.Id, fy:x.BudgetYear, et:(x.ExpenseType||'').trim(), sg:(x.SubGroup||'').trim(), item:(x.BudgetItem||'').trim(),
     unit:x.RateUnit||'', rate:Number(x.Rate||0), ...aud(x)}));
   STATE.deptsListMissing = depts===null;
@@ -756,7 +789,7 @@ async function startApp(){
   document.getElementById('sb-av').textContent = CU.initials;
   if(isAdmin()){ document.getElementById('nav-users').style.display='flex'; }
   buildDeptFilter();
-  if(isCFO()||isBUHead()){ ['btn-opex','btn-capex'].forEach(id=>{const b=document.getElementById(id); if(b) b.style.display='none';}); }
+  if(isCFO()||isBUHead()||isFPA()){ ['btn-opex','btn-capex','btn-hc'].forEach(id=>{const b=document.getElementById(id); if(b) b.style.display='none';}); }
   await buildDynamicRoleMap();
   buildYearSelector();
   populateFilters();
@@ -867,17 +900,18 @@ function renderAll(){
   renderDepts();
   renderMaster();
   renderRates();
+  renderHC();
   if(CU) buildDeptFilter();
   document.querySelectorAll('.adm').forEach(el=>el.style.display=isAdmin()?'flex':'none');
 }
 
 function renderDash(){
-  const opex=visibleItems('opex'), capex=visibleItems('capex'), edits=STATE.edits;
+  const opex=reportOpex(), capex=visibleItems('capex'), edits=STATE.edits;
   const opexT=opex.reduce((a,r)=>a+r.curBudget,0);
   const capexT=capex.reduce((a,r)=>a+r.curBudget,0);
   const pending=edits.filter(e=>e.status==='Submitted').length;
   document.getElementById('dash-metrics').innerHTML=`
-    <div class="mc"><div class="lbl">OPEX budget (${STATE.activeYear})</div><div class="val v-b">&#x20B9;${fmt(opexT)}L</div><div class="sub">${opex.length} items</div></div>
+    <div class="mc"><div class="lbl">OPEX incl. salary (${STATE.activeYear})</div><div class="val v-b">&#x20B9;${fmt(opexT)}L</div><div class="sub">${opex.length} items</div></div>
     <div class="mc"><div class="lbl">CAPEX budget</div><div class="val v-b" style="color:var(--pu)">&#x20B9;${fmt(capexT)}L</div><div class="sub">${capex.length} items</div></div>
     <div class="mc"><div class="lbl">Active entities</div><div class="val v-g">${activeEntities().length}</div><div class="sub">HR: ${totHR().toLocaleString()} · SAP: ${totSAP().toLocaleString()}</div></div>
     <div class="mc"><div class="lbl">Approved so far</div><div class="val v-g">${pct([...opex,...capex].filter(r=>r.status==='Approved').reduce((a,r)=>a+r.curBudget,0),opexT+capexT)}</div><div class="sub">of OPEX + CAPEX value</div></div>
@@ -891,11 +925,12 @@ function renderDash(){
     : '<div class="empty" style="padding:14px">No pending edits</div>';
 }
 
-let currentTab='dept';
+let currentTab='nature';
 function switchTab(tab, el){
   currentTab=tab;
   if(el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); }
-  const opex=visibleItems('opex');
+  if(tab==='nature'){ renderNatureTab(); return; }
+  const opex=reportOpex();
   if(tab==='dept'||tab==='status'){
     const all=[...opex.map(r=>({...r,_t:'OPEX'})),...visibleItems('capex').map(r=>({...r,_t:'CAPEX'}))];
     const key=tab==='dept'?(r=>r.dept):(r=>r.status);
@@ -985,7 +1020,7 @@ function renderOPEX(){
     return`<tr><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
       <td>${deptCell(r)}</td><td style="font-size:11px">${entLabel(r)}</td><td>${r.owner}</td>
       <td><strong>${esc(r.group)}</strong></td><td>${esc(r.sub)}</td>
-      <td style="max-width:180px;font-size:12px">${esc(r.activity)}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
+      <td style="max-width:180px;font-size:12px">${esc(r.activity)}${r.desc?`<div style="font-size:10.5px;color:var(--tx2)">${esc(r.desc)}</div>`:''}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
       <td style="font-size:11px;white-space:nowrap">${qtyRate(r)}</td>
       <td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td>
       <td>${methodBadge(r)}</td>
@@ -1006,7 +1041,7 @@ function renderCAPEX(){
   document.getElementById('t-capex').innerHTML=items.length?items.map(r=>`<tr>
     <td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
     <td>${deptCell(r)}</td><td style="font-size:11px">${entLabel(r)}</td><td>${r.owner}</td>
-    <td><strong>${esc(r.group)}</strong></td><td>${esc(r.sub)}</td><td>${esc(r.activity)}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
+    <td><strong>${esc(r.group)}</strong></td><td>${esc(r.sub)}</td><td>${esc(r.activity)}${r.desc?`<div style="font-size:10.5px;color:var(--tx2)">${esc(r.desc)}</div>`:''}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
     <td style="font-size:11px;white-space:nowrap">${qtyRate(r)}</td>
     <td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td>
     <td>${r.entity?'<span class="badge b-gr">DIRECT</span>':`<span class="badge b-p">${r.method}</span>`}</td>
@@ -1258,6 +1293,7 @@ const FORMS={
     <div class="fg"><label>Active</label><select id="f-mact"><option value="true"${d.active!==false?' selected':''}>Yes</option><option value="false"${d.active===false?' selected':''}>No</option></select></div>
     <div class="fg"><label>${req('Budget item')}</label><input id="f-item" value="${esc(d.item||'')}" placeholder="e.g. Travel Fare"></div>
     <div class="fg"><label>Budget item GL</label><input id="f-itemgl" value="${esc(d.itemGL||'')}"></div>
+    <div class="fg"><label>Nature</label><input id="f-mnat" list="dl-nat" value="${esc(d.nature||'')}" placeholder="e.g. Functional Cost"><datalist id="dl-nat">${uniq(['Functional Cost','Salary','Variable Pay','Directors Cost',...STATE.master.map(m=>m.nature)]).map(v=>`<option value="${esc(v)}">`).join('')}</datalist></div>
     <div class="info-box" style="grid-column:1/-1;font-size:11px;padding:6px 10px">Each row carries its own GL at all three levels; they are used in reporting only.</div>
   </div>`,
   rate:(d={})=>{const fy=d.fy||STATE.activeYear;return `<div class="fgrid">
@@ -1268,17 +1304,19 @@ const FORMS={
     <div class="fg"><label>${req('Rate unit')}</label><input id="f-runit" list="dl-unit" value="${esc(d.unit||'')}" placeholder="e.g. Trip, Month, Person, Licence"><datalist id="dl-unit">${uniq(['Trip','Month','Person','Licence','Day','Night','Unit','Lump sum',...STATE.rates.map(r=>r.unit)]).map(v=>`<option value="${esc(v)}">`).join('')}</datalist></div>
     <div class="fg"><label>${req('Rate per unit (&#x20B9;)')}</label><input id="f-rrate" type="number" min="0" step="0.01" value="${d.rate!=null?d.rate:''}" placeholder="e.g. 15000"></div>
   </div>`;},
+  hc:(d={})=>hcForm(d),
   opex:(d={})=>lineForm('opex',d),
   capex:(d={})=>lineForm('capex',d),
 };
 
 function openModal(type,data={}){
   CM=type;CEid=data.id||null;
-  document.getElementById('modal-box').className='modal'+(type==='override'||type==='mrow'?' modal-lg':'')+((type==='opex'||type==='capex')?' modal-xl':'');
-  document.getElementById('m-title').textContent={mrow:data.id?'Edit budget item':'Add budget item',rate:data.id?'Edit rate':'Add rate',dept:data.id?'Edit cost center':'Add cost center',entity:data.id?'Edit entity':'Add entity',opex:data.id?'Edit OPEX item':'Add OPEX item',capex:data.id?'Edit CAPEX item':'Add CAPEX item',override:'Edit fixed overrides'}[type]||'Edit';
+  document.getElementById('modal-box').className='modal'+(type==='override'||type==='mrow'?' modal-lg':'')+((type==='opex'||type==='capex')?' modal-xl':type==='hc'?' modal-lg':'');
+  document.getElementById('m-title').textContent={hc:data.id?'Edit headcount':'Add headcount',mrow:data.id?'Edit budget item':'Add budget item',rate:data.id?'Edit rate':'Add rate',dept:data.id?'Edit cost center':'Add cost center',entity:data.id?'Edit entity':'Add entity',opex:data.id?'Edit OPEX item':'Add OPEX item',capex:data.id?'Edit CAPEX item':'Add CAPEX item',override:'Edit fixed overrides'}[type]||'Edit';
   document.getElementById('m-body').innerHTML=(FORMS[type]||(()=>''))(data);
   document.getElementById('ov').classList.add('open');
   if(type==='opex'||type==='capex') initLineForm(type,data);
+  if(type==='hc') hcCalc();
 }
 function closeModal(){document.getElementById('ov').classList.remove('open');CM=null;CEid=null;}
 
@@ -1310,7 +1348,7 @@ async function saveModal(){
       else await spPost(SP_CONFIG.lists.depts,data);
     } else if(CM==='mrow'){
       if(!validate([{id:'f-et'},{id:'f-sg'},{id:'f-item'}])) return;
-      const row={et:gv('f-et'),etGL:gv('f-etgl'),sg:gv('f-sg'),sgGL:gv('f-sggl'),item:gv('f-item'),itemGL:gv('f-itemgl'),dept:gv('f-mdept'),active:gv('f-mact')==='true'};
+      const row={et:gv('f-et'),etGL:gv('f-etgl'),sg:gv('f-sg'),sgGL:gv('f-sggl'),item:gv('f-item'),itemGL:gv('f-itemgl'),dept:gv('f-mdept'),active:gv('f-mact')==='true',nature:gv('f-mnat')};
       const dup=STATE.master.find(m=>m.id!==CEid&&mkey(m)===mkey(row));
       if(dup){showToast('This budget item already exists for that expense type, sub group and department.');setSynced();return;}
       const data=masterData(row);
@@ -1321,6 +1359,8 @@ async function saveModal(){
       const dup=STATE.rates.find(r=>r.id!==CEid&&rkey({fy:data.BudgetYear,et:data.ExpenseType,sg:data.SubGroup,item:data.BudgetItem})===rkey(r));
       if(dup){showToast('A rate for this item and year already exists. Edit that one instead.');setSynced();return;}
       if(CEid) await spPatch(SP_CONFIG.lists.rates,CEid,data); else await spPost(SP_CONFIG.lists.rates,data);
+    } else if(CM==='hc'){
+      const ok=await saveHC(CEid); if(!ok){ setSynced(); return; }
     } else if(CM==='opex'||CM==='capex'){
       const ok=await saveLines(CM,CEid); if(!ok){ setSynced(); return; }
     } else if(CM==='override'){
@@ -1392,7 +1432,7 @@ function clearSel(){
 // ═══════════════════════════════════════════════════════
 //  NAV & UTILS
 // ═══════════════════════════════════════════════════════
-const PG={approvals:'Approvals',depts:'Department master',master:'Expense master',rates:'Rates & units',dash:'Dashboard',users:'User Management',entities:'Entities & HR/SAP users',opex:'OPEX budget',capex:'CAPEX budget',dist:'Distribution table',edit:'Entity budget edit',audit:'Audit log'};
+const PG={hc:'Headcount & salary',approvals:'Approvals',depts:'Department master',master:'Expense master',rates:'Rates & units',dash:'Dashboard',users:'User Management',entities:'Entities & HR/SAP users',opex:'OPEX budget',capex:'CAPEX budget',dist:'Distribution table',edit:'Entity budget edit',audit:'Audit log'};
 function go(id,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
@@ -1409,6 +1449,7 @@ function go(id,el){
   if(id==='audit') renderAudit();
   if(id==='users') renderUsers();
   if(id==='approvals') renderApprovals();
+  if(id==='hc') renderHC();
   if(id==='depts') renderDepts();
   if(id==='master') renderMaster();
   if(id==='rates') renderRates();
@@ -1422,17 +1463,20 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeA
 // ═══════════════════════════════════════════════════════
 //  GROUP: DEPARTMENTS & APPROVAL WORKFLOW
 // ═══════════════════════════════════════════════════════
-const ST={draft:'Draft',bu:'Pending BU Head',cfo:'Pending CFO',ok:'Approved',ret:'Returned'};
+const ST={draft:'Draft',bu:'Pending BU Head',fpa:'Pending FP&A',cfo:'Pending CFO',ok:'Approved',ret:'Returned'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function wfFields(r){
   return { dept: r.Department||'IT', entity: r.EntityName||'', status: r.LineStatus||ST.ok,
     just: r.Justification||'', retComment: r.ReturnComment||'',
     buBy: r.BUApprovedBy||'', cfoBy: r.CFOApprovedBy||'', cc: r.CostCenter||'',
     qty: r.Quantity!=null?Number(r.Quantity):null, unit: r.Unit||'', rate: r.Rate!=null?Number(r.Rate):null,
-    etGL: r.ExpenseTypeGL||'', sgGL: r.SubGroupGL||'', itemGL: r.BudgetItemGL||'', ...aud(r) };
+    etGL: r.ExpenseTypeGL||'', sgGL: r.SubGroupGL||'', itemGL: r.BudgetItemGL||'',
+    nature: r.Nature||'', persons: r.Persons!=null?Number(r.Persons):null, factor: r.Factor!=null?Number(r.Factor):null,
+    desc: r.LineDescription||'', stdRate: r.StdRate!=null?Number(r.StdRate):null, fpaBy: r.FPAApprovedBy||'',
+    q: [r.PhaseQ1,r.PhaseQ2,r.PhaseQ3,r.PhaseQ4].map(x=>x==null?null:Number(x)), ...aud(r) };
 }
 function stBadge(s){
-  const c={[ST.draft]:'st-draft',[ST.bu]:'st-bu',[ST.cfo]:'st-cfo',[ST.ok]:'st-ok',[ST.ret]:'st-ret'}[s]||'st-draft';
+  const c={[ST.draft]:'st-draft',[ST.bu]:'st-bu',[ST.fpa]:'st-fpa',[ST.cfo]:'st-cfo',[ST.ok]:'st-ok',[ST.ret]:'st-ret'}[s]||'st-draft';
   return `<span class="st ${c}">${esc(s)}</span>`;
 }
 function chg(cur,prev){
@@ -1453,7 +1497,7 @@ function statusNote(d){
 }
 // who can see a line
 function canSeeLine(r){
-  if(isAdmin()||isCFO()) return true;
+  if(isAdmin()||isCFO()||isFPA()) return true;
   if(isBUHead()) return r.entity===CU.entity || (!r.entity && false);
   return r.dept===myDept() && canSeeOwner(r.owner);
 }
@@ -1467,13 +1511,13 @@ function l1Approver(r){
 }
 function canEditLine(r){
   if(isAdmin()) return true;
-  if(isCFO()||isBUHead()) return false;
+  if(isCFO()||isBUHead()||isFPA()) return false;
   if(r.dept!==myDept()||!canSeeOwner(r.owner)) return false;
   if(!needsApproval(r.dept)) return true;
   return [ST.draft,ST.ret,ST.ok].includes(r.status);
 }
 function canSubmit(r){
-  return needsApproval(r.dept) && [ST.draft,ST.ret].includes(r.status) && (isAdmin() || (r.dept===myDept()&&canSeeOwner(r.owner)&&!isCFO()&&!isBUHead()));
+  return needsApproval(r.dept) && [ST.draft,ST.ret].includes(r.status) && (isAdmin() || (r.dept===myDept()&&canSeeOwner(r.owner)&&!isCFO()&&!isBUHead()&&!isFPA()));
 }
 function canApprove(r){
   if(!CU) return false;
@@ -1484,15 +1528,18 @@ function canApprove(r){
     if(isBUHead()&&r.entity&&r.entity===CU.entity) return true;
     return isAdmin(); // no approver configured: admin can act
   }
+  if(r.status===ST.fpa) return isFPA();
   if(r.status===ST.cfo) return isCFO();
   return false;
 }
+const TYPES=['opex','capex','hc'];
+const TLABEL={opex:'OPEX',capex:'CAPEX',hc:'SALARY'};
 function myQueue(){
-  const all=[...yearItems('opex').map(r=>['opex',r]),...yearItems('capex').map(r=>['capex',r])];
+  const all=TYPES.flatMap(t=>yearItems(t).map(r=>[t,r]));
   return all.filter(([t,r])=>canApprove(r));
 }
 function myOwn(){
-  const all=[...yearItems('opex').map(r=>['opex',r]),...yearItems('capex').map(r=>['capex',r])];
+  const all=TYPES.flatMap(t=>yearItems(t).map(r=>[t,r]));
   return all.filter(([t,r])=>canSubmit(r));
 }
 function lineActions(type,r){
@@ -1546,12 +1593,14 @@ async function submitAllDrafts(){
 async function approveLine(type,id,silent){
   const r=STATE[type].find(x=>x.id===id); if(!r||!canApprove(r)) return false;
   const now=new Date().toISOString();
-  const data=r.status===ST.bu?{LineStatus:ST.cfo,BUApprovedBy:CU.email,BUApprovedOn:now}:{LineStatus:ST.ok,CFOApprovedBy:CU.email,CFOApprovedOn:now};
+  const next=r.status===ST.bu?(fpaOn()?ST.fpa:ST.cfo):r.status===ST.fpa?ST.cfo:ST.ok;
+  const data=r.status===ST.bu?{LineStatus:next,BUApprovedBy:CU.email,BUApprovedOn:now}:r.status===ST.fpa?{LineStatus:next,FPAApprovedBy:CU.email,FPAApprovedOn:now}:{LineStatus:ST.ok,CFOApprovedBy:CU.email,CFOApprovedOn:now};
+  const who={[ST.bu]:'BU',[ST.fpa]:'FP&A',[ST.cfo]:'CFO'}[r.status];
   setSyncing();
   try{
     await spPatch(SP_CONFIG.lists[type],id,data);
-    await logAction(type,id,r.status===ST.bu?'Approved (BU)':'Approved (CFO)','');
-    if(!silent){ await loadAllData(); renderAll(); showToast(r.status===ST.bu?'Approved and sent to Group CFO.':'Final approval given.'); }
+    await logAction(type,id,`Approved (${who})`,'');
+    if(!silent){ await loadAllData(); renderAll(); showToast(next===ST.fpa?'Approved and sent to FP&A.':next===ST.cfo?'Approved and sent to Group CFO.':'Final approval given.'); }
     return true;
   }catch(e){ setSyncErr(); showToast('Error: '+e.message); return false; }
 }
@@ -1614,17 +1663,18 @@ function renderApprovals(){
   if(!CU) return;
   const q=myQueue(), own=myOwn();
   const cnt=document.getElementById('appr-cnt'); if(cnt) cnt.textContent=(q.length+own.filter(([t,r])=>r.status===ST.ret).length)||'';
-  const isApprover=isCFO()||isBUHead()||q.length>0||isAdmin()||STATE.entities.some(e=>e.buHead===(CU.email||'').toLowerCase())||STATE.depts.some(d=>d.head===(CU.email||'').toLowerCase());
+  const isApprover=isCFO()||isFPA()||isBUHead()||q.length>0||isAdmin()||STATE.entities.some(e=>e.buHead===(CU.email||'').toLowerCase())||STATE.depts.some(d=>d.head===(CU.email||'').toLowerCase());
   const banner=document.getElementById('appr-banner');
-  banner.innerHTML=isCFO()?'<strong>Group CFO:</strong> lines approved by BU heads wait here for final approval.'
+  banner.innerHTML=isFPA()?'<strong>FP&amp;A review:</strong> lines approved by BU heads / HODs wait here. Approving sends them to the Group CFO.'
+    :isCFO()?`<strong>Group CFO:</strong> lines approved by ${fpaOn()?'FP&amp;A':'BU heads'} wait here for final approval.`
     :isBUHead()?`<strong>BU head · ${esc(CU.entity)}:</strong> lines submitted for ${esc(CU.entity)} wait here. Approving sends them to the Group CFO.`
-    :'Flow: owner submits → BU head (or department head for shared lines) approves → Group CFO gives final approval. Either approver can return a line with a comment.';
+    :`Flow: owner submits → BU head (or cost center HOD for shared lines) approves → ${fpaOn()?'FP&amp;A reviews → ':''}Group CFO gives final approval. Any approver can return a line with a comment.`;
   document.getElementById('appr-mine-card').style.display=isApprover?'block':'none';
-  document.getElementById('appr-own-card').style.display=(isCFO()||isBUHead())?'none':'block';
+  document.getElementById('appr-own-card').style.display=(isCFO()||isBUHead()||isFPA())?'none':'block';
   document.getElementById('appr-bulk-ok').style.display=q.length>1?'inline-flex':'none';
   document.getElementById('appr-bulk-ok').setAttribute('onclick','confirmBulk()');
   document.getElementById('t-appr').innerHTML=q.length?q.map(([t,r])=>`<tr>
-    <td><span class="badge ${t==='opex'?'b-b':'b-p'}">${t.toUpperCase()}</span></td><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
+    <td><span class="badge ${t==='opex'?'b-b':t==='hc'?'b-g':'b-p'}">${TLABEL[t]}</span></td><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
     <td>${deptCell(r)}</td><td style="font-size:11px">${entLabel(r)}</td><td>${esc(r.owner)}</td><td>${esc(r.activity)}</td>
     <td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td><td>${chg(r.curBudget,r.prevBudget)}</td><td>${stBadge(r.status)}</td>
     <td><div style="display:flex;gap:3px"><button class="btn btn-g" style="font-size:10px;padding:3px 7px" onclick="approveLine('${t}',${r.id})">✓ Approve</button><button class="btn btn-d" onclick="openReturn('${t}',${r.id})">↩ Return</button><button class="btn" style="font-size:10px;padding:3px 7px" onclick="openHistory('${t}',${r.id})">⋯</button></div></td></tr>`).join('')
@@ -1632,7 +1682,7 @@ function renderApprovals(){
   const drafts=own.filter(([t,r])=>r.status===ST.draft).length;
   const sb=document.getElementById('btn-submit-all'); sb.disabled=!drafts; sb.textContent=drafts?`Submit ${drafts} draft${drafts===1?'':'s'}`:'No drafts to submit';
   document.getElementById('t-own').innerHTML=own.length?own.map(([t,r])=>`<tr>
-    <td><span class="badge ${t==='opex'?'b-b':'b-p'}">${t.toUpperCase()}</span></td><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
+    <td><span class="badge ${t==='opex'?'b-b':t==='hc'?'b-g':'b-p'}">${TLABEL[t]}</span></td><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
     <td><span class="dept-tag">${esc(r.dept)}</span></td><td style="font-size:11px">${entLabel(r)}</td><td>${esc(r.activity)}</td>
     <td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td><td>${stBadge(r.status)}</td><td style="font-size:11px;max-width:240px">${esc(r.retComment)||'—'}</td>
     <td><div style="display:flex;gap:3px">${lineActions(t,r)}</div></td></tr>`).join('')
@@ -1657,7 +1707,7 @@ function renderDepts(){
 }
 function buildDeptFilter(){
   const sel=document.getElementById('dept-sel');
-  const show=isAdmin()||isCFO()||isBUHead();
+  const show=isAdmin()||isCFO()||isBUHead()||isFPA();
   sel.style.display=show?'':'none';
   sel.innerHTML='<option value="">All departments</option>'+activeDepts().map(d=>`<option>${esc(d.name)}</option>`).join('');
   sel.value=STATE.deptFilter||'';
@@ -1691,11 +1741,20 @@ const norm=s=>String(s??'').trim().toLowerCase();
 function optList(arr,sel){ return '<option value="">— select —</option>'+arr.map(v=>`<option${v===sel?' selected':''}>${esc(v)}</option>`).join(''); }
 const mkey=m=>[m.et,m.sg,m.item,m.dept||''].map(norm).join('|');
 const rkey=r=>[r.fy,r.et,r.sg,r.item].map(norm).join('|');
-function masterData(m){ return {ExpenseType:m.et,ExpenseTypeGL:m.etGL||'',SubGroup:m.sg,SubGroupGL:m.sgGL||'',BudgetItem:m.item,BudgetItemGL:m.itemGL||'',Department:m.dept||null,IsActive:m.active!==false}; }
-function masterFor(dept){ return STATE.master.filter(m=>m.active!==false&&(!m.dept||m.dept===dept)); }
+function masterData(m){ return {Nature:m.nature||null,ExpenseType:m.et,ExpenseTypeGL:m.etGL||'',SubGroup:m.sg,SubGroupGL:m.sgGL||'',BudgetItem:m.item,BudgetItemGL:m.itemGL||'',Department:m.dept||null,IsActive:m.active!==false}; }
+// salary-type natures are budgeted in Headcount & salary, not on budget lines
+const HC_NATURES=['salary','variable pay','recovered'];
+function isHCItem(m){ return HC_NATURES.includes(norm(m.nature))||['salary','variable pay'].includes(norm(m.et)); }
+function masterFor(dept){ return STATE.master.filter(m=>m.active!==false&&!isHCItem(m)&&(!m.dept||m.dept===dept)); }
 function rateFor(fy,et,sg,item){ return STATE.rates.find(r=>norm(r.fy)===norm(fy)&&norm(r.et)===norm(et)&&norm(r.sg)===norm(sg)&&norm(r.item)===norm(item)); }
 function fmtR(n){ return Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2}); }
-function qtyRate(r){ return r.qty!=null&&r.rate!=null?`${fmtR(r.qty)} ${esc(r.unit||'')} &times; &#x20B9;${fmtR(r.rate)}`:'<span style="color:var(--tx3)">Lump sum</span>'; }
+function qtyRate(r){
+  if(r.qty==null||r.rate==null) return '<span style="color:var(--tx3)">Lump sum</span>';
+  let s=`${fmtR(r.qty)} ${esc(r.unit||'')}`; if(r.persons>1) s+=` &times; ${fmtR(r.persons)} pers.`; if(r.factor>1) s+=` &times; ${fmtR(r.factor)}`;
+  s+=` &times; &#x20B9;${fmtR(r.rate)}`;
+  if(r.stdRate!=null&&Math.abs(r.stdRate-r.rate)>0.005) s+=`<div style="color:var(--am)" title="Standard rate overridden">&#x2691; std &#x20B9;${fmtR(r.stdRate)}</div>`;
+  return s;
+}
 // keep expense-type / sub-group GL identical across rows
 async function syncSharedGL(row,selfId){
   for(const m of STATE.master){
@@ -1726,12 +1785,12 @@ function renderMaster(){
   if(dv==='__common') rows=rows.filter(m=>!m.dept); else if(dv) rows=rows.filter(m=>!m.dept||m.dept===dv);
   if(q) rows=rows.filter(m=>norm([m.et,m.sg,m.item,m.etGL,m.sgGL,m.itemGL].join(' ')).includes(q));
   tb.innerHTML=rows.length?rows.map(m=>{const r=rateFor(STATE.activeYear,m.et,m.sg,m.item);return `<tr style="${m.active?'':'opacity:.5'}">
-    <td><strong>${esc(m.et)}</strong></td><td class="gl">${esc(m.etGL)||'—'}</td><td>${esc(m.sg)}</td><td class="gl">${esc(m.sgGL)||'—'}</td>
+    <td style="font-size:11px">${esc(m.nature)||'—'}${isHCItem(m)?'<div class="gl">via headcount</div>':''}</td><td><strong>${esc(m.et)}</strong></td><td class="gl">${esc(m.etGL)||'—'}</td><td>${esc(m.sg)}</td><td class="gl">${esc(m.sgGL)||'—'}</td>
     <td>${esc(m.item)}</td><td class="gl">${esc(m.itemGL)||'—'}</td><td>${m.dept?`<span class="dept-tag">${esc(m.dept)}</span>`:'<span style="color:var(--tx3);font-size:11px">All</span>'}</td>
     <td style="font-size:11px;white-space:nowrap">${r?`&#x20B9;${fmtR(r.rate)} / ${esc(r.unit)}`:'<span style="color:var(--tx3)">Lump sum</span>'}</td>
     <td><span class="badge ${m.active?'b-g':'b-r'}">${m.active?'Yes':'No'}</span></td><td>${updCell(m)}</td>
     <td>${isAdmin()?`<button class="btn btn-e" onclick="editMaster(${m.id})">✎</button>`:''}</td></tr>`;}).join('')
-    :`<tr><td colspan="11"><div class="empty">${STATE.masterMissing?'The ITB_ExpenseMaster list is missing.':'No budget items yet. Download the template, fill it in and upload it.'}</div></td></tr>`;
+    :`<tr><td colspan="12"><div class="empty">${STATE.masterMissing?'The ITB_ExpenseMaster list is missing.':'No budget items yet. Download the template, fill it in and upload it.'}</div></td></tr>`;
 }
 function editMaster(id){ const m=STATE.master.find(x=>x.id===id); if(m) openModal('mrow',m); }
 function renderRates(){
@@ -1775,7 +1834,8 @@ function lineForm(type,d){
   </div>
   ${!edit&&!ets.length?`<div class="warn-box" style="margin-bottom:10px">No expense master for <strong>${esc(dept)}</strong> yet. ${isAdmin()?'Add or upload budget items under Master Data → Expense master.':'Ask the budget administrator to set up the expense master.'}</div>`:''}
   <div id="f-gridwrap"></div>
-  <div class="fg"><label>Justification</label><textarea id="f-just" rows="2" placeholder="Needed when a line is new or more than 10% above last year">${esc(d.just||'')}</textarea></div>
+  ${phaseBlock(d)}
+  <div class="fg"><label>Justification</label><textarea id="f-just" rows="2" placeholder="Needed when a line is new, more than 10% above last year, or a standard rate is overridden">${esc(d.just||'')}</textarea></div>
   ${statusNote(d)}`;
 }
 let LF={type:null,edit:null};
@@ -1798,39 +1858,91 @@ function buildGrid(){
   let rows=[];
   if(LF.edit){
     const d=LF.edit, r=rateFor(fy,d.group,d.sub,d.activity), m=STATE.master.find(x=>norm(x.et)===norm(d.group)&&norm(x.sg)===norm(d.sub)&&norm(x.item)===norm(d.activity));
-    rows=[{item:d.activity,etGL:m?m.etGL:d.etGL,sgGL:m?m.sgGL:d.sgGL,itemGL:m?m.itemGL:d.itemGL,unit:r?r.unit:(d.unit||'Lump sum'),rate:r?r.rate:(d.rate!=null?d.rate:Math.round(d.curBudget*100000*100)/100),
-      fixed:!!r,qty:d.qty!=null?d.qty:1,prev:d.prevBudget}];
+    const std=r?r.rate:null, cur=d.rate!=null?d.rate:Math.round(d.curBudget*100000*100)/100;
+    rows=[{item:d.activity,nature:(m&&m.nature)||d.nature,etGL:m?m.etGL:d.etGL,sgGL:m?m.sgGL:d.sgGL,itemGL:m?m.itemGL:d.itemGL,unit:r?r.unit:(d.unit||'Lump sum'),
+      std, rate:(d.rate!=null?d.rate:(std!=null?std:cur)), fixed:!!r, qty:d.qty!=null?d.qty:1, pers:d.persons||1, fac:d.factor||1, desc:d.desc||'', prev:d.prevBudget}];
   } else if(et&&sg){
     rows=masterFor(dept).filter(m=>m.et===et&&m.sg===sg).sort((a,b)=>a.item.localeCompare(b.item)).map(m=>{const r=rateFor(fy,m.et,m.sg,m.item);
-      return {item:m.item,etGL:m.etGL,sgGL:m.sgGL,itemGL:m.itemGL,unit:r?r.unit:'Lump sum',rate:r?r.rate:'',fixed:!!r,qty:r?'':1,prev:''};});
+      return {item:m.item,nature:m.nature,etGL:m.etGL,sgGL:m.sgGL,itemGL:m.itemGL,unit:r?r.unit:'Lump sum',std:r?r.rate:null,rate:r?r.rate:'',fixed:!!r,qty:r?'':1,pers:1,fac:1,desc:'',prev:''};});
   }
-  // keep quantities the user already typed
-  const old={}; document.querySelectorAll('#f-grid tbody tr').forEach(tr=>{old[tr.dataset.item]={q:tr.querySelector('.g-qty').value,p:tr.querySelector('.g-prev').value,r:tr.querySelector('.g-rate').value};});
+  // keep what the user already typed (by item, in row order)
+  const old={}; document.querySelectorAll('#f-grid tbody tr').forEach(tr=>{(old[tr.dataset.item]=old[tr.dataset.item]||[]).push({q:tr.querySelector('.g-qty').value,p:tr.querySelector('.g-prev').value,r:tr.querySelector('.g-rate').value,n:tr.querySelector('.g-pers').value,f:tr.querySelector('.g-fac').value,d:tr.querySelector('.g-desc').value});});
   if(!rows.length){ wrap.innerHTML=''; return; }
+  const out=[]; rows.forEach(r=>{ const prev=old[r.item]; if(prev&&prev.length){ prev.forEach(o=>out.push({...r,o})); } else out.push({...r,o:{}}); });
   const units=uniq(rows.filter(r=>r.fixed).map(r=>r.unit));
   const nLump=rows.filter(r=>!r.fixed).length;
   wrap.innerHTML=`${LF.edit||!units.length?'':`<div class="qall">Quantity for all rate-based items <input id="f-qall" type="number" min="0" step="any" placeholder="e.g. 10" oninput="qtyAll()"> <span style="font-weight:500">${units.length===1?esc(units[0])+'s':''} · you can still change each row below</span></div>`}
   ${nLump&&!LF.edit?`<div class="info-box" style="font-size:11px;padding:6px 10px;margin-bottom:8px">${nLump===rows.length?'These items have':'Items marked <strong>Lump sum</strong> have'} no rate in the rate master. Enter the amount in &#x20B9;; leave it blank to skip the item.</div>`:''}
-  <div class="qgrid"><table id="f-grid"><thead><tr><th>Budget item</th><th>GL</th><th>Unit</th><th style="text-align:right">Rate / Amount (&#x20B9;)</th><th style="text-align:right">Quantity</th><th style="text-align:right">Amount (&#x20B9;L)</th><th style="text-align:right">Prev FY (&#x20B9;L)</th></tr></thead>
-  <tbody>${rows.map(r=>{const o=old[r.item]||{};return `<tr data-item="${esc(r.item)}" data-unit="${esc(r.unit)}" data-fixed="${r.fixed?1:0}" data-etgl="${esc(r.etGL||'')}" data-sggl="${esc(r.sgGL||'')}" data-itemgl="${esc(r.itemGL||'')}">
-    <td><strong>${esc(r.item)}</strong></td><td class="gl">${esc(r.itemGL)||'—'}</td><td>${r.fixed?esc(r.unit):'<span class="badge b-gr">Lump sum</span>'}</td>
-    <td><input class="g-rate" type="number" min="0" step="0.01" value="${r.fixed?r.rate:(o.r!=null?o.r:r.rate)}" ${r.fixed?'readonly title="Rate from the rate master"':'placeholder="Lump-sum amount" title="No rate in the rate master: enter the amount"'} oninput="calcGrid()"></td>
-    <td><input class="g-qty" type="number" min="0" step="any" value="${o.q!=null?o.q:r.qty}" oninput="calcGrid()"></td>
-    <td class="amt g-amt">—</td>
-    <td><input class="g-prev" type="number" min="0" step="0.01" value="${o.p!=null?o.p:r.prev}" placeholder="0"></td></tr>`;}).join('')}</tbody>
-  <tfoot><tr><td colspan="5">Total</td><td class="amt" id="g-total">—</td><td></td></tr></tfoot></table></div>`;
+  <div class="qgrid"><table id="f-grid"><thead><tr><th>Budget item</th><th>GL</th><th>Description / destination</th><th>Unit</th><th style="text-align:right" title="Standard rate from the rate master; change it to override">Rate / Amount (&#x20B9;)</th><th style="text-align:right">Qty</th><th style="text-align:right">Persons</th><th style="text-align:right" title="Nights, legs or any other multiplier">Nights / legs</th><th style="text-align:right">Amount (&#x20B9;L)</th><th style="text-align:right">Prev FY (&#x20B9;L)</th></tr></thead>
+  <tbody>${out.map(r=>gridRow(r,r.o)).join('')}</tbody>
+  <tfoot><tr><td colspan="8">Total</td><td class="amt" id="g-total">—</td><td></td></tr></tfoot></table></div>
+  <div style="font-size:11px;color:var(--tx2);margin:-4px 0 10px">Amount = Rate &times; Qty &times; Persons &times; Nights/legs. Use <strong>＋</strong> to add another line for the same item (e.g. a second destination). A changed standard rate turns amber and needs a justification.</div>`;
   calcGrid();
 }
+function gridRow(r,o){
+  const v=(a,b)=>a!=null&&a!==''?a:b;
+  return `<tr data-item="${esc(r.item)}" data-unit="${esc(r.unit)}" data-fixed="${r.fixed?1:0}" data-std="${r.std!=null?r.std:''}" data-nature="${esc(r.nature||'')}" data-etgl="${esc(r.etGL||'')}" data-sggl="${esc(r.sgGL||'')}" data-itemgl="${esc(r.itemGL||'')}">
+    <td style="white-space:nowrap"><strong>${esc(r.item)}</strong>${LF.edit?'':'<button type="button" class="dup" title="Add another line for this item" onclick="dupRow(this)">＋</button>'}</td><td class="gl">${esc(r.itemGL)||'—'}</td>
+    <td><input class="g-desc" maxlength="250" value="${esc(v(o.d,r.desc))}" placeholder="optional"></td>
+    <td>${r.fixed?esc(r.unit):'<span class="badge b-gr">Lump sum</span>'}</td>
+    <td><input class="g-rate" type="number" min="0" step="0.01" value="${v(o.r,r.rate)}" ${r.fixed?'title="Standard rate — change only with justification"':'placeholder="Lump-sum amount" title="No rate in the rate master: enter the amount"'} oninput="calcGrid()"></td>
+    <td><input class="g-qty" type="number" min="0" step="any" value="${v(o.q,r.qty)}" oninput="calcGrid()"></td>
+    <td><input class="g-pers" type="number" min="0" step="any" value="${v(o.n,r.pers)}" oninput="calcGrid()" style="min-width:56px"></td>
+    <td><input class="g-fac" type="number" min="0" step="any" value="${v(o.f,r.fac)}" oninput="calcGrid()" style="min-width:56px"></td>
+    <td class="amt g-amt">—</td>
+    <td><input class="g-prev" type="number" min="0" step="0.01" value="${v(o.p,r.prev)}" placeholder="0"></td></tr>`;
+}
+function dupRow(btn){
+  const tr=btn.closest('tr'), c=tr.cloneNode(true);
+  c.querySelector('.g-desc').value=''; c.querySelector('.g-prev').value='';
+  if(tr.dataset.fixed==='1') c.querySelector('.g-rate').value=tr.dataset.std;
+  tr.after(c); calcGrid(); c.querySelector('.g-desc').focus();
+}
 function qtyAll(){ const v=document.getElementById('f-qall').value; document.querySelectorAll('#f-grid tr[data-fixed="1"] .g-qty').forEach(i=>i.value=v); calcGrid(); }
+function rowVals(tr){
+  const n=c=>parseFloat(tr.querySelector(c).value);
+  const q=n('.g-qty'), r=n('.g-rate'), p=n('.g-pers'), f=n('.g-fac');
+  return {q, r, pers:isNaN(p)?1:p, fac:isNaN(f)?1:f};
+}
 function calcGrid(){
   let t=0;
   document.querySelectorAll('#f-grid tbody tr').forEach(tr=>{
-    const q=parseFloat(tr.querySelector('.g-qty').value), r=parseFloat(tr.querySelector('.g-rate').value);
-    const a=(!isNaN(q)&&!isNaN(r))?q*r/100000:null;
+    const x=rowVals(tr), a=(!isNaN(x.q)&&!isNaN(x.r))?x.q*x.pers*x.fac*x.r/100000:null;
     tr.querySelector('.g-amt').textContent=a!=null?'₹'+fmt(a):'—'; if(a) t+=a;
+    const std=tr.dataset.std, ri=tr.querySelector('.g-rate');
+    const ov=tr.dataset.fixed==='1'&&std!==''&&!isNaN(x.r)&&Math.abs(x.r-parseFloat(std))>0.005;
+    ri.classList.toggle('ovr',ov); ri.title=ov?`Overridden — standard rate is ₹${fmtR(parseFloat(std))}`:(tr.dataset.fixed==='1'?'Standard rate — change only with justification':ri.title);
   });
   const tt=document.getElementById('g-total'); if(tt) tt.textContent='₹'+fmt(t)+'L';
+  phaseCalc();
 }
+/* ---- quarterly phasing ---- */
+function phasePct(d){
+  const q=d&&d.q, cur=d&&d.curBudget;
+  if(!q||!cur||q.some(x=>x==null)) return null;
+  const p=q.map(x=>Math.round(x/cur*1000)/10);
+  return p.every(x=>Math.abs(x-25)<0.05)?null:p;
+}
+function phaseBlock(d){
+  const p=phasePct(d||{});
+  return `<div class="phase"><strong>Quarterly phasing</strong>
+    <select id="f-ph" onchange="phaseMode()"><option value="eq"${p?'':' selected'}>Equal — 25% each quarter</option><option value="cu"${p?' selected':''}>Custom %</option></select>
+    <span id="f-phc" ${p?'':'hidden'}>${[0,1,2,3].map(i=>`Q${i+1} <input id="f-q${i+1}" type="number" min="0" max="100" step="0.1" value="${p?p[i]:25}" oninput="phaseCalc()">%`).join(' ')}</span>
+    <span id="f-phs" style="color:var(--tx2)"></span></div>`;
+}
+function phaseMode(){ document.getElementById('f-phc').hidden=document.getElementById('f-ph').value!=='cu'; phaseCalc(); }
+function readPhase(){
+  const m=document.getElementById('f-ph'); if(!m||m.value!=='cu') return [25,25,25,25];
+  return [1,2,3,4].map(i=>parseFloat(document.getElementById('f-q'+i).value)||0);
+}
+function phaseCalc(){
+  const el=document.getElementById('f-phs'); if(!el) return;
+  const p=readPhase(), sum=p.reduce((a,b)=>a+b,0);
+  const tot=parseFloat((document.getElementById('g-total')?.textContent||document.getElementById('hc-total')?.dataset.v||'0').replace(/[^0-9.]/g,''))||0;
+  el.innerHTML=(Math.abs(sum-100)>0.05?`<span style="color:var(--rd);font-weight:600">Total ${fmtR(sum)}% — must be 100%</span> · `:'')+p.map((x,i)=>`Q${i+1} ₹${fmt(tot*x/100)}L`).join(' · ');
+}
+function phaseOK(){ const s=readPhase().reduce((a,b)=>a+b,0); if(Math.abs(s-100)>0.05){ showToast('Quarterly phasing must add up to 100%.'); return false; } return true; }
+function phaseAmounts(cur){ const p=readPhase(); return Object.fromEntries(p.map((x,i)=>['PhaseQ'+(i+1),Math.round(cur*x/100*1e6)/1e6])); }
 async function saveLines(type,id){
   const gv=i=>{const el=document.getElementById(i);return el?el.value.trim():''};
   const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
@@ -1841,23 +1953,30 @@ async function saveLines(type,id){
   if(!id&&!validate(need)) return false;
   if(id&&!validate([{id:'f-payer'},...(shared?[{id:'f-method'}]:[])])) return false;
   if(!owner){showToast('Owner is required.');return false;}
-  const lines=[]; let bad=0;
+  const lines=[]; let bad=0, ovr=0;
   document.querySelectorAll('#f-grid tbody tr').forEach(tr=>{
-    const q=parseFloat(tr.querySelector('.g-qty').value), r=parseFloat(tr.querySelector('.g-rate').value), p=parseFloat(tr.querySelector('.g-prev').value);
+    const x=rowVals(tr), p=parseFloat(tr.querySelector('.g-prev').value);
     tr.querySelector('.g-rate').classList.remove('err');
-    if(tr.dataset.fixed!=='1'&&(isNaN(r)||r<=0)) return; // lump sum left blank: skip
-    if(isNaN(q)||q<=0) return;
-    if(isNaN(r)||r<0){ bad++; tr.querySelector('.g-rate').classList.add('err'); return; }
-    lines.push({item:tr.dataset.item,unit:tr.dataset.unit,etGL:tr.dataset.etgl,sgGL:tr.dataset.sggl,itemGL:tr.dataset.itemgl,qty:q,rate:r,prev:isNaN(p)?0:p});
+    if(tr.dataset.fixed!=='1'&&(isNaN(x.r)||x.r<=0)) return; // lump sum left blank: skip
+    if(isNaN(x.q)||x.q<=0||x.pers<=0||x.fac<=0) return;
+    if(isNaN(x.r)||x.r<0){ bad++; tr.querySelector('.g-rate').classList.add('err'); return; }
+    const std=tr.dataset.std!==''?parseFloat(tr.dataset.std):null;
+    if(std!=null&&Math.abs(std-x.r)>0.005) ovr++;
+    lines.push({item:tr.dataset.item,unit:tr.dataset.unit,nature:tr.dataset.nature,etGL:tr.dataset.etgl,sgGL:tr.dataset.sggl,itemGL:tr.dataset.itemgl,
+      qty:x.q,rate:x.r,pers:x.pers,fac:x.fac,std,desc:tr.querySelector('.g-desc').value.trim(),prev:isNaN(p)?0:p});
   });
   if(bad){ showToast('Enter an amount for the highlighted items.'); return false; }
   if(!lines.length){ showToast('Enter a quantity, or a lump-sum amount, for at least one budget item.'); return false; }
+  if(ovr&&!gv('f-just')){ document.getElementById('f-just').classList.add('err'); showToast(`${ovr} standard rate${ovr>1?'s are':' is'} overridden — add a justification.`); return false; }
+  if(!phaseOK()) return false;
   const et=LF.edit?LF.edit.group:gv('f-et'), sg=LF.edit?LF.edit.sub:gv('f-sg');
   const bid=gv('f-bid');
   const common={BudgetYear:gv('f-year'),ITOwner:owner,GroupName:et,SubGroup:sg,Payer:gv('f-payer'),DistMethod:shared?gv('f-method'):'FIXED',CostCenter:gv('f-cc')||null,...wfSaveFields(type,id)};
   if(type==='opex') common.FunctionalCost=et;
-  const mk=(l,i)=>({...common,BudgetID:bid?(lines.length>1?`${bid}-${i+1}`:bid):null,ActivityName:l.item,Quantity:l.qty,Unit:l.unit,Rate:l.rate,
-    CurBudget:Math.round(l.qty*l.rate/100000*1e6)/1e6,PrevBudget:l.prev,ExpenseTypeGL:l.etGL,SubGroupGL:l.sgGL,BudgetItemGL:l.itemGL});
+  const mk=(l,i)=>{const cur=Math.round(l.qty*l.pers*l.fac*l.rate/100000*1e6)/1e6;
+    return {...common,BudgetID:bid?(lines.length>1?`${bid}-${i+1}`:bid):null,ActivityName:l.item,Quantity:l.qty,Unit:l.unit,Rate:l.rate,
+    Persons:l.pers,Factor:l.fac,StdRate:l.std,LineDescription:l.desc||null,Nature:l.nature||'Functional Cost',
+    CurBudget:cur,PrevBudget:l.prev,ExpenseTypeGL:l.etGL,SubGroupGL:l.sgGL,BudgetItemGL:l.itemGL,...phaseAmounts(cur)};};
   if(id){
     const existing=STATE[type].find(r=>r.id===id); const data=mk(lines[0],0);
     if(type==='opex') data.Overrides=JSON.stringify(data.EntityName?{}:(existing?existing.overrides:{}));
@@ -1870,6 +1989,123 @@ async function saveLines(type,id){
   return true;
 }
 
+/* ---------- reporting helpers ---------- */
+function natureOf(r){
+  if(r.nature) return r.nature;
+  const m=STATE.master.find(x=>norm(x.et)===norm(r.group)&&norm(x.sg)===norm(r.sub)&&norm(x.item)===norm(r.activity));
+  return (m&&m.nature)||'Functional Cost';
+}
+function qOf(r){ return r.q&&r.q.every(x=>x!=null)?r.q:[0,1,2,3].map(()=>r.curBudget/4); }
+function hcReport(){
+  return visibleItems('hc').flatMap(r=>{
+    const sc=a=>{const q=qOf(r), t=r.curBudget||1; return q.map(x=>x*a/t);};
+    if(r.htype==='Consultant') return [{...r,_hc:true,group:'Consultant',nature:'Salary',activity:r.band||'Consultant'}];
+    return [{...r,_hc:true,group:'Salary',nature:'Salary',activity:r.band||r.htype,curBudget:r.salAmt,q:sc(r.salAmt)},
+            {...r,_hc:true,group:'Variable Pay',nature:'Variable Pay',activity:r.band||r.htype,curBudget:r.vpAmt,prevBudget:0,q:sc(r.vpAmt)}].filter(x=>x.curBudget||x.prevBudget);
+  });
+}
+function reportOpex(){ return [...visibleItems('opex'),...hcReport()]; }
+function renderNatureTab(){
+  const L=reportOpex();
+  const blocks=[['(A) Salary cost',r=>['salary','variable pay','recovered'].includes(norm(natureOf(r)))],
+                ['(B) Directors cost',r=>norm(natureOf(r))==='directors cost'],
+                ['(C) Functional cost',r=>!['salary','variable pay','recovered','directors cost'].includes(norm(natureOf(r)))]];
+  const row=(label,arr,cls)=>{const cur=arr.reduce((a,r)=>a+r.curBudget,0), prev=arr.reduce((a,r)=>a+r.prevBudget,0), q=[0,1,2,3].map(i=>arr.reduce((a,r)=>a+qOf(r)[i],0));
+    return `<tr class="${cls||''}"><td>${label}</td><td style="text-align:right">&#x20B9;${fmt(prev)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(cur)}</td><td>${chg(cur,prev)}</td>${q.map(x=>`<td style="text-align:right">&#x20B9;${fmt(x)}</td>`).join('')}<td style="text-align:right">${arr.length}</td></tr>`;};
+  let h='';
+  blocks.forEach(([lbl,f])=>{ const arr=L.filter(f); h+=row(`<strong>${lbl}</strong>`,arr,'nat-h');
+    const by={}; arr.forEach(r=>{(by[r.group]=by[r.group]||[]).push(r);});
+    Object.keys(by).sort((a,b)=>by[b].reduce((x,r)=>x+r.curBudget,0)-by[a].reduce((x,r)=>x+r.curBudget,0)).forEach(k=>{h+=row('&nbsp;&nbsp;&nbsp;'+esc(k),by[k]);}); });
+  h+=row('<strong>(D) Total gross cost (A+B+C)</strong>',L,'nat-t');
+  const cx=visibleItems('capex'); if(cx.length) h+=row('<strong>CAPEX</strong> (separate)',cx,'nat-h');
+  document.getElementById('summary-table').innerHTML=`<div class="tw"><table><thead><tr><th>Particulars</th><th style="text-align:right">Prev FY (&#x20B9;L)</th><th style="text-align:right">${esc(STATE.activeYear)} (&#x20B9;L)</th><th>Change</th><th style="text-align:right">Q1</th><th style="text-align:right">Q2</th><th style="text-align:right">Q3</th><th style="text-align:right">Q4</th><th style="text-align:right">Lines</th></tr></thead><tbody>${h}</tbody></table></div>`;
+}
+
+/* ---------- Headcount & salary ---------- */
+function hcAmounts(x){
+  const base=(x.hcount||0)*(x.ctc||0)*(x.months||0)*((x.cat==='Existing'&&x.htype==='Employee')?(1+(x.incPct||0)/100):1)/100000;
+  const vp=x.htype==='Employee'?base*(x.vpPct||0)/100:0;
+  const r6=v=>Math.round(v*1e6)/1e6;
+  return {total:r6(base),sal:r6(base-vp),vp:r6(vp)};
+}
+function hcForm(d){
+  const dept=d.dept||myDept();
+  const o=(arr,v)=>arr.map(a=>`<option${a===v?' selected':''}>${a}</option>`).join('');
+  return `<div class="fgrid3">
+    <div class="fg"><label>${req('Budget year')}</label><select id="f-year">${yearOpts(d.year||STATE.activeYear)}</select></div>
+    <div class="fg"><label>${req('Department')}</label>${deptField(d.dept)}</div>
+    <div class="fg"><label>${req('Cost center')}</label><select id="f-cc">${ccOpts(dept,d.cc)}</select></div>
+    <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
+    <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
+    <div class="fg"><label>${req('Payer')}</label><select id="f-payer"><option value="" disabled${!d.payer?' selected':''}>— select —</option>${payerOpts(dept,d.payer)}</select></div>
+    <div class="fg"><label>${req('Distribution method')}</label><select id="f-method"${d.entity?' disabled':''}><option value="" disabled${!d.method?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
+    <div class="fg"><label>${req('Category')}</label><select id="f-hcat" onchange="hcCalc()">${o(['Existing','New'],d.cat||'Existing')}</select></div>
+    <div class="fg"><label>${req('Type')}</label><select id="f-htype" onchange="hcCalc()">${o(['Employee','Consultant','Trainee'],d.htype||'Employee')}</select></div>
+    <div class="fg"><label>Band / role</label><input id="f-hband" value="${esc(d.band||'')}" placeholder="e.g. M1, Analyst"></div>
+    <div class="fg"><label>${req('Headcount')}</label><input id="f-hcnt" type="number" min="0" step="1" value="${d.hcount??''}" oninput="hcCalc()"></div>
+    <div class="fg"><label id="l-hctc">${req('Average monthly CTC incl. VP (₹)')}</label><input id="f-hctc" type="number" min="0" step="1" value="${d.ctc??''}" oninput="hcCalc()"></div>
+    <div class="fg" id="g-hvp"><label>Variable pay % of CTC</label><input id="f-hvp" type="number" min="0" max="100" step="0.1" value="${d.vpPct??''}" oninput="hcCalc()" placeholder="0"></div>
+    <div class="fg" id="g-hinc"><label>Increment %</label><input id="f-hinc" type="number" min="0" max="100" step="0.1" value="${d.incPct??''}" oninput="hcCalc()" placeholder="0"></div>
+    <div class="fg"><label>${req('Months in the year')}</label><input id="f-hmon" type="number" min="0" max="12" step="0.5" value="${d.months??12}" oninput="hcCalc()"></div>
+    <div class="fg"><label>Previous FY (₹L)</label><input id="f-hprev" type="number" min="0" step="0.01" value="${d.prevBudget??''}" placeholder="0"></div>
+  </div>
+  <div class="hc-calc"><div>Salary<b id="hc-sal">₹0.00L</b></div><div>Variable pay<b id="hc-vp">₹0.00L</b></div><div>Total<b id="hc-total" data-v="0">₹0.00L</b></div><div id="hc-formula" style="align-self:center;color:var(--tx2)"></div></div>
+  ${phaseBlock(d)}
+  <div class="fg"><label>Justification</label><textarea id="f-just" rows="2" placeholder="Needed for new positions or more than 10% above last year">${esc(d.just||'')}</textarea></div>
+  ${statusNote(d)}`;
+}
+function hcVals(){
+  const g=i=>document.getElementById(i).value, n=i=>parseFloat(g(i))||0;
+  return {cat:g('f-hcat'),htype:g('f-htype'),band:g('f-hband').trim(),hcount:n('f-hcnt'),ctc:n('f-hctc'),vpPct:n('f-hvp'),incPct:n('f-hinc'),months:n('f-hmon')};
+}
+function hcCalc(){
+  if(!document.getElementById('f-hcat')) return;
+  const x=hcVals(), a=hcAmounts(x);
+  document.getElementById('g-hvp').style.display=x.htype==='Employee'?'':'none';
+  document.getElementById('g-hinc').style.display=(x.htype==='Employee'&&x.cat==='Existing')?'':'none';
+  document.getElementById('l-hctc').innerHTML=req(x.htype==='Consultant'?'Monthly professional fee (₹)':x.htype==='Trainee'?'Monthly stipend (₹)':'Average monthly CTC incl. VP (₹)');
+  document.getElementById('hc-sal').textContent='₹'+fmt(a.sal)+'L'; document.getElementById('hc-vp').textContent='₹'+fmt(a.vp)+'L';
+  const t=document.getElementById('hc-total'); t.textContent='₹'+fmt(a.total)+'L'; t.dataset.v=a.total;
+  document.getElementById('hc-formula').textContent=`${fmtR(x.hcount)} × ₹${fmtR(x.ctc)} × ${fmtR(x.months)} months${x.htype==='Employee'&&x.cat==='Existing'&&x.incPct?` × (1 + ${fmtR(x.incPct)}% increment)`:''}${x.htype==='Employee'&&x.vpPct?`; variable pay ${fmtR(x.vpPct)}%`:''}`;
+  phaseCalc();
+}
+async function saveHC(id){
+  const gv=i=>{const el=document.getElementById(i);return el?el.value.trim():''};
+  const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
+  const shared=!gv('f-entity'), needCC=deptCCs(gv('f-dept')).length>0;
+  if(!validate([{id:'f-payer'},{id:'f-hcnt'},{id:'f-hctc'},{id:'f-hmon'},...(shared?[{id:'f-method'}]:[]),...(needCC?[{id:'f-cc'}]:[])])) return false;
+  if(!owner){ showToast('Owner is required.'); return false; }
+  const x=hcVals(), a=hcAmounts(x);
+  if(x.hcount<=0||x.ctc<=0||x.months<=0){ showToast('Headcount, monthly amount and months must be above zero.'); return false; }
+  if(!phaseOK()) return false;
+  const data={BudgetYear:gv('f-year'),ITOwner:owner,Payer:gv('f-payer'),DistMethod:shared?gv('f-method'):'FIXED',CostCenter:gv('f-cc')||null,
+    HCCategory:x.cat,HCType:x.htype,Band:x.band||null,Headcount:x.hcount,MonthlyCTC:x.ctc,VPPercent:x.htype==='Employee'?x.vpPct:0,IncrementPercent:(x.htype==='Employee'&&x.cat==='Existing')?x.incPct:0,
+    Months:x.months,SalaryAmount:a.sal,VPAmount:a.vp,CurBudget:a.total,PrevBudget:parseFloat(gv('f-hprev'))||0,
+    Nature:'Salary',GroupName:x.htype==='Consultant'?'Consultant':'Salary',SubGroup:`${x.cat} ${x.htype}`,ActivityName:x.band||x.htype,
+    ...phaseAmounts(a.total),...wfSaveFields('hc',id)};
+  if(id){ const ex=STATE.hc.find(r=>r.id===id); await spPatch(SP_CONFIG.lists.hc,id,data); await logAfterSave('hc',id,ex,data); }
+  else { const res=await spPost(SP_CONFIG.lists.hc,data); await logAction('hc',res.Id||res.ID,'Created',''); }
+  return true;
+}
+function renderHC(){
+  const tb=document.getElementById('t-hc'); if(!tb||!CU) return;
+  const L=visibleItems('hc');
+  tb.innerHTML=L.length?L.map(r=>`<tr>
+    <td>${deptCell(r)}</td><td style="font-size:11px">${entLabel(r)}</td><td>${esc(r.cat)}</td><td>${esc(r.htype)}</td><td>${esc(r.band)||'—'}</td>
+    <td style="text-align:right">${fmtR(r.hcount)}</td><td style="text-align:right">&#x20B9;${fmtR(r.ctc)}</td><td>${r.htype==='Employee'?fmtR(r.vpPct)+'%':'—'}</td><td>${r.htype==='Employee'&&r.cat==='Existing'?fmtR(r.incPct)+'%':'—'}</td><td>${fmtR(r.months)}</td>
+    <td style="text-align:right">&#x20B9;${fmt(r.salAmt)}</td><td style="text-align:right">&#x20B9;${fmt(r.vpAmt)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td><td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td>
+    <td>${stBadge(r.status)}</td><td>${updCell(r)}</td><td><div style="display:flex;gap:3px">${lineActions('hc',r)}</div></td></tr>`).join('')
+    :`<tr><td colspan="17"><div class="empty">${STATE.hcMissing?'The ITB_Headcount list is missing.':'No headcount budgeted for this year yet.'}</div></td></tr>`;
+  const s=k=>L.reduce((a,r)=>a+(r[k]||0),0);
+  document.getElementById('t-hc-foot').innerHTML=L.length?`<tr style="background:var(--bll);font-weight:700"><td colspan="5">TOTAL</td><td style="text-align:right">${fmtR(s('hcount'))}</td><td colspan="4"></td><td style="text-align:right">&#x20B9;${fmt(s('salAmt'))}</td><td style="text-align:right">&#x20B9;${fmt(s('vpAmt'))}</td><td style="text-align:right">&#x20B9;${fmt(s('curBudget'))}</td><td style="text-align:right">&#x20B9;${fmt(s('prevBudget'))}</td><td colspan="3"></td></tr>`:'';
+}
+async function exportHC(){
+  try{ await loadXLSX(); }catch(e){ showToast(e.message); return; }
+  const cols=['Budget Year','Department','Cost Center','Entity','Owner','Category','Type','Band / Role','Headcount','Monthly CTC / Fee (Rs)','VP %','Increment %','Months','Salary (Rs L)','Variable Pay (Rs L)','Total (Rs L)','Prev FY (Rs L)','Q1 (Rs L)','Q2 (Rs L)','Q3 (Rs L)','Q4 (Rs L)','Status','Justification','Created By','Created On','Updated By','Updated On'];
+  const rows=visibleItems('hc').map(r=>{const q=qOf(r);return [r.year,r.dept,r.cc,r.entity||'Shared',r.owner,r.cat,r.htype,r.band,r.hcount,r.ctc,r.vpPct,r.incPct,r.months,r.salAmt,r.vpAmt,r.curBudget,r.prevBudget,q[0],q[1],q[2],q[3],r.status,r.just,r.cBy,dt(r.cAt),r.uBy,dt(r.uAt)];});
+  xlSave(rows,cols,`Headcount & Salary ${STATE.activeYear} - ${new Date().toISOString().slice(0,10)}.xlsx`,'Headcount');
+}
+
 /* ---------- Excel: templates, upload with preview, export ---------- */
 async function loadXLSX(){
   if(window.XLSX) return;
@@ -1878,7 +2114,7 @@ async function loadXLSX(){
 const XL={
   dept:{name:'Department Master',cols:['Cost Center','Department','HOD Name','HOD Email','Approval Required (Y/N)','Active (Y/N)'],
     sample:[['1007GMIT','IT','','','N','Y']]},
-  master:{name:'Expense Master',cols:['Expense Type','Expense Type GL','Sub Group','Sub Group GL','Budget Item','Budget Item GL','Department (blank = all)','Active (Y/N)'],
+  master:{name:'Expense Master',cols:['Expense Type','Expense Type GL','Sub Group','Sub Group GL','Budget Item','Budget Item GL','Department (blank = all)','Active (Y/N)','Nature'],
     sample:[['Travel Expense','','Domestic','','Travel Fare','','','Y'],['Travel Expense','','Domestic','','Boarding','','','Y'],['Travel Expense','','Domestic','','Lodging','','','Y'],['Travel Expense','','Domestic','','Miscellaneous','','','Y']]},
   rates:{name:'Rate Master',cols:['Budget Year','Expense Type','Sub Group','Budget Item','Rate Unit','Rate (Rs)'],
     sample:[['FY 2026-27','Travel Expense','Domestic','Travel Fare','Trip',15000],['FY 2026-27','Travel Expense','Domestic','Boarding','Trip',5000],['FY 2026-27','Travel Expense','Domestic','Lodging','Trip',8000],['FY 2026-27','Travel Expense','Domestic','Miscellaneous','Trip',2000]]}
@@ -1899,14 +2135,14 @@ async function xlExport(kind){
   const yn=b=>b?'Y':'N';
   let rows=[];
   if(kind==='dept') rows=STATE.ccs.filter(d=>d.id).sort((x,y)=>(x.name+x.cc).localeCompare(y.name+y.cc)).map(d=>[d.cc,d.name,d.hodName,d.head,yn(d.approval!==false),yn(d.active!==false),...a(d)]);
-  if(kind==='master') rows=STATE.master.map(m=>[m.et,m.etGL,m.sg,m.sgGL,m.item,m.itemGL,m.dept,yn(m.active),...a(m)]);
+  if(kind==='master') rows=STATE.master.map(m=>[m.et,m.etGL,m.sg,m.sgGL,m.item,m.itemGL,m.dept,yn(m.active),m.nature,...a(m)]);
   if(kind==='rates') rows=STATE.rates.map(r=>[r.fy,r.et,r.sg,r.item,r.unit,r.rate,...a(r)]);
   xlSave(rows,[...t.cols,...A],`${t.name} - Export ${new Date().toISOString().slice(0,10)}.xlsx`,t.name);
 }
 async function exportLines(type){
   try{ await loadXLSX(); }catch(e){ showToast(e.message); return; }
-  const cols=['Budget ID','Budget Year','Department','Cost Center','Person Responsible','Entity','Owner','Expense Type','Expense Type GL','Sub Group','Sub Group GL','Budget Item','Budget Item GL','Quantity','Unit','Rate (Rs)','Payer','Distribution','Prev FY (Rs L)','Current FY (Rs L)','Status','Justification','BU Approved By','CFO Approved By','Created By','Created On','Updated By','Updated On'];
-  const rows=visibleItems(type).map(r=>{const c=STATE.ccs.find(x=>norm(x.cc)===norm(r.cc))||{};return [r.budgetId||'',r.year,r.dept,r.cc||'',c.hodName||'',r.entity||'Shared',r.owner,r.group,r.etGL,r.sub,r.sgGL,r.activity,r.itemGL,r.qty,r.unit,r.rate,r.payer,r.entity?'Direct':r.method,r.prevBudget,r.curBudget,r.status,r.just,r.buBy,r.cfoBy,r.cBy,dt(r.cAt),r.uBy,dt(r.uAt)];});
+  const cols=['Budget ID','Budget Year','Department','Cost Center','Person Responsible','Entity','Owner','Nature','Expense Type','Expense Type GL','Sub Group','Sub Group GL','Budget Item','Budget Item GL','Description','Quantity','Unit','Persons','Nights/Legs','Rate (Rs)','Std Rate (Rs)','Payer','Distribution','Prev FY (Rs L)','Current FY (Rs L)','Q1 (Rs L)','Q2 (Rs L)','Q3 (Rs L)','Q4 (Rs L)','Status','Justification','BU Approved By','CFO Approved By','Created By','Created On','Updated By','Updated On'];
+  const rows=visibleItems(type).map(r=>{const c=STATE.ccs.find(x=>norm(x.cc)===norm(r.cc))||{};const q=qOf(r);return [r.budgetId||'',r.year,r.dept,r.cc||'',c.hodName||'',r.entity||'Shared',r.owner,natureOf(r),r.group,r.etGL,r.sub,r.sgGL,r.activity,r.itemGL,r.desc,r.qty,r.unit,r.persons,r.factor,r.rate,r.stdRate,r.payer,r.entity?'Direct':r.method,r.prevBudget,r.curBudget,q[0],q[1],q[2],q[3],r.status,r.just,r.buBy,r.cfoBy,r.cBy,dt(r.cAt),r.uBy,dt(r.uAt)];});
   xlSave(rows,cols,`${type.toUpperCase()} ${STATE.activeYear} - ${new Date().toISOString().slice(0,10)}.xlsx`,type.toUpperCase());
 }
 let XLKIND=null, XLPLAN=null;
@@ -1922,7 +2158,7 @@ async function xlRead(input){
     const ALIAS={'cost centre':'cost center','department name':'department','person responsible':'hod name','hod':'hod name','hod mail':'hod email','person responsible email':'hod email'};
     const t=XL[XLKIND], head=aoa[0].map(h=>{const x=norm(h).replace(/\s+/g,' ').replace(/centre/g,'center'); return ALIAS[x]||x;});
     const idx=t.cols.map(c=>{const k=norm(c).replace(/\s*\(.*\)/,''); return head.findIndex(h=>h.replace(/\s*\(.*\)/,'')===k);});
-    const missing=t.cols.filter((c,i)=>idx[i]<0&&!/active|approval|department \(/i.test(c)&&!/gl$/i.test(c)&&!/hod/i.test(c));
+    const missing=t.cols.filter((c,i)=>idx[i]<0&&!/active|approval|department \(|nature/i.test(c)&&!/gl$/i.test(c)&&!/hod/i.test(c));
     if(missing.length){ showToast('Missing columns: '+missing.join(', ')+'. Use the template.'); return; }
     const data=aoa.slice(1).map((r,n)=>({row:n+2,v:idx.map(i=>i<0?'':String(r[i]??'').trim())}));
     XLPLAN=planImport(XLKIND,data);
@@ -1952,13 +2188,14 @@ function planImport(kind,data){
   }
   if(kind==='master'){
     const conflicts={};
-    data.forEach(({row,v})=>{const [et,eg,sg,sgg,item,ig,dept,act]=v;
+    data.forEach(({row,v})=>{const [et,eg,sg,sgg,item,ig,dept,act,nat]=v;
       const deptOk=!dept||STATE.depts.some(d=>norm(d.name)===norm(dept));
       const dName=dept?(STATE.depts.find(d=>norm(d.name)===norm(dept))||{}).name||dept:'';
-      const m={et,etGL:eg||'',sg,sgGL:sgg||'',item,itemGL:ig,dept:dName,active:yesNo(act,true)};
+      const m={et,etGL:eg||'',sg,sgGL:sgg||'',item,itemGL:ig,dept:dName,active:yesNo(act,true),nature:nat||''};
       const ex=STATE.master.find(x=>mkey(x)===mkey(m));
       let err=!et?'Expense Type is required':!sg?'Sub Group is required':!item?'Budget Item is required':!deptOk?`Department "${dept}" is not in the department master`:(conflicts[row]||'');
-      let op='new'; if(ex){ op=(ex.etGL===m.etGL&&ex.sgGL===m.sgGL&&ex.itemGL===m.itemGL&&ex.active===m.active)?'same':'update'; }
+      if(ex&&!m.nature) m.nature=ex.nature;
+      let op='new'; if(ex){ op=(ex.etGL===m.etGL&&ex.sgGL===m.sgGL&&ex.itemGL===m.itemGL&&ex.active===m.active&&(ex.nature||'')===(m.nature||''))?'same':'update'; }
       push(row,mkey(m),`${et} › ${sg} › ${item}${dName?' ['+dName+']':''}`,op,masterData(m),ex&&ex.id,err);});
   }
   if(kind==='rates'){
@@ -2089,7 +2326,7 @@ async function saveUser(){
   const scope=document.getElementById('u-scope').value;
   const dept=document.getElementById('u-dept').value;
   const entity=document.getElementById('u-entity').value;
-  const needsOwner=!['Group CFO','BU Head','Admin','IT Head','Finance','Viewer'].includes(role);
+  const needsOwner=!['Group CFO','FP&A','BU Head','Admin','IT Head','Finance','Viewer'].includes(role);
   if(!name||!email||(needsOwner&&!owner)){showToast(needsOwner?'Name, email and owner name are required.':'Name and email are required.');return}
   if(role==='BU Head'&&!entity){showToast('Pick the entity this BU head approves for.');return}
   setSyncing();
@@ -2124,7 +2361,7 @@ async function buildDynamicRoleMap(){
   if(!users.length) return; // use hardcoded ROLE_MAP
   users.filter(u=>u.active).forEach(u=>{
     const prefix = u.email.split('@')[0].toLowerCase();
-    const isOwnerRole=!['Group CFO','BU Head','Admin','IT Head','Finance','Viewer'].includes(u.role);
+    const isOwnerRole=!['Group CFO','FP&A','BU Head','Admin','IT Head','Finance','Viewer'].includes(u.role);
     ROLE_MAP[prefix] = { role: u.role, ownerName: isOwnerRole ? (u.ownerName||null) : null, scope: u.scope, dept: u.dept, entity: u.entity };
   });
 }
