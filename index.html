@@ -158,6 +158,7 @@ tbody tr:hover{background:#f8fafc}
 .qgrid .dup{border:0;background:none;color:var(--bl);cursor:pointer;font-size:14px;padding:0 4px}
 .phase{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;font-size:12px}
 .phase[hidden]{display:none}
+.appr-box{padding:6px 9px;border:1px solid var(--bd);border-radius:var(--r);background:var(--sf2);font-size:12px;min-height:34px;line-height:1.35}
 #g-manual{display:block}#g-manual[hidden]{display:none}#g-manual input{width:100%}
 .phase input{width:64px;padding:5px 7px;border:1px solid var(--bd2);border-radius:6px;text-align:right}
 .phase select{padding:5px 8px;border:1px solid var(--bd2);border-radius:6px}
@@ -1261,10 +1262,29 @@ function yearOpts(sel){return STATE.budgetYears.map(y=>`<option${y===sel?' selec
 function ownerField(sel){
   if(isAdmin()){
     const known=uniq([...STATE.users.filter(u=>u.active).map(u=>u.name),...STATE.users.map(u=>u.ownerName),...STATE.opex.map(r=>r.owner),...STATE.hc.map(r=>r.owner),...STATE.capex.map(r=>r.owner)]);
-    return `<input id="f-owner" list="owner-list" value="${esc(sel||(CU&&CU.name)||'')}" placeholder="Type or pick an owner" required><datalist id="owner-list">${known.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`;
+    const cur=sel||(CU&&CU.name)||'', L=known.includes(cur)||!cur?known:[cur,...known];
+    return `<span id="owner-wrap"><select id="f-owner" onchange="ownerOther(this)">${L.map(o=>`<option value="${esc(o)}"${o===cur?' selected':''}>${esc(o)}</option>`).join('')}<option value="__other">+ Other (type a name)…</option></select></span>`;
   }
   return `<select id="f-owner" disabled><option selected>${esc(sel||myOwner()||(CU&&CU.name)||'')}</option></select>`;
 }
+function apprInfo(dept,cc,entity){
+  if(!needsApproval(dept)) return {none:true};
+  const uName=e=>{const u=STATE.users.find(x=>x.email===e); return u?u.name:'';};
+  if(entity){ const e=STATE.entities.find(x=>x.name===entity); if(e&&e.buHead) return {email:e.buHead,name:uName(e.buHead),src:'BU head of '+entity}; }
+  const c=cc&&STATE.ccs.find(x=>norm(x.cc)===norm(cc)); if(c&&c.head) return {email:c.head,name:c.hodName&&c.hodName!=='Vacant'?c.hodName:uName(c.head),src:'HOD of cost center '+c.cc};
+  const d=deptByName(dept); if(d&&d.head) return {email:d.head,name:d.hodName||uName(d.head),src:'HOD of '+dept};
+  return {missing:true};
+}
+function apprPreview(){
+  const el=document.getElementById('f-appr'); if(!el) return;
+  const v=i=>document.getElementById(i)?.value||'';
+  const a=apprInfo(v('f-dept')||myDept(),v('f-cc'),v('f-entity'));
+  const chain=(fpaOn()?' → FP&amp;A':'')+' → Group CFO';
+  el.innerHTML=a.none?'<span style="color:var(--tx2)">Not required — approved on save</span>'
+    :a.missing?`<span style="color:var(--rd)">No HOD set in the Department master</span><div class="gl">Admin approves${chain}</div>`
+    :`<b>${esc(a.name||a.email)}</b>${a.name?` <span style="color:var(--tx2);font-size:11px">${esc(a.email)}</span>`:''}<div class="gl" title="${esc(a.src)}">${esc(a.src)}${chain}</div>`;
+}
+function ownerOther(el){ if(el.value!=='__other') return; document.getElementById('owner-wrap').innerHTML='<input id="f-owner" placeholder="Type the owner name" required>'; document.getElementById('f-owner').focus(); }
 function deptField(sel){
   const d=sel||myDept();
   if(isAdmin()) return `<select id="f-dept" onchange="onFormDeptChange()">${activeDepts().map(x=>`<option${x.name===d?' selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
@@ -1291,7 +1311,7 @@ function onFormDeptChange_old(){
 function onFormEntityChange(){
   const shared=!document.getElementById('f-entity').value;
   const m=document.getElementById('f-method'); if(m){ m.disabled=!shared; if(!shared) m.value=''; }
-  manualShow();
+  manualShow(); apprPreview();
 }
 const FORMS={
   entity:(d={})=>`<div class="fgrid">
@@ -1345,7 +1365,7 @@ function openModal(type,data={}){
   document.getElementById('ov').classList.add('open');
   if(type==='opex'||type==='capex') initLineForm(type,data);
   if(type==='hc') hcCalc();
-  if(type==='opex'||type==='capex'||type==='hc') manualShow();
+  if(type==='opex'||type==='capex'||type==='hc'){ manualShow(); apprPreview(); }
 }
 function closeModal(){document.getElementById('ov').classList.remove('open');CM=null;CEid=null;}
 
@@ -1858,7 +1878,8 @@ function lineForm(type,d){
   return `<div class="fgrid3">
     <div class="fg"><label>${req('Budget year')}</label><select id="f-year" onchange="buildGrid()">${yearOpts(d.year||STATE.activeYear)}</select></div>
     <div class="fg"><label>${req('Department')}</label>${deptField(d.dept)}</div>
-    <div class="fg"><label>${req('Cost center')}</label><select id="f-cc">${ccOpts(dept,d.cc)}</select></div>
+    <div class="fg"><label>${req('Cost center')}</label><select id="f-cc" onchange="apprPreview()">${ccOpts(dept,d.cc)}</select></div>
+    <div class="fg"><label>Approver (from master)</label><div id="f-appr" class="appr-box">—</div></div>
     <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
     <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
     <div class="fg"><label>${req('Payer')}</label><select id="f-payer">${payerOpts(dept,d.payer)}</select></div>
@@ -1879,7 +1900,7 @@ function initLineForm(type,d){ LF={type,edit:d.id?d:null}; buildGrid(); }
 function onFormDeptChange(){
   const d=document.getElementById('f-dept').value;
   const gm=document.getElementById('g-method'); if(gm){ gm.style.display=usesDist(d)?'':'none'; if(!usesDist(d)) document.getElementById('f-method').value=''; manualShow(); }
-  const c=document.getElementById('f-cc'); if(c) c.innerHTML=ccOpts(d,'');
+  const c=document.getElementById('f-cc'); if(c) c.innerHTML=ccOpts(d,''); apprPreview();
   const p=document.getElementById('f-payer'); if(p) p.innerHTML=payerOpts(d,p.value);
   const et=document.getElementById('f-et'); if(et&&!LF.edit){ et.innerHTML=optList(uniq(masterFor(d).map(m=>m.et)),''); onEtChange(); }
 }
@@ -2101,7 +2122,8 @@ function hcForm(d){
   return `<div class="fgrid3">
     <div class="fg"><label>${req('Budget year')}</label><select id="f-year">${yearOpts(d.year||STATE.activeYear)}</select></div>
     <div class="fg"><label>${req('Department')}</label>${deptField(d.dept)}</div>
-    <div class="fg"><label>${req('Cost center')}</label><select id="f-cc">${ccOpts(dept,d.cc)}</select></div>
+    <div class="fg"><label>${req('Cost center')}</label><select id="f-cc" onchange="apprPreview()">${ccOpts(dept,d.cc)}</select></div>
+    <div class="fg"><label>Approver (from master)</label><div id="f-appr" class="appr-box">—</div></div>
     <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
     <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
     <div class="fg"><label>${req('Payer')}</label><select id="f-payer">${payerOpts(dept,d.payer)}</select></div>
