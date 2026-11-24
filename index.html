@@ -150,11 +150,15 @@ tbody tr:hover{background:#f8fafc}
 .imp-tbl td,.imp-tbl th{font-size:11px;padding:5px 8px}
 .row-err td{background:var(--rdl)}
 .modal-xl{width:1180px}
+.deptpick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 12px;max-height:170px;overflow:auto;border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px;background:var(--sf)}
+.deptpick label{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:400;color:var(--tx);cursor:pointer}
 .st-fpa{background:#ede9fe;color:#5b21b6}
 .qgrid input.g-desc{text-align:left;min-width:150px}
 .qgrid input.ovr{background:#fef3c7;border-color:#f59e0b;color:#92400e;font-weight:600}
 .qgrid .dup{border:0;background:none;color:var(--bl);cursor:pointer;font-size:14px;padding:0 4px}
 .phase{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;font-size:12px}
+.phase[hidden]{display:none}
+#g-manual{display:block}#g-manual[hidden]{display:none}#g-manual input{width:100%}
 .phase input{width:64px;padding:5px 7px;border:1px solid var(--bd2);border-radius:6px;text-align:right}
 .phase select{padding:5px 8px;border:1px solid var(--bd2);border-radius:6px}
 .nat-h td{background:#eef2ff;font-weight:700;color:#3730a3}
@@ -193,9 +197,9 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
     <div class="nav" onclick="go('capex',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>CAPEX</div>
     <div class="nav" id="nav-hc" onclick="go('hc',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg>Headcount &amp; salary</div>
     <div class="nav" id="nav-appr" onclick="go('approvals',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Approvals<span class="cnt" id="appr-cnt"></span></div>
-    <div class="sec">Distribution</div>
-    <div class="nav" onclick="go('dist',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Distribution table</div>
-    <div class="nav" onclick="go('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Entity edit</div>
+    <div class="sec it-only">Distribution</div>
+    <div class="nav it-only" onclick="go('dist',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Distribution table</div>
+    <div class="nav it-only" onclick="go('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Entity edit</div>
     <div class="sec">Admin</div>
     <div class="nav" id="nav-users" style="display:none" onclick="go('users',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>User Management</div>
     <div class="nav" onclick="go('audit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Audit log</div>
@@ -314,7 +318,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
           <div class="info-box" style="flex:1;margin-right:12px;font-size:11px">Salary is budgeted from headcount, not GL by GL: headcount &times; average monthly CTC (incl. variable pay) &times; months, with the increment applied to existing employees. Variable pay is split out by its %. Consultants on payroll and trainees use their monthly fee / stipend.</div>
           <div style="display:flex;gap:6px"><button class="btn" onclick="exportHC()">&#x2B07; Export to Excel</button><button class="btn btn-p" id="btn-hc" onclick="openModal('hc')">+ Add headcount</button></div>
         </div>
-        <div class="tw"><table><thead><tr><th>Department</th><th>Entity</th><th>Category</th><th>Type</th><th>Band / role</th><th style="text-align:right">HC</th><th style="text-align:right">Monthly CTC (&#x20B9;)</th><th>VP %</th><th>Incr. %</th><th>Months</th><th style="text-align:right">Salary (&#x20B9;L)</th><th style="text-align:right">Variable pay (&#x20B9;L)</th><th style="text-align:right">Total (&#x20B9;L)</th><th style="text-align:right">Prev FY (&#x20B9;L)</th><th>Status</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-hc"></tbody><tfoot id="t-hc-foot"></tfoot></table></div>
+        <div class="tw"><table><thead><tr><th>Department</th><th>Entity</th><th>Category</th><th>Type</th><th style="text-align:right">HC</th><th style="text-align:right">Prev year CTC (&#x20B9;)</th><th>Incr. %</th><th>Months</th><th style="text-align:right">Salary (&#x20B9;L)</th><th style="text-align:right">Variable pay (&#x20B9;L)</th><th style="text-align:right">Total (&#x20B9;L)</th><th style="text-align:right">Prev FY (&#x20B9;L)</th><th>Status</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-hc"></tbody><tfoot id="t-hc-foot"></tfoot></table></div>
       </div>
 
       <!-- APPROVALS -->
@@ -344,7 +348,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
           </div>
         </div>
         <div class="toolbar"><input type="search" id="cc-f-q" placeholder="Search cost center, department or person" oninput="renderDepts()" style="min-width:280px"><label style="font-size:12px;display:flex;gap:5px;align-items:center"><input type="checkbox" id="cc-f-act" onchange="renderDepts()"> Show inactive</label><span id="cc-count" style="font-size:11px;color:var(--tx2)"></span></div>
-        <div class="tw"><table><thead><tr><th>Cost center</th><th>Department</th><th>Person responsible (HOD)</th><th>HOD email (approver)</th><th>Approval required</th><th>Active</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-depts"></tbody></table></div>
+        <div class="tw"><table><thead><tr><th>Cost center</th><th>Department</th><th>Person responsible (HOD)</th><th>HOD email (approver)</th><th>Approval required</th><th>Distribution</th><th>Active</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-depts"></tbody></table></div>
       </div>
 
       <!-- EXPENSE MASTER -->
@@ -412,7 +416,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
         </div>
         <div class="tw">
           <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Entity</th><th>Owner Name (in budget)</th><th>Access Scope</th><th>Status</th><th>Updated by</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Departments</th><th>Entity</th><th>Owner Name (in budget)</th><th>Access Scope</th><th>Status</th><th>Updated by</th><th>Actions</th></tr></thead>
             <tbody id="t-users"></tbody>
           </table>
         </div>
@@ -446,7 +450,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
               </select>
             </div>
             <div class="fg"><label>Owner Name in Budget</label><input id="u-owner" placeholder="Required for owners; matches the Owner on budget lines"></div>
-            <div class="fg"><label>Department</label><select id="u-dept"></select></div>
+            <div class="fg" style="grid-column:1/-1"><label>Departments <span style="font-weight:400;color:var(--tx3)">— tick one or more</span></label><input id="u-dsearch" placeholder="Filter departments" oninput="filterDeptPick()" style="margin-bottom:6px"><div id="u-depts" class="deptpick"></div></div>
             <div class="fg"><label>Entity (BU heads only)</label><select id="u-entity"></select></div>
             <div class="fg" style="grid-column:1/-1"><label>Access Scope</label>
               <select id="u-scope">
@@ -633,7 +637,10 @@ function isCFO(){ return CU && CU.spRole==='Group CFO'; }
 function isFPA(){ return CU && CU.spRole==='FP&A'; }
 function fpaOn(){ return (STATE.users||[]).some(u=>u.active&&u.role==='FP&A'); }
 function isBUHead(){ return CU && CU.spRole==='BU Head'; }
-function myDept(){ return (CU && CU.dept) || 'IT'; }
+function myDepts(){ return (CU&&CU.depts&&CU.depts.length)?CU.depts:[(CU&&CU.dept)||'IT']; }
+function myDept(){ const f=STATE.deptFilter; return (f&&myDepts().includes(f))?f:myDepts()[0]; }
+function inMyDepts(d){ return myDepts().includes(d); }
+const splitDepts=v=>String(v||'').split(/[;\n]/).map(x=>x.trim()).filter(Boolean);
 function myOwner(){ return CU ? CU.ownerName : null; }
 function canSeeOwner(o){ return isAdmin() || isCFO() || myOwner()===null || myOwner()===o; }
 
@@ -658,7 +665,8 @@ async function boot(){
       initials: spUser.Title.trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2),
       spRole: roleInfo.role,
       ownerName: roleInfo.ownerName,
-      dept: roleInfo.dept || 'IT',
+      dept: (roleInfo.depts&&roleInfo.depts[0]) || roleInfo.dept || 'IT',
+      depts: (roleInfo.depts&&roleInfo.depts.length)?roleInfo.depts:[roleInfo.dept||'IT'],
       entity: roleInfo.entity || ''
     };
     setLoading('Loading budget data from SharePoint...');
@@ -718,7 +726,7 @@ async function loadAllData(){
   ]);
   STATE.hcMissing = hc===null;
   STATE.hc = (hc||[]).map(r=>({ id:r.Id, budgetId:r.BudgetID, year:r.BudgetYear, owner:r.ITOwner, group:r.GroupName||'Salary', sub:r.SubGroup||'', activity:r.ActivityName||'',
-    payer:r.Payer, method:r.DistMethod, overrides:{}, prevBudget:Number(r.PrevBudget||0), curBudget:Number(r.CurBudget||0),
+    payer:payerNorm(r.Payer), method:r.DistMethod, overrides:r.Overrides?JSON.parse(r.Overrides):{}, prevBudget:Number(r.PrevBudget||0), curBudget:Number(r.CurBudget||0),
     cat:r.HCCategory||'Existing', htype:r.HCType||'Employee', band:r.Band||'', hcount:Number(r.Headcount||0), ctc:Number(r.MonthlyCTC||0),
     vpPct:Number(r.VPPercent||0), incPct:Number(r.IncrementPercent||0), months:Number(r.Months||12), salAmt:Number(r.SalaryAmount||0), vpAmt:Number(r.VPAmount||0),
     ...wfFields(r) }));
@@ -731,10 +739,10 @@ async function loadAllData(){
   STATE.ccs = (depts||[]).map(d=>({
     id: d.Id, name: (d.DeptName||'').trim(), head: (d.DeptHeadEmail||'').toLowerCase(),
     approval: d.RequiresApproval!==false, groups: (d.CostGroups||'').split(/[,;\n]/).map(s=>s.trim()).filter(Boolean),
-    active: d.IsActive!==false, hodName: d.HODName||'', cc: (d.CostCenter||'').trim(), ...aud(d)
+    active: d.IsActive!==false, hodName: d.HODName||'', cc: (d.CostCenter||'').trim(), dist: d.AllowDistribution===true, ...aud(d)
   }));
   STATE.depts = deriveDepts(STATE.ccs);
-  if(!STATE.depts.some(d=>d.name==='IT')) STATE.depts.unshift({id:null,name:'IT',head:'',approval:false,groups:IT_GROUPS.slice(),active:true,ccs:[]});
+  if(!STATE.depts.some(d=>d.name==='IT')) STATE.depts.unshift({id:null,name:'IT',head:'',approval:false,dist:true,groups:IT_GROUPS.slice(),active:true,ccs:[]});
   STATE.log = (log||[]).map(l=>({id:l.Id, type:l.LineType, lineId:Number(l.LineID||0), action:l.Action, actor:l.Actor, comment:l.Comment, at:l.Created}));
 
   STATE.entities = entities.map(e=>({
@@ -746,7 +754,7 @@ async function loadAllData(){
   STATE.opex = opex.map(r=>({
     id: r.Id, budgetId: r.BudgetID, year: r.BudgetYear, owner: r.ITOwner,
     ctype: r.FunctionalCost, group: r.GroupName, sub: r.SubGroup,
-    activity: r.ActivityName, payer: r.Payer, method: r.DistMethod,
+    activity: r.ActivityName, payer: payerNorm(r.Payer), method: r.DistMethod,
     prevBudget: Number(r.PrevBudget||0), curBudget: Number(r.CurBudget||0),
     overrides: r.Overrides ? JSON.parse(r.Overrides) : {},
     ...wfFields(r)
@@ -755,7 +763,7 @@ async function loadAllData(){
   STATE.capex = capex.map(r=>({
     id: r.Id, budgetId: r.BudgetID, year: r.BudgetYear, owner: r.ITOwner,
     group: r.GroupName, sub: r.SubGroup, activity: r.ActivityName,
-    payer: r.Payer, method: r.DistMethod,
+    payer: payerNorm(r.Payer), method: r.DistMethod,
     prevBudget: Number(r.PrevBudget||0), curBudget: Number(r.CurBudget||0),
     ...wfFields(r)
   }));
@@ -789,6 +797,8 @@ async function startApp(){
   document.getElementById('sb-av').textContent = CU.initials;
   if(isAdmin()){ document.getElementById('nav-users').style.display='flex'; }
   buildDeptFilter();
+  const itNav=isAdmin()||isCFO()||isFPA()||myDepts().some(usesDist);
+  document.querySelectorAll('.it-only').forEach(el=>el.style.display=itNav?'':'none');
   if(isCFO()||isBUHead()||isFPA()){ ['btn-opex','btn-capex','btn-hc'].forEach(id=>{const b=document.getElementById(id); if(b) b.style.display='none';}); }
   await buildDynamicRoleMap();
   buildYearSelector();
@@ -856,6 +866,7 @@ function entById(id){ return STATE.entities.find(e=>e.id===Number(id)); }
 function getAutoValue(item, eid){
   if(item.entity){ const e=entById(eid); return e && e.name===item.entity ? Number(item.curBudget) : 0; }
   const ov = item.overrides||{};
+  if(item.method==='MANUAL') return Number(ov[String(eid)]||0);
   const fixedSum = Object.values(ov).reduce((a,v)=>a+Number(v),0);
   const residual = Number(item.curBudget)-fixedSum;
   if(ov.hasOwnProperty(String(eid))) return Number(ov[String(eid)]);
@@ -877,15 +888,15 @@ function getEffectiveValue(item, eid){
   return getAutoValue(item, eid);
 }
 function getFixedSum(item){ return Object.values(item.overrides||{}).reduce((a,v)=>a+Number(v),0); }
-function isHybrid(item){ return Object.keys(item.overrides||{}).length>0 && item.method!=='FIXED'; }
+function isHybrid(item){ return Object.keys(item.overrides||{}).length>0 && item.method!=='FIXED' && item.method!=='MANUAL'; }
 // HR/SAP-user distribution across entities applies to IT only
-function usesDist(dept){ return norm(dept)==='it'; }
+function usesDist(dept){ const d=deptByName(dept); return d&&d.dist!=null?!!d.dist:norm(dept)==='it'; }
 function distFor(dept,shared,method){ return usesDist(dept)?(shared?method:'FIXED'):'N/A'; }
 function methodBadge(item){
   if(!usesDist(item.dept)) return '<span style="color:var(--tx3)">—</span>';
   if(isHybrid(item)) return '<span class="badge b-b" style="background:var(--cyl);color:var(--cy)">HYBRID</span>';
   if(item.entity) return '<span class="badge b-gr">DIRECT</span>';
-  return `<span class="badge ${item.method==='SAP'?'b-p':item.method==='HR'?'b-g':'b-a'}">${item.method}</span>`;
+  return `<span class="badge ${item.method==='SAP'?'b-p':item.method==='HR'?'b-g':item.method==='MANUAL'?'b-b':'b-a'}">${item.method}</span>`;
 }
 function yearItems(type){ return (STATE[type]||[]).filter(r=>r.year===STATE.activeYear); }
 
@@ -954,7 +965,7 @@ function switchTab(tab, el){
     const biz=opex.filter(r=>r.payer==='Business').reduce((a,r)=>a+r.curBudget,0);
     const tot=it+biz;
     el2.innerHTML=`<div class="tw"><table><thead><tr><th>Payer</th><th>Budget (&#x20B9;L)</th><th>% of total</th><th>Items</th></tr></thead><tbody>
-      <tr><td><span class="badge b-it">IT / Corporate</span></td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(it)}</td><td>${pct(it,tot)}</td><td>${opex.filter(r=>r.payer!=='Business').length}</td></tr>
+      <tr><td><span class="badge b-it">Own Department</span></td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(it)}</td><td>${pct(it,tot)}</td><td>${opex.filter(r=>r.payer!=='Business').length}</td></tr>
       <tr><td><span class="badge b-biz">Business</span></td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(biz)}</td><td>${pct(biz,tot)}</td><td>${opex.filter(r=>r.payer==='Business').length}</td></tr>
       <tr style="background:var(--bll)"><td><strong>TOTAL</strong></td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(tot)}</td><td>100%</td><td>${opex.length}</td></tr>
     </tbody></table></div>`;
@@ -967,7 +978,7 @@ function switchTab(tab, el){
     }).sort((a,b)=>b.tot-a.tot);
     const grand=rows.reduce((a,r)=>a+r.tot,0);
     el2.innerHTML=`<div class="tw"><table><thead><tr><th>Entity</th><th>HR users</th><th>SAP users</th><th>Fixed (&#x20B9;L)</th><th>Distributed (&#x20B9;L)</th><th>Total (&#x20B9;L)</th><th>% share</th><th>Payer</th></tr></thead><tbody>
-      ${rows.map(r=>`<tr><td style="font-weight:500">${r.name}</td><td style="text-align:right">${r.hr.toLocaleString()}</td><td style="text-align:right">${r.sap.toLocaleString()}</td><td style="text-align:right;color:var(--am)">&#x20B9;${fmt(r.fixed)}</td><td style="text-align:right;color:var(--gn)">&#x20B9;${fmt(r.dist)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.tot)}</td><td>${pct(r.tot,grand)}</td><td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td></tr>`).join('')}
+      ${rows.map(r=>`<tr><td style="font-weight:500">${r.name}</td><td style="text-align:right">${r.hr.toLocaleString()}</td><td style="text-align:right">${r.sap.toLocaleString()}</td><td style="text-align:right;color:var(--am)">&#x20B9;${fmt(r.fixed)}</td><td style="text-align:right;color:var(--gn)">&#x20B9;${fmt(r.dist)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.tot)}</td><td>${pct(r.tot,grand)}</td><td><span class="badge ${r.payer!=='Business'?'b-it':'b-biz'}">${esc(r.payer||'')}</span></td></tr>`).join('')}
       <tr style="background:var(--bll)"><td><strong>TOTAL</strong></td><td style="text-align:right;font-weight:700">${totHR().toLocaleString()}</td><td style="text-align:right;font-weight:700">${totSAP().toLocaleString()}</td><td></td><td></td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(grand)}</td><td>100%</td><td></td></tr>
     </tbody></table></div>`;
   } else {
@@ -977,7 +988,7 @@ function switchTab(tab, el){
     opex.forEach(r=>{const k=keyFn(r);if(!map[k])map[k]={it:0,biz:0,tot:0,n:0};map[k].tot+=r.curBudget;map[k].n++;r.payer!=='Business'?map[k].it+=r.curBudget:map[k].biz+=r.curBudget;});
     const grand=opex.reduce((a,r)=>a+r.curBudget,0);
     const rows=Object.entries(map).sort((a,b)=>b[1].tot-a[1].tot);
-    el2.innerHTML=`<div class="tw"><table><thead><tr><th>${labelMap[tab]}</th><th>IT / Corporate cost (&#x20B9;L)</th><th>Business cost (&#x20B9;L)</th><th>Total (&#x20B9;L)</th><th>% of budget</th><th>Items</th></tr></thead><tbody>
+    el2.innerHTML=`<div class="tw"><table><thead><tr><th>${labelMap[tab]}</th><th>Own department cost (&#x20B9;L)</th><th>Business cost (&#x20B9;L)</th><th>Total (&#x20B9;L)</th><th>% of budget</th><th>Items</th></tr></thead><tbody>
       ${rows.map(([k,v])=>`<tr><td style="font-weight:500">${k}</td><td style="text-align:right;color:var(--bl)">&#x20B9;${fmt(v.it)}</td><td style="text-align:right;color:var(--pu)">&#x20B9;${fmt(v.biz)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(v.tot)}</td><td>${pct(v.tot,grand)}</td><td>${v.n}</td></tr>`).join('')}
       <tr style="background:var(--bll)"><td><strong>TOTAL</strong></td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(opex.filter(r=>r.payer!=='Business').reduce((a,r)=>a+r.curBudget,0))}</td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(opex.filter(r=>r.payer==='Business').reduce((a,r)=>a+r.curBudget,0))}</td><td style="text-align:right;font-weight:700">&#x20B9;${fmt(grand)}</td><td>100%</td><td>${opex.length}</td></tr>
     </tbody></table></div>`;
@@ -1026,7 +1037,7 @@ function renderOPEX(){
       <td><strong>${esc(r.group)}</strong></td><td>${esc(r.sub)}</td>
       <td style="max-width:180px;font-size:12px">${esc(r.activity)}${r.desc?`<div style="font-size:10.5px;color:var(--tx2)">${esc(r.desc)}</div>`:''}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
       <td style="font-size:11px;white-space:nowrap">${qtyRate(r)}</td>
-      <td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td>
+      <td><span class="badge ${r.payer!=='Business'?'b-it':'b-biz'}">${esc(r.payer||'')}</span></td>
       <td>${methodBadge(r)}</td>
       <td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td>
       <td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td>
@@ -1035,7 +1046,7 @@ function renderOPEX(){
       <td>${updCell(r)}</td>
       <td><div style="display:flex;gap:3px">
         ${lineActions('opex',r)}
-        ${canEditLine(r)&&!r.entity&&usesDist(r.dept)?`<button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="openOverride(${r.id})">Overrides</button>`:''}
+        ${canEditLine(r)&&!r.entity&&usesDist(r.dept)&&r.method!=='MANUAL'?`<button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="openOverride(${r.id})">Overrides</button>`:''}
       </div></td></tr>`;
   }).join(''):'<tr><td colspan="16"><div class="empty">No OPEX items for this year</div></td></tr>';
 }
@@ -1047,7 +1058,7 @@ function renderCAPEX(){
     <td>${deptCell(r)}</td><td style="font-size:11px">${entLabel(r)}</td><td>${r.owner}</td>
     <td><strong>${esc(r.group)}</strong></td><td>${esc(r.sub)}</td><td>${esc(r.activity)}${r.desc?`<div style="font-size:10.5px;color:var(--tx2)">${esc(r.desc)}</div>`:''}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
     <td style="font-size:11px;white-space:nowrap">${qtyRate(r)}</td>
-    <td><span class="badge ${r.payer==='IT'?'b-it':'b-biz'}">${r.payer}</span></td>
+    <td><span class="badge ${r.payer!=='Business'?'b-it':'b-biz'}">${esc(r.payer||'')}</span></td>
     <td>${r.entity?'<span class="badge b-gr">DIRECT</span>':`<span class="badge b-p">${r.method}</span>`}</td>
     <td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td>
     <td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td>
@@ -1059,17 +1070,21 @@ function renderCAPEX(){
 
 function renderDist(){
   const ents=activeEntities();
-  let items=visibleItems('opex').filter(r=>usesDist(r.dept));
+  let items=[...visibleItems('opex'),...visibleItems('hc')].filter(r=>usesDist(r.dept));
   const fOwn=document.getElementById('dist-f-own')?.value||'';
   const fGrp=document.getElementById('dist-f-grp')?.value||'';
   if(fOwn) items=items.filter(r=>r.owner===fOwn);
   if(fGrp) items=items.filter(r=>r.group===fGrp);
-  if(!items.length){document.getElementById('dist-table').innerHTML='<div class="empty">No items</div>';return}
+  if(!items.length){
+    document.getElementById('dist-table').innerHTML=`<table><thead><tr><th style="min-width:140px">Activity</th><th>Method</th><th>Total</th>${ents.map(e=>`<th style="min-width:110px">${esc(e.name)}</th>`).join('')}</tr></thead>
+      <tbody><tr><td colspan="${3+ents.length}"><div class="empty" style="padding:18px">No distributable lines for ${esc(STATE.activeYear)} yet.<br>Distribution applies to departments flagged for it in the Department master (now: ${esc(activeDepts().filter(d=>d.dist).map(d=>d.name).join(', ')||'none')}). Add an OPEX or headcount line with Entity = <em>All entities — shared</em> and pick SAP users, HR users or Manual split. Lines are spread across the ${ents.length} entities here.</div></td></tr></tbody></table>`;
+    return;
+  }
   let h=`<table><thead><tr><th style="min-width:140px">Activity</th><th>Method</th><th>Total</th>`;
   ents.forEach(e=>h+=`<th style="min-width:110px">${e.name}</th>`);
   h+=`</tr></thead><tbody>`;
   items.forEach(r=>{
-    h+=`<tr><td style="font-weight:500;font-size:11px">${r.activity}</td><td>${methodBadge(r)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td>`;
+    h+=`<tr><td style="font-weight:500;font-size:11px">${esc(r.activity)}<div class="gl">${esc(r.dept)}</div></td><td>${methodBadge(r)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td>`;
     ents.forEach(e=>{
       const isF=(r.overrides||{}).hasOwnProperty(String(e.id));
       h+=`<td class="${isF?'fixed-cell':'dist-cell'}" style="text-align:right">&#x20B9;${fmt(getEffectiveValue(r,e.id))}</td>`;
@@ -1236,6 +1251,8 @@ const IT_GROUPS=['Application','Network','End User Support','Datacentre'];
 const GROUPS=IT_GROUPS;
 const CTYPES=['Prof & Consulting','Annual Subscription','Repair & Maint','Software License','Software Expenses','Manpower','Rent & Utilities','Travel & Conveyance','Training','Marketing & Promotion','Insurance','Communication','Capital Asset','Other'];
 const METHODS=['SAP','HR','FIXED'];
+const METHOD_LABEL={SAP:'SAP users',HR:'HR users',FIXED:'FIXED',MANUAL:'Manual split'};
+function methodOpts(type,sel){ const L=type==='capex'?METHODS:[...METHODS,'MANUAL']; return L.map(v=>`<option value="${v}"${v===sel?' selected':''}>${METHOD_LABEL[v]||v}</option>`).join(''); }
 const PAYERS=['IT','Business'];
 function req(l){return `${l}<span class="req">*</span>`}
 function selOpts(arr,sel){return arr.map(v=>`<option value="${v}"${v===sel?' selected':''}>${v}</option>`).join('')}
@@ -1250,6 +1267,8 @@ function ownerField(sel){
 function deptField(sel){
   const d=sel||myDept();
   if(isAdmin()) return `<select id="f-dept" onchange="onFormDeptChange()">${activeDepts().map(x=>`<option${x.name===d?' selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
+  const L=myDepts();
+  if(L.length>1) return `<select id="f-dept" onchange="onFormDeptChange()">${L.map(x=>`<option${x===d?' selected':''}>${esc(x)}</option>`).join('')}</select>`;
   return `<select id="f-dept" disabled><option selected>${esc(d)}</option></select>`;
 }
 function entityField(sel){
@@ -1260,15 +1279,18 @@ function groupOpts(dept,sel){
   const list=sel&&!g.includes(sel)?[...g,sel]:g;
   return `<option value="" disabled${!sel?' selected':''}>— select —</option>`+selOpts(list,sel);
 }
-function payerOpts(dept,sel){ return selOpts(dept==='IT'?PAYERS:['Corporate','Business'],sel); }
+const PAYER_OWN='Own Department';
+function payerNorm(p){ return (!p||p==='Corporate'||p==='IT')?PAYER_OWN:p; }
+function payerOpts(dept,sel){ return selOpts([PAYER_OWN,'Business'],payerNorm(sel)); }
 function onFormDeptChange_old(){
   const d=document.getElementById('f-dept').value;
   const g=document.getElementById('f-grp'); if(g) g.innerHTML=groupOpts(d,'');
-  const p=document.getElementById('f-payer'); if(p) p.innerHTML='<option value="" disabled selected>— select —</option>'+payerOpts(d,'');
+  const p=document.getElementById('f-payer'); if(p) p.innerHTML=payerOpts(d,p.value);
 }
 function onFormEntityChange(){
   const shared=!document.getElementById('f-entity').value;
   const m=document.getElementById('f-method'); if(m){ m.disabled=!shared; if(!shared) m.value=''; }
+  manualShow();
 }
 const FORMS={
   entity:(d={})=>`<div class="fgrid">
@@ -1286,6 +1308,7 @@ const FORMS={
     <div class="fg"><label>Person responsible (HOD)</label><input id="f-dhname" value="${esc(d.hodName||'')}" placeholder="Head of department"></div>
     <div class="fg"><label>HOD email (approver)</label><input id="f-dhead" type="email" value="${esc(d.head||'')}" placeholder="name@arvind.in"></div>
     <div class="fg"><label>Approval required</label><select id="f-dappr"><option value="true"${d.approval!==false?' selected':''}>Yes — Dept → BU head → CFO</option><option value="false"${d.approval===false?' selected':''}>No — lines are approved on save</option></select></div>
+    <div class="fg"><label>Distribution across entities</label><select id="f-ddist"><option value="false"${!d.dist?' selected':''}>No</option><option value="true"${d.dist?' selected':''}>Yes — shared lines are split across entities</option></select></div>
     <div class="fg"><label>Active</label><select id="f-dact"><option value="true"${d.active!==false?' selected':''}>Yes</option><option value="false"${d.active===false?' selected':''}>No</option></select></div>
   </div>`,
   mrow:(d={})=>`<div class="fgrid3">
@@ -1321,6 +1344,7 @@ function openModal(type,data={}){
   document.getElementById('ov').classList.add('open');
   if(type==='opex'||type==='capex') initLineForm(type,data);
   if(type==='hc') hcCalc();
+  if(type==='opex'||type==='capex'||type==='hc') manualShow();
 }
 function closeModal(){document.getElementById('ov').classList.remove('open');CM=null;CEid=null;}
 
@@ -1346,7 +1370,7 @@ async function saveModal(){
     } else if(CM==='dept'){
       if(!validate([{id:'f-dname'},{id:'f-dcc'}])) return;
       if(STATE.ccs.some(x=>x.id!==CEid&&norm(x.cc)===norm(gv('f-dcc')))){showToast('Cost center '+gv('f-dcc')+' already exists.');setSynced();return;}
-      const data={DeptName:gv('f-dname'),CostCenter:gv('f-dcc'),HODName:gv('f-dhname'),DeptHeadEmail:gv('f-dhead').toLowerCase(),RequiresApproval:gv('f-dappr')==='true',IsActive:gv('f-dact')==='true'};
+      const data={DeptName:gv('f-dname'),CostCenter:gv('f-dcc'),HODName:gv('f-dhname'),DeptHeadEmail:gv('f-dhead').toLowerCase(),RequiresApproval:gv('f-dappr')==='true',AllowDistribution:gv('f-ddist')==='true',IsActive:gv('f-dact')==='true'};
       if(STATE.deptsListMissing){showToast('The ITB_Departments list is missing.');setSyncErr();return;}
       if(CEid) await spPatch(SP_CONFIG.lists.depts,CEid,data);
       else await spPost(SP_CONFIG.lists.depts,data);
@@ -1503,7 +1527,7 @@ function statusNote(d){
 function canSeeLine(r){
   if(isAdmin()||isCFO()||isFPA()) return true;
   if(isBUHead()) return r.entity===CU.entity || (!r.entity && false);
-  return r.dept===myDept() && canSeeOwner(r.owner);
+  return inMyDepts(r.dept) && canSeeOwner(r.owner);
 }
 function visibleItems(type){
   return yearItems(type).filter(canSeeLine).filter(r=>!STATE.deptFilter||r.dept===STATE.deptFilter);
@@ -1516,26 +1540,28 @@ function l1Approver(r){
 function canEditLine(r){
   if(isAdmin()) return true;
   if(isCFO()||isBUHead()||isFPA()) return false;
-  if(r.dept!==myDept()||!canSeeOwner(r.owner)) return false;
+  if(!inMyDepts(r.dept)||!canSeeOwner(r.owner)) return false;
   if(!needsApproval(r.dept)) return true;
   return [ST.draft,ST.ret,ST.ok].includes(r.status);
 }
 function canSubmit(r){
-  return needsApproval(r.dept) && [ST.draft,ST.ret].includes(r.status) && (isAdmin() || (r.dept===myDept()&&canSeeOwner(r.owner)&&!isCFO()&&!isBUHead()&&!isFPA()));
+  return needsApproval(r.dept) && [ST.draft,ST.ret].includes(r.status) && (isAdmin() || (inMyDepts(r.dept)&&canSeeOwner(r.owner)&&!isCFO()&&!isBUHead()&&!isFPA()));
 }
 function canApprove(r){
   if(!CU) return false;
   const me=(CU.email||'').toLowerCase();
   if(r.status===ST.bu){
     const a=l1Approver(r);
+    if(isAdmin()) return true; // admin can approve on behalf of the HOD / BU head
     if(a) return a===me;
     if(isBUHead()&&r.entity&&r.entity===CU.entity) return true;
-    return isAdmin(); // no approver configured: admin can act
+    return false;
   }
   if(r.status===ST.fpa) return isFPA();
   if(r.status===ST.cfo) return isCFO();
   return false;
 }
+function apprTitle(r){ if(r.status!==ST.bu||!isAdmin()) return 'Approve'; const a=l1Approver(r); return a&&a!==(CU.email||'').toLowerCase()?'Approve on behalf of '+a:'Approve'; }
 const TYPES=['opex','capex','hc'];
 const TLABEL={opex:'OPEX',capex:'CAPEX',hc:'SALARY'};
 function myQueue(){
@@ -1550,7 +1576,7 @@ function lineActions(type,r){
   let h='';
   if(canEditLine(r)) h+=`<button class="btn btn-e" title="Edit" onclick="editItem('${type}',${r.id})">✎</button>`;
   if(canSubmit(r)) h+=`<button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="submitLine('${type}',${r.id})">Submit</button>`;
-  if(canApprove(r)) h+=`<button class="btn btn-g" style="font-size:10px;padding:3px 7px" onclick="approveLine('${type}',${r.id})">✓</button><button class="btn btn-d" title="Return" onclick="openReturn('${type}',${r.id})">↩</button>`;
+  if(canApprove(r)) h+=`<button class="btn btn-g" style="font-size:10px;padding:3px 7px" title="${esc(apprTitle(r))}" onclick="approveLine('${type}',${r.id})">✓</button><button class="btn btn-d" title="Return" onclick="openReturn('${type}',${r.id})">↩</button>`;
   h+=`<button class="btn" style="font-size:10px;padding:3px 7px" title="History" onclick="openHistory('${type}',${r.id})">⋯</button>`;
   if(canEditLine(r)&&(isAdmin()||r.status!==ST.ok||!needsApproval(r.dept))) h+=`<button class="btn btn-d" title="Delete" onclick="delItem('${type}',${r.id})">🗑</button>`;
   return h;
@@ -1600,10 +1626,12 @@ async function approveLine(type,id,silent){
   const next=r.status===ST.bu?(fpaOn()?ST.fpa:ST.cfo):r.status===ST.fpa?ST.cfo:ST.ok;
   const data=r.status===ST.bu?{LineStatus:next,BUApprovedBy:CU.email,BUApprovedOn:now}:r.status===ST.fpa?{LineStatus:next,FPAApprovedBy:CU.email,FPAApprovedOn:now}:{LineStatus:ST.ok,CFOApprovedBy:CU.email,CFOApprovedOn:now};
   const who={[ST.bu]:'BU',[ST.fpa]:'FP&A',[ST.cfo]:'CFO'}[r.status];
+  const appr=r.status===ST.bu?l1Approver(r):'';
+  const onBehalf=r.status===ST.bu&&isAdmin()&&appr&&appr!==(CU.email||'').toLowerCase();
   setSyncing();
   try{
     await spPatch(SP_CONFIG.lists[type],id,data);
-    await logAction(type,id,`Approved (${who})`,'');
+    await logAction(type,id,onBehalf?`Approved (BU) on behalf of ${appr}`:`Approved (${who})`,onBehalf?`Approved by admin ${CU.email} on behalf of ${appr}`:'');
     if(!silent){ await loadAllData(); renderAll(); showToast(next===ST.fpa?'Approved and sent to FP&A.':next===ST.cfo?'Approved and sent to Group CFO.':'Final approval given.'); }
     return true;
   }catch(e){ setSyncErr(); showToast('Error: '+e.message); return false; }
@@ -1681,7 +1709,7 @@ function renderApprovals(){
     <td><span class="badge ${t==='opex'?'b-b':t==='hc'?'b-g':'b-p'}">${TLABEL[t]}</span></td><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
     <td>${deptCell(r)}</td><td style="font-size:11px">${entLabel(r)}</td><td>${esc(r.owner)}</td><td>${esc(r.activity)}</td>
     <td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td><td>${chg(r.curBudget,r.prevBudget)}</td><td>${stBadge(r.status)}</td>
-    <td><div style="display:flex;gap:3px"><button class="btn btn-g" style="font-size:10px;padding:3px 7px" onclick="approveLine('${t}',${r.id})">✓ Approve</button><button class="btn btn-d" onclick="openReturn('${t}',${r.id})">↩ Return</button><button class="btn" style="font-size:10px;padding:3px 7px" onclick="openHistory('${t}',${r.id})">⋯</button></div></td></tr>`).join('')
+    <td><div style="display:flex;gap:3px"><button class="btn btn-g" style="font-size:10px;padding:3px 7px" title="${esc(apprTitle(r))}" onclick="approveLine('${t}',${r.id})">${apprTitle(r)==='Approve'?'✓ Approve':'✓ Approve on behalf'}</button><button class="btn btn-d" onclick="openReturn('${t}',${r.id})">↩ Return</button><button class="btn" style="font-size:10px;padding:3px 7px" onclick="openHistory('${t}',${r.id})">⋯</button></div></td></tr>`).join('')
     :'<tr><td colspan="11"><div class="empty">Nothing waiting for you.</div></td></tr>';
   const drafts=own.filter(([t,r])=>r.status===ST.draft).length;
   const sb=document.getElementById('btn-submit-all'); sb.disabled=!drafts; sb.textContent=drafts?`Submit ${drafts} draft${drafts===1?'':'s'}`:'No drafts to submit';
@@ -1704,16 +1732,18 @@ function renderDepts(){
     <td><span class="dept-tag">${esc(d.name)}</span></td><td>${d.hodName==='Vacant'?'<span class="badge b-a">Vacant</span>':(esc(d.hodName)||'—')}</td>
     <td style="font-size:11px">${d.head?esc(d.head):'<span style="color:var(--rd)">Not set</span>'}</td>
     <td><span class="badge ${d.approval!==false?'b-a':'b-gr'}">${d.approval!==false?'Yes':'No'}</span></td>
+    <td><span class="badge ${d.dist?'b-p':'b-gr'}">${d.dist?'Yes':'No'}</span></td>
     <td><span class="badge ${d.active!==false?'b-g':'b-r'}">${d.active!==false?'Yes':'No'}</span></td>
     <td>${updCell(d)}</td>
     <td>${isAdmin()&&d.id?`<button class="btn btn-e" onclick="editDept(${d.id})">✎</button>`:''}</td></tr>`).join('')+
-    (STATE.deptsListMissing?'<tr><td colspan="8"><div class="warn-box">ITB_Departments list not found.</div></td></tr>':'');
+    (STATE.deptsListMissing?'<tr><td colspan="9"><div class="warn-box">ITB_Departments list not found.</div></td></tr>':'');
 }
 function buildDeptFilter(){
   const sel=document.getElementById('dept-sel');
-  const show=isAdmin()||isCFO()||isBUHead()||isFPA();
-  sel.style.display=show?'':'none';
-  sel.innerHTML='<option value="">All departments</option>'+activeDepts().map(d=>`<option>${esc(d.name)}</option>`).join('');
+  const all=isAdmin()||isCFO()||isBUHead()||isFPA(), multi=!all&&myDepts().length>1;
+  sel.style.display=(all||multi)?'':'none';
+  sel.innerHTML=(multi?`<option value="">All my departments (${myDepts().length})</option>`+myDepts().map(d=>`<option>${esc(d)}</option>`).join('')
+    :'<option value="">All departments</option>'+activeDepts().map(d=>`<option>${esc(d.name)}</option>`).join(''));
   sel.value=STATE.deptFilter||'';
 }
 function onDeptFilter(){ STATE.deptFilter=document.getElementById('dept-sel').value; populateFilters(); renderAll(); }
@@ -1726,7 +1756,7 @@ function deriveDepts(ccs){
   ccs.forEach(c=>{ if(!c.name) return; const k=norm(c.name); (by[k]=by[k]||[]).push(c); });
   return Object.values(by).map(rows=>{ const act=rows.filter(r=>r.active!==false), base=act[0]||rows[0];
     return { id:base.id, name:base.name, head:(act.find(r=>r.head)||{}).head||'', hodName:(act.find(r=>r.hodName&&r.hodName!=='Vacant')||{}).hodName||'',
-      approval:base.approval!==false, groups:base.groups||[], active:act.length>0, cc:base.cc, ccs:act.filter(r=>r.cc) }; })
+      approval:base.approval!==false, dist:rows.some(r=>r.dist), groups:base.groups||[], active:act.length>0, cc:base.cc, ccs:act.filter(r=>r.cc) }; })
     .sort((a,b)=>a.name.localeCompare(b.name));
 }
 function deptCCs(dept){ const d=deptByName(dept); return d&&d.ccs?d.ccs:[]; }
@@ -1830,13 +1860,14 @@ function lineForm(type,d){
     <div class="fg"><label>${req('Cost center')}</label><select id="f-cc">${ccOpts(dept,d.cc)}</select></div>
     <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
     <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
-    <div class="fg"><label>${req('Payer')}</label><select id="f-payer"><option value="" disabled${!d.payer?' selected':''}>— select —</option>${payerOpts(dept,d.payer)}</select></div>
-    <div class="fg" id="g-method"${usesDist(dept)?'':' style="display:none"'}><label>${req('Distribution method')}</label><select id="f-method"${d.entity?' disabled':''}><option value="" disabled${!d.method||d.method==='N/A'?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
+    <div class="fg"><label>${req('Payer')}</label><select id="f-payer">${payerOpts(dept,d.payer)}</select></div>
+    <div class="fg" id="g-method"${usesDist(dept)?'':' style="display:none"'}><label>${req('Distribution method')}</label><select id="f-method"${d.entity?' disabled':''} onchange="manualShow()"><option value="" disabled${!d.method||d.method==='N/A'?' selected':''}>— select —</option>${methodOpts(type,d.method)}</select></div>
     <div class="fg"><label>${req('Expense type')}</label><select id="f-et" onchange="onEtChange()" ${edit?'disabled':''}>${optList(ets,d.group||'')}</select></div>
     <div class="fg"><label>${req('Sub group')}</label><select id="f-sg" onchange="buildGrid()" ${edit?'disabled':''}>${edit?optList([d.sub],d.sub):'<option value="">— select expense type —</option>'}</select></div>
     <div class="fg"><label>Budget ID</label><input id="f-bid" value="${esc(d.budgetId||'')}" placeholder="Optional"></div>
   </div>
   ${!edit&&!ets.length?`<div class="warn-box" style="margin-bottom:10px">No expense master for <strong>${esc(dept)}</strong> yet. ${isAdmin()?'Add or upload budget items under Master Data → Expense master.':'Ask the budget administrator to set up the expense master.'}</div>`:''}
+  ${type!=='capex'?manualBlock(d):''}
   <div id="f-gridwrap"></div>
   ${phaseBlock(d)}
   <div class="fg"><label>Justification</label><textarea id="f-just" rows="2" placeholder="Needed when a line is new, more than 10% above last year, or a standard rate is overridden">${esc(d.just||'')}</textarea></div>
@@ -1846,9 +1877,9 @@ let LF={type:null,edit:null};
 function initLineForm(type,d){ LF={type,edit:d.id?d:null}; buildGrid(); }
 function onFormDeptChange(){
   const d=document.getElementById('f-dept').value;
-  const gm=document.getElementById('g-method'); if(gm){ gm.style.display=usesDist(d)?'':'none'; if(!usesDist(d)) document.getElementById('f-method').value=''; }
+  const gm=document.getElementById('g-method'); if(gm){ gm.style.display=usesDist(d)?'':'none'; if(!usesDist(d)) document.getElementById('f-method').value=''; manualShow(); }
   const c=document.getElementById('f-cc'); if(c) c.innerHTML=ccOpts(d,'');
-  const p=document.getElementById('f-payer'); if(p) p.innerHTML='<option value="" disabled selected>— select —</option>'+payerOpts(d,'');
+  const p=document.getElementById('f-payer'); if(p) p.innerHTML=payerOpts(d,p.value);
   const et=document.getElementById('f-et'); if(et&&!LF.edit){ et.innerHTML=optList(uniq(masterFor(d).map(m=>m.et)),''); onEtChange(); }
 }
 function onEtChange(){
@@ -1921,6 +1952,25 @@ function calcGrid(){
   const tt=document.getElementById('g-total'); if(tt) tt.textContent='₹'+fmt(t)+'L';
   phaseCalc();
 }
+/* ---- manual distribution split (% per entity) ---- */
+function manualBlock(d){
+  const ents=activeEntities(), ov=(d&&d.method==='MANUAL'&&d.overrides)||{}, cur=(d&&d.curBudget)||0;
+  const pc=e=>{const v=ov[String(e.id)]; return v!=null&&cur?Math.round(Number(v)/cur*10000)/100:'';};
+  return `<div class="phase" id="g-manual" hidden><strong>Manual split across entities</strong> <span style="font-size:11px;color:var(--tx2)">Enter each entity's share in %. Applied to every line saved from this form.</span>
+    <div class="fgrid3" style="margin-top:8px">${ents.map(e=>`<div class="fg" style="margin-bottom:4px"><label>${esc(e.name)}</label><input class="mp" data-eid="${e.id}" type="number" min="0" max="100" step="0.01" value="${pc(e)}" placeholder="0" oninput="manualCalc()"></div>`).join('')}</div>
+    <div id="f-mps" style="font-size:12px"></div></div>`;
+}
+function isManual(){ const m=document.getElementById('f-method'), e=document.getElementById('f-entity'); return !!(m&&!m.disabled&&m.value==='MANUAL'&&(!e||!e.value)&&document.getElementById('g-method')?.style.display!=='none'); }
+function manualShow(){ const g=document.getElementById('g-manual'); if(g) g.hidden=!isManual(); manualCalc(); }
+function manualPct(){ const o={}; document.querySelectorAll('#g-manual .mp').forEach(i=>{const v=parseFloat(i.value); if(v>0) o[i.dataset.eid]=v;}); return o; }
+function manualCalc(){
+  const el=document.getElementById('f-mps'); if(!el) return;
+  const p=manualPct(), sum=Object.values(p).reduce((a,b)=>a+b,0);
+  const tot=parseFloat((document.getElementById('g-total')?.textContent||document.getElementById('hc-total')?.dataset.v||'0').replace(/[^0-9.]/g,''))||0;
+  el.innerHTML=(Math.abs(sum-100)>0.05?`<span style="color:var(--rd);font-weight:600">Total ${fmtR(sum)}% — must be 100%</span>`:`<span style="color:var(--gn);font-weight:600">Total 100%</span>`)+(tot?` · `+activeEntities().filter(e=>p[e.id]).map(e=>`${esc(e.name)} ₹${fmt(tot*p[e.id]/100)}L`).join(' · '):'');
+}
+function manualOK(){ if(!isManual()) return true; const s=Object.values(manualPct()).reduce((a,b)=>a+b,0); if(Math.abs(s-100)>0.05){ showToast('Manual split must add up to 100%.'); return false; } return true; }
+function manualOverrides(cur){ if(!isManual()) return null; const p=manualPct(); return Object.fromEntries(Object.entries(p).map(([k,v])=>[k,Math.round(cur*v/100*1e6)/1e6])); }
 /* ---- quarterly phasing ---- */
 function phasePct(d){
   const q=d&&d.q, cur=d&&d.curBudget;
@@ -1945,6 +1995,7 @@ function phaseCalc(){
   const p=readPhase(), sum=p.reduce((a,b)=>a+b,0);
   const tot=parseFloat((document.getElementById('g-total')?.textContent||document.getElementById('hc-total')?.dataset.v||'0').replace(/[^0-9.]/g,''))||0;
   el.innerHTML=(Math.abs(sum-100)>0.05?`<span style="color:var(--rd);font-weight:600">Total ${fmtR(sum)}% — must be 100%</span> · `:'')+p.map((x,i)=>`Q${i+1} ₹${fmt(tot*x/100)}L`).join(' · ');
+  manualCalc();
 }
 function phaseOK(){ const s=readPhase().reduce((a,b)=>a+b,0); if(Math.abs(s-100)>0.05){ showToast('Quarterly phasing must add up to 100%.'); return false; } return true; }
 function phaseAmounts(cur){ const p=readPhase(); return Object.fromEntries(p.map((x,i)=>['PhaseQ'+(i+1),Math.round(cur*x/100*1e6)/1e6])); }
@@ -1974,7 +2025,7 @@ async function saveLines(type,id){
   if(bad){ showToast('Enter an amount for the highlighted items.'); return false; }
   if(!lines.length){ showToast('Enter a quantity, or a lump-sum amount, for at least one budget item.'); return false; }
   if(ovr&&!gv('f-just')){ document.getElementById('f-just').classList.add('err'); showToast(`${ovr} standard rate${ovr>1?'s are':' is'} overridden — add a justification.`); return false; }
-  if(!phaseOK()) return false;
+  if(!phaseOK()||!manualOK()) return false;
   const et=LF.edit?LF.edit.group:gv('f-et'), sg=LF.edit?LF.edit.sub:gv('f-sg');
   const bid=gv('f-bid');
   const common={BudgetYear:gv('f-year'),ITOwner:owner,GroupName:et,SubGroup:sg,Payer:gv('f-payer'),DistMethod:distFor(gv('f-dept'),shared,gv('f-method')),CostCenter:gv('f-cc')||null,...wfSaveFields(type,id)};
@@ -1985,10 +2036,10 @@ async function saveLines(type,id){
     CurBudget:cur,PrevBudget:l.prev,ExpenseTypeGL:l.etGL,SubGroupGL:l.sgGL,BudgetItemGL:l.itemGL,...phaseAmounts(cur)};};
   if(id){
     const existing=STATE[type].find(r=>r.id===id); const data=mk(lines[0],0);
-    if(type==='opex') data.Overrides=JSON.stringify(data.EntityName?{}:(existing?existing.overrides:{}));
+    if(type==='opex'){ const mo=manualOverrides(data.CurBudget); data.Overrides=JSON.stringify(data.EntityName?{}:mo?mo:(existing&&existing.method!=='MANUAL'?existing.overrides:{})); }
     await spPatch(SP_CONFIG.lists[type],id,data); await logAfterSave(type,id,existing,data);
   } else {
-    for(let i=0;i<lines.length;i++){ const data=mk(lines[i],i); if(type==='opex') data.Overrides='{}';
+    for(let i=0;i<lines.length;i++){ const data=mk(lines[i],i); if(type==='opex') data.Overrides=JSON.stringify(manualOverrides(data.CurBudget)||{});
       const res=await spPost(SP_CONFIG.lists[type],data); await logAction(type,res.Id||res.ID,'Created',''); }
   }
   if(!id&&lines.length>1) setTimeout(()=>showToast(`${lines.length} budget lines saved.`),50);
@@ -2005,9 +2056,9 @@ function qOf(r){ return r.q&&r.q.every(x=>x!=null)?r.q:[0,1,2,3].map(()=>r.curBu
 function hcReport(){
   return visibleItems('hc').flatMap(r=>{
     const sc=a=>{const q=qOf(r), t=r.curBudget||1; return q.map(x=>x*a/t);};
-    if(r.htype==='Consultant') return [{...r,_hc:true,group:'Consultant',nature:'Salary',activity:r.band||'Consultant'}];
-    return [{...r,_hc:true,group:'Salary',nature:'Salary',activity:r.band||r.htype,curBudget:r.salAmt,q:sc(r.salAmt)},
-            {...r,_hc:true,group:'Variable Pay',nature:'Variable Pay',activity:r.band||r.htype,curBudget:r.vpAmt,prevBudget:0,q:sc(r.vpAmt)}].filter(x=>x.curBudget||x.prevBudget);
+    if(r.htype==='Consultant') return [{...r,_hc:true,group:'Consultant',nature:'Salary',activity:'Consultant'}];
+    return [{...r,_hc:true,group:'Salary',nature:'Salary',activity:r.htype,curBudget:r.salAmt,q:sc(r.salAmt)},
+            {...r,_hc:true,group:'Variable Pay',nature:'Variable Pay',activity:r.htype,curBudget:r.vpAmt,prevBudget:0,q:sc(r.vpAmt)}].filter(x=>x.curBudget||x.prevBudget);
   });
 }
 function reportOpex(){ return [...visibleItems('opex'),...hcReport()]; }
@@ -2029,10 +2080,12 @@ function renderNatureTab(){
 
 /* ---------- Headcount & salary ---------- */
 function hcAmounts(x){
-  const base=(x.hcount||0)*(x.ctc||0)*(x.months||0)*((x.cat==='Existing'&&x.htype==='Employee')?(1+(x.incPct||0)/100):1)/100000;
-  const vp=x.htype==='Employee'?base*(x.vpPct||0)/100:0;
+  // Salary = previous-year CTC + increment (existing) or annual CTC pro-rated by months (new); VP is an amount; Total = Salary + VP
+  const ex=x.cat==='Existing';
+  const sal=(x.ctc||0)*(ex?(1+(x.incPct||0)/100):Math.min(12,x.months||0)/12)/100000;
+  const vp=x.htype==='Employee'?(x.vpRs||0)/100000:0;
   const r6=v=>Math.round(v*1e6)/1e6;
-  return {total:r6(base),sal:r6(base-vp),vp:r6(vp)};
+  return {total:r6(sal+vp),sal:r6(sal),vp:r6(vp),prev:r6(ex?(x.ctc||0)/100000:0)};
 }
 function hcForm(d){
   const dept=d.dept||myDept();
@@ -2043,51 +2096,54 @@ function hcForm(d){
     <div class="fg"><label>${req('Cost center')}</label><select id="f-cc">${ccOpts(dept,d.cc)}</select></div>
     <div class="fg"><label>${req('Entity')}</label>${entityField(d.entity)}</div>
     <div class="fg"><label>${req('Owner')}</label>${ownerField(d.owner)}</div>
-    <div class="fg"><label>${req('Payer')}</label><select id="f-payer"><option value="" disabled${!d.payer?' selected':''}>— select —</option>${payerOpts(dept,d.payer)}</select></div>
-    <div class="fg" id="g-method"${usesDist(dept)?'':' style="display:none"'}><label>${req('Distribution method')}</label><select id="f-method"${d.entity?' disabled':''}><option value="" disabled${!d.method||d.method==='N/A'?' selected':''}>— select —</option>${selOpts(METHODS,d.method)}</select></div>
+    <div class="fg"><label>${req('Payer')}</label><select id="f-payer">${payerOpts(dept,d.payer)}</select></div>
+    <div class="fg" id="g-method"${usesDist(dept)?'':' style="display:none"'}><label>${req('Distribution method')}</label><select id="f-method"${d.entity?' disabled':''} onchange="manualShow()"><option value="" disabled${!d.method||d.method==='N/A'?' selected':''}>— select —</option>${methodOpts('hc',d.method)}</select></div>
     <div class="fg"><label>${req('Category')}</label><select id="f-hcat" onchange="hcCalc()">${o(['Existing','New'],d.cat||'Existing')}</select></div>
     <div class="fg"><label>${req('Type')}</label><select id="f-htype" onchange="hcCalc()">${o(['Employee','Consultant','Trainee'],d.htype||'Employee')}</select></div>
-    <div class="fg"><label>Band / role</label><input id="f-hband" value="${esc(d.band||'')}" placeholder="e.g. M1, Analyst"></div>
     <div class="fg"><label>${req('Headcount')}</label><input id="f-hcnt" type="number" min="0" step="1" value="${d.hcount??''}" oninput="hcCalc()"></div>
-    <div class="fg"><label id="l-hctc">${req('Average monthly CTC incl. VP (₹)')}</label><input id="f-hctc" type="number" min="0" step="1" value="${d.ctc??''}" oninput="hcCalc()"></div>
-    <div class="fg" id="g-hvp"><label>Variable pay % of CTC</label><input id="f-hvp" type="number" min="0" max="100" step="0.1" value="${d.vpPct??''}" oninput="hcCalc()" placeholder="0"></div>
+    <div class="fg"><label id="l-hctc">${req('Previous year CTC — total amount (₹)')}</label><input id="f-hctc" type="number" min="0" step="1" value="${d.ctc??''}" oninput="hcCalc()" placeholder="Total for all heads in this line"></div>
     <div class="fg" id="g-hinc"><label>Increment %</label><input id="f-hinc" type="number" min="0" max="100" step="0.1" value="${d.incPct??''}" oninput="hcCalc()" placeholder="0"></div>
-    <div class="fg"><label>${req('Months in the year')}</label><input id="f-hmon" type="number" min="0" max="12" step="0.5" value="${d.months??12}" oninput="hcCalc()"></div>
-    <div class="fg"><label>Previous FY (₹L)</label><input id="f-hprev" type="number" min="0" step="0.01" value="${d.prevBudget??''}" placeholder="0"></div>
+    <div class="fg" id="g-hvp"><label>Variable pay — amount (₹)</label><input id="f-hvp" type="number" min="0" step="1" value="${d.vpAmt?Math.round(d.vpAmt*100000):''}" oninput="hcCalc()" placeholder="0"></div>
+    <div class="fg" id="g-hmon"><label>${req('Months in the year')}</label><input id="f-hmon" type="number" min="0" max="12" step="0.5" value="${d.months??12}" oninput="hcCalc()"></div>
   </div>
-  <div class="hc-calc"><div>Salary<b id="hc-sal">₹0.00L</b></div><div>Variable pay<b id="hc-vp">₹0.00L</b></div><div>Total<b id="hc-total" data-v="0">₹0.00L</b></div><div id="hc-formula" style="align-self:center;color:var(--tx2)"></div></div>
+  ${manualBlock(d)}
+  <div class="hc-calc"><div>Previous year<b id="hc-prev">₹0.00L</b></div><div>Salary<b id="hc-sal">₹0.00L</b></div><div>Variable pay<b id="hc-vp">₹0.00L</b></div><div>Total budget<b id="hc-total" data-v="0">₹0.00L</b></div><div id="hc-formula" style="align-self:center;color:var(--tx2)"></div></div>
   ${phaseBlock(d)}
   <div class="fg"><label>Justification</label><textarea id="f-just" rows="2" placeholder="Needed for new positions or more than 10% above last year">${esc(d.just||'')}</textarea></div>
   ${statusNote(d)}`;
 }
 function hcVals(){
   const g=i=>document.getElementById(i).value, n=i=>parseFloat(g(i))||0;
-  return {cat:g('f-hcat'),htype:g('f-htype'),band:g('f-hband').trim(),hcount:n('f-hcnt'),ctc:n('f-hctc'),vpPct:n('f-hvp'),incPct:n('f-hinc'),months:n('f-hmon')};
+  return {cat:g('f-hcat'),htype:g('f-htype'),hcount:n('f-hcnt'),ctc:n('f-hctc'),vpRs:n('f-hvp'),incPct:n('f-hinc'),months:n('f-hmon')};
 }
 function hcCalc(){
   if(!document.getElementById('f-hcat')) return;
-  const x=hcVals(), a=hcAmounts(x);
+  const x=hcVals(), a=hcAmounts(x), ex=x.cat==='Existing';
   document.getElementById('g-hvp').style.display=x.htype==='Employee'?'':'none';
-  document.getElementById('g-hinc').style.display=(x.htype==='Employee'&&x.cat==='Existing')?'':'none';
-  document.getElementById('l-hctc').innerHTML=req(x.htype==='Consultant'?'Monthly professional fee (₹)':x.htype==='Trainee'?'Monthly stipend (₹)':'Average monthly CTC incl. VP (₹)');
+  document.getElementById('g-hinc').style.display=ex?'':'none';
+  document.getElementById('g-hmon').style.display=ex?'none':'';
+  const what=x.htype==='Consultant'?'professional fee':x.htype==='Trainee'?'stipend':'CTC';
+  document.getElementById('l-hctc').innerHTML=req(ex?`Previous year ${what} — total amount (₹)`:`Annual ${what} — total amount (₹)`);
+  document.getElementById('hc-prev').textContent='₹'+fmt(a.prev)+'L';
   document.getElementById('hc-sal').textContent='₹'+fmt(a.sal)+'L'; document.getElementById('hc-vp').textContent='₹'+fmt(a.vp)+'L';
   const t=document.getElementById('hc-total'); t.textContent='₹'+fmt(a.total)+'L'; t.dataset.v=a.total;
-  document.getElementById('hc-formula').textContent=`${fmtR(x.hcount)} × ₹${fmtR(x.ctc)} × ${fmtR(x.months)} months${x.htype==='Employee'&&x.cat==='Existing'&&x.incPct?` × (1 + ${fmtR(x.incPct)}% increment)`:''}${x.htype==='Employee'&&x.vpPct?`; variable pay ${fmtR(x.vpPct)}%`:''}`;
+  document.getElementById('hc-formula').textContent=(ex?`Salary = ₹${fmtR(x.ctc)} × (1 + ${fmtR(x.incPct)}%)`:`Salary = ₹${fmtR(x.ctc)} × ${fmtR(x.months)}/12 months`)+(x.htype==='Employee'?` · Total = Salary + VP ₹${fmtR(x.vpRs)}`:'');
   phaseCalc();
 }
 async function saveHC(id){
   const gv=i=>{const el=document.getElementById(i);return el?el.value.trim():''};
   const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
   const shared=!gv('f-entity'), needCC=deptCCs(gv('f-dept')).length>0;
-  if(!validate([{id:'f-payer'},{id:'f-hcnt'},{id:'f-hctc'},{id:'f-hmon'},...(shared&&usesDist(gv('f-dept'))?[{id:'f-method'}]:[]),...(needCC?[{id:'f-cc'}]:[])])) return false;
+  if(!validate([{id:'f-payer'},{id:'f-hcnt'},{id:'f-hctc'},...(gv('f-hcat')==='New'?[{id:'f-hmon'}]:[]),...(shared&&usesDist(gv('f-dept'))?[{id:'f-method'}]:[]),...(needCC?[{id:'f-cc'}]:[])])) return false;
   if(!owner){ showToast('Owner is required.'); return false; }
   const x=hcVals(), a=hcAmounts(x);
-  if(x.hcount<=0||x.ctc<=0||x.months<=0){ showToast('Headcount, monthly amount and months must be above zero.'); return false; }
-  if(!phaseOK()) return false;
+  if(x.hcount<=0||x.ctc<=0||(x.cat==='New'&&x.months<=0)){ showToast('Headcount, CTC amount'+(x.cat==='New'?' and months':'')+' must be above zero.'); return false; }
+  if(!phaseOK()||!manualOK()) return false;
   const data={BudgetYear:gv('f-year'),ITOwner:owner,Payer:gv('f-payer'),DistMethod:distFor(gv('f-dept'),shared,gv('f-method')),CostCenter:gv('f-cc')||null,
-    HCCategory:x.cat,HCType:x.htype,Band:x.band||null,Headcount:x.hcount,MonthlyCTC:x.ctc,VPPercent:x.htype==='Employee'?x.vpPct:0,IncrementPercent:(x.htype==='Employee'&&x.cat==='Existing')?x.incPct:0,
-    Months:x.months,SalaryAmount:a.sal,VPAmount:a.vp,CurBudget:a.total,PrevBudget:parseFloat(gv('f-hprev'))||0,
-    Nature:'Salary',GroupName:x.htype==='Consultant'?'Consultant':'Salary',SubGroup:`${x.cat} ${x.htype}`,ActivityName:x.band||x.htype,
+    HCCategory:x.cat,HCType:x.htype,Band:null,Headcount:x.hcount,MonthlyCTC:x.ctc,VPPercent:0,IncrementPercent:x.cat==='Existing'?x.incPct:0,
+    Months:x.cat==='Existing'?12:x.months,SalaryAmount:a.sal,VPAmount:a.vp,CurBudget:a.total,PrevBudget:a.prev,
+    Nature:'Salary',GroupName:x.htype==='Consultant'?'Consultant':'Salary',SubGroup:`${x.cat} ${x.htype}`,ActivityName:x.htype,
+    Overrides:JSON.stringify(gv('f-entity')?{}:(manualOverrides(a.total)||{})),
     ...phaseAmounts(a.total),...wfSaveFields('hc',id)};
   if(id){ const ex=STATE.hc.find(r=>r.id===id); await spPatch(SP_CONFIG.lists.hc,id,data); await logAfterSave('hc',id,ex,data); }
   else { const res=await spPost(SP_CONFIG.lists.hc,data); await logAction('hc',res.Id||res.ID,'Created',''); }
@@ -2097,18 +2153,18 @@ function renderHC(){
   const tb=document.getElementById('t-hc'); if(!tb||!CU) return;
   const L=visibleItems('hc');
   tb.innerHTML=L.length?L.map(r=>`<tr>
-    <td>${deptCell(r)}</td><td style="font-size:11px">${entLabel(r)}</td><td>${esc(r.cat)}</td><td>${esc(r.htype)}</td><td>${esc(r.band)||'—'}</td>
-    <td style="text-align:right">${fmtR(r.hcount)}</td><td style="text-align:right">&#x20B9;${fmtR(r.ctc)}</td><td>${r.htype==='Employee'?fmtR(r.vpPct)+'%':'—'}</td><td>${r.htype==='Employee'&&r.cat==='Existing'?fmtR(r.incPct)+'%':'—'}</td><td>${fmtR(r.months)}</td>
+    <td>${deptCell(r)}</td><td style="font-size:11px">${entLabel(r)}</td><td>${esc(r.cat)}</td><td>${esc(r.htype)}</td>
+    <td style="text-align:right">${fmtR(r.hcount)}</td><td style="text-align:right">&#x20B9;${fmtR(r.ctc)}</td><td>${r.cat==='Existing'?fmtR(r.incPct)+'%':'—'}</td><td>${fmtR(r.months)}</td>
     <td style="text-align:right">&#x20B9;${fmt(r.salAmt)}</td><td style="text-align:right">&#x20B9;${fmt(r.vpAmt)}</td><td style="text-align:right;font-weight:600">&#x20B9;${fmt(r.curBudget)}</td><td style="text-align:right;color:var(--tx2)">&#x20B9;${fmt(r.prevBudget)}</td>
     <td>${stBadge(r.status)}</td><td>${updCell(r)}</td><td><div style="display:flex;gap:3px">${lineActions('hc',r)}</div></td></tr>`).join('')
-    :`<tr><td colspan="17"><div class="empty">${STATE.hcMissing?'The ITB_Headcount list is missing.':'No headcount budgeted for this year yet.'}</div></td></tr>`;
+    :`<tr><td colspan="15"><div class="empty">${STATE.hcMissing?'The ITB_Headcount list is missing.':'No headcount budgeted for this year yet.'}</div></td></tr>`;
   const s=k=>L.reduce((a,r)=>a+(r[k]||0),0);
-  document.getElementById('t-hc-foot').innerHTML=L.length?`<tr style="background:var(--bll);font-weight:700"><td colspan="5">TOTAL</td><td style="text-align:right">${fmtR(s('hcount'))}</td><td colspan="4"></td><td style="text-align:right">&#x20B9;${fmt(s('salAmt'))}</td><td style="text-align:right">&#x20B9;${fmt(s('vpAmt'))}</td><td style="text-align:right">&#x20B9;${fmt(s('curBudget'))}</td><td style="text-align:right">&#x20B9;${fmt(s('prevBudget'))}</td><td colspan="3"></td></tr>`:'';
+  document.getElementById('t-hc-foot').innerHTML=L.length?`<tr style="background:var(--bll);font-weight:700"><td colspan="4">TOTAL</td><td style="text-align:right">${fmtR(s('hcount'))}</td><td style="text-align:right">&#x20B9;${fmtR(s('ctc'))}</td><td colspan="2"></td><td style="text-align:right">&#x20B9;${fmt(s('salAmt'))}</td><td style="text-align:right">&#x20B9;${fmt(s('vpAmt'))}</td><td style="text-align:right">&#x20B9;${fmt(s('curBudget'))}</td><td style="text-align:right">&#x20B9;${fmt(s('prevBudget'))}</td><td colspan="3"></td></tr>`:'';
 }
 async function exportHC(){
   try{ await loadXLSX(); }catch(e){ showToast(e.message); return; }
-  const cols=['Budget Year','Department','Cost Center','Entity','Owner','Category','Type','Band / Role','Headcount','Monthly CTC / Fee (Rs)','VP %','Increment %','Months','Salary (Rs L)','Variable Pay (Rs L)','Total (Rs L)','Prev FY (Rs L)','Q1 (Rs L)','Q2 (Rs L)','Q3 (Rs L)','Q4 (Rs L)','Status','Justification','Created By','Created On','Updated By','Updated On'];
-  const rows=visibleItems('hc').map(r=>{const q=qOf(r);return [r.year,r.dept,r.cc,r.entity||'Shared',r.owner,r.cat,r.htype,r.band,r.hcount,r.ctc,r.vpPct,r.incPct,r.months,r.salAmt,r.vpAmt,r.curBudget,r.prevBudget,q[0],q[1],q[2],q[3],r.status,r.just,r.cBy,dt(r.cAt),r.uBy,dt(r.uAt)];});
+  const cols=['Budget Year','Department','Cost Center','Entity','Owner','Category','Type','Headcount','Previous Year CTC (Rs)','Increment %','Months','Variable Pay (Rs)','Salary (Rs L)','Variable Pay (Rs L)','Total (Rs L)','Prev FY (Rs L)','Q1 (Rs L)','Q2 (Rs L)','Q3 (Rs L)','Q4 (Rs L)','Status','Justification','Created By','Created On','Updated By','Updated On'];
+  const rows=visibleItems('hc').map(r=>{const q=qOf(r);return [r.year,r.dept,r.cc,r.entity||'Shared',r.owner,r.cat,r.htype,r.hcount,r.ctc,r.incPct,r.months,Math.round(r.vpAmt*100000),r.salAmt,r.vpAmt,r.curBudget,r.prevBudget,q[0],q[1],q[2],q[3],r.status,r.just,r.cBy,dt(r.cAt),r.uBy,dt(r.uAt)];});
   xlSave(rows,cols,`Headcount & Salary ${STATE.activeYear} - ${new Date().toISOString().slice(0,10)}.xlsx`,'Headcount');
 }
 
@@ -2118,8 +2174,8 @@ async function loadXLSX(){
   await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load the Excel library from cdnjs.cloudflare.com'));document.head.appendChild(s);});
 }
 const XL={
-  dept:{name:'Department Master',cols:['Cost Center','Department','HOD Name','HOD Email','Approval Required (Y/N)','Active (Y/N)'],
-    sample:[['1007GMIT','IT','','','N','Y']]},
+  dept:{name:'Department Master',cols:['Cost Center','Department','HOD Name','HOD Email','Approval Required (Y/N)','Active (Y/N)','Distribution (Y/N)'],
+    sample:[['1007GMIT','IT','','','N','Y','Y'],['1007HRCORP','Corporate HR','','','Y','Y','Y']]},
   master:{name:'Expense Master',cols:['Expense Type','Expense Type GL','Sub Group','Sub Group GL','Budget Item','Budget Item GL','Department (blank = all)','Active (Y/N)','Nature'],
     sample:[['Travel Expense','','Domestic','','Travel Fare','','','Y'],['Travel Expense','','Domestic','','Boarding','','','Y'],['Travel Expense','','Domestic','','Lodging','','','Y'],['Travel Expense','','Domestic','','Miscellaneous','','','Y']]},
   rates:{name:'Rate Master',cols:['Budget Year','Expense Type','Sub Group','Budget Item','Rate Unit','Rate (Rs)'],
@@ -2140,7 +2196,7 @@ async function xlExport(kind){
   const a=x=>[x.cBy,dt(x.cAt),x.uBy,dt(x.uAt)];
   const yn=b=>b?'Y':'N';
   let rows=[];
-  if(kind==='dept') rows=STATE.ccs.filter(d=>d.id).sort((x,y)=>(x.name+x.cc).localeCompare(y.name+y.cc)).map(d=>[d.cc,d.name,d.hodName,d.head,yn(d.approval!==false),yn(d.active!==false),...a(d)]);
+  if(kind==='dept') rows=STATE.ccs.filter(d=>d.id).sort((x,y)=>(x.name+x.cc).localeCompare(y.name+y.cc)).map(d=>[d.cc,d.name,d.hodName,d.head,yn(d.approval!==false),yn(d.active!==false),yn(d.dist),...a(d)]);
   if(kind==='master') rows=STATE.master.map(m=>[m.et,m.etGL,m.sg,m.sgGL,m.item,m.itemGL,m.dept,yn(m.active),m.nature,...a(m)]);
   if(kind==='rates') rows=STATE.rates.map(r=>[r.fy,r.et,r.sg,r.item,r.unit,r.rate,...a(r)]);
   xlSave(rows,[...t.cols,...A],`${t.name} - Export ${new Date().toISOString().slice(0,10)}.xlsx`,t.name);
@@ -2164,7 +2220,7 @@ async function xlRead(input){
     const ALIAS={'cost centre':'cost center','department name':'department','person responsible':'hod name','hod':'hod name','hod mail':'hod email','person responsible email':'hod email'};
     const t=XL[XLKIND], head=aoa[0].map(h=>{const x=norm(h).replace(/\s+/g,' ').replace(/centre/g,'center'); return ALIAS[x]||x;});
     const idx=t.cols.map(c=>{const k=norm(c).replace(/\s*\(.*\)/,''); return head.findIndex(h=>h.replace(/\s*\(.*\)/,'')===k);});
-    const missing=t.cols.filter((c,i)=>idx[i]<0&&!/active|approval|department \(|nature/i.test(c)&&!/gl$/i.test(c)&&!/hod/i.test(c));
+    const missing=t.cols.filter((c,i)=>idx[i]<0&&!/active|approval|distribution|department \(|nature/i.test(c)&&!/gl$/i.test(c)&&!/hod/i.test(c));
     if(missing.length){ showToast('Missing columns: '+missing.join(', ')+'. Use the template.'); return; }
     const data=aoa.slice(1).map((r,n)=>({row:n+2,v:idx.map(i=>i<0?'':String(r[i]??'').trim())}));
     XLPLAN=planImport(XLKIND,data);
@@ -2181,13 +2237,13 @@ function planImport(kind,data){
   };
   if(kind==='dept'){
     const adopted=new Set();
-    data.forEach(({row,v})=>{const [cc,name,hod,email,appr,act]=v;
+    data.forEach(({row,v})=>{const [cc,name,hod,email,appr,act,dst]=v;
       let ex=STATE.ccs.find(d=>d.id&&d.cc&&norm(d.cc)===norm(cc));
       if(!ex&&cc){ ex=STATE.ccs.find(d=>d.id&&!d.cc&&norm(d.name)===norm(name)&&!adopted.has(d.id)); if(ex) adopted.add(ex.id); }
       const known=STATE.depts.find(d=>norm(d.name)===norm(name));
       let err=!cc?'Cost Center is required':!name?'Department is required':(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))?'HOD Email is not a valid email':'';
-      const payload={CostCenter:cc,DeptName:known?known.name:name,HODName:hod,DeptHeadEmail:email.toLowerCase(),RequiresApproval:yesNo(appr,ex?ex.approval!==false:(known?known.approval!==false:norm(name)!=='it')),IsActive:yesNo(act,true)};
-      let op='new'; if(ex){ op=(ex.cc===cc&&ex.name===payload.DeptName&&ex.hodName===hod&&ex.head===payload.DeptHeadEmail&&(ex.approval!==false)===payload.RequiresApproval&&(ex.active!==false)===payload.IsActive)?'same':'update'; }
+      const payload={CostCenter:cc,DeptName:known?known.name:name,HODName:hod,DeptHeadEmail:email.toLowerCase(),RequiresApproval:yesNo(appr,ex?ex.approval!==false:(known?known.approval!==false:norm(name)!=='it')),AllowDistribution:yesNo(dst,ex?!!ex.dist:(known?!!known.dist:norm(name)==='it')),IsActive:yesNo(act,true)};
+      let op='new'; if(ex){ op=(!!ex.dist===payload.AllowDistribution&&ex.cc===cc&&ex.name===payload.DeptName&&ex.hodName===hod&&ex.head===payload.DeptHeadEmail&&(ex.approval!==false)===payload.RequiresApproval&&(ex.active!==false)===payload.IsActive)?'same':'update'; }
       push(row,norm(cc),`${cc} · ${name} · ${hod||'—'}`,op,payload,ex&&ex.id,err);});
     STATE.ccs.filter(d=>d.id&&d.active!==false&&!plan.some(p=>p.id===d.id)).forEach(d=>
       plan.push({row:'—',label:`${d.cc||'(no cost center)'} · ${d.name}`,op:'retire',payload:{IsActive:false},id:d.id}));
@@ -2261,7 +2317,8 @@ async function loadUsers(){
     return items.map(u=>({
       id: u.Id, name: u.UserName, email: u.UserEmail.toLowerCase(),
       role: u.UserRole, ownerName: u.OwnerName, scope: u.AccessScope||'All', active: u.IsActive!==false,
-      dept: u.Department||'IT', entity: u.EntityName||'', ...aud(u)
+      depts: splitDepts(u.Departments||u.Department).length?splitDepts(u.Departments||u.Department):['IT'],
+      dept: splitDepts(u.Departments||u.Department)[0]||'IT', entity: u.EntityName||'', ...aud(u)
     }));
   } catch(e) {
     // List may not exist yet — return empty
@@ -2282,7 +2339,7 @@ async function renderUsers(){
     <td style="font-weight:600">${u.name}</td>
     <td style="font-size:11px;color:var(--tx2)">${u.email}</td>
     <td><span class="badge ${u.role==='IT Head'||u.role==='Admin'||u.role==='Group CFO'?'b-b':u.role==='BU Head'?'b-a':u.role==='Viewer'||u.role==='Finance'?'b-gr':'b-g'}">${u.role}</span></td>
-    <td><span class="dept-tag">${esc(u.dept)}</span></td><td style="font-size:11px">${esc(u.entity)||'—'}</td>
+    <td style="max-width:260px">${u.depts.map(d=>`<span class="dept-tag" style="margin:1px 2px 1px 0">${esc(d)}</span>`).join('')}</td><td style="font-size:11px">${esc(u.entity)||'—'}</td>
     <td><code style="font-size:11px;background:var(--sf2);padding:2px 6px;border-radius:4px">${u.ownerName||'—'}</code></td>
     <td><span class="badge ${scopeColors[u.scope]||'b-gr'}">${u.scope}</span></td>
     <td><span class="badge ${u.active?'b-g':'b-r'}">${u.active?'Active':'Inactive'}</span></td>
@@ -2302,13 +2359,16 @@ function openUserModal(id=null){
     document.getElementById('u-role').value='Dept Owner';
     document.getElementById('u-scope').value='All';
   }
-  const dsel=document.getElementById('u-dept'), esel=document.getElementById('u-entity');
-  const dv=dsel.value, ev=esel.value;
-  dsel.innerHTML=activeDepts().map(d=>`<option>${esc(d.name)}</option>`).join('');
+  const esel=document.getElementById('u-entity'); const ev=esel.value;
+  const chosen=id?(window._uDepts||[]):[];
+  const names=uniq([...activeDepts().map(d=>d.name),...chosen]);
+  document.getElementById('u-dsearch').value='';
+  document.getElementById('u-depts').innerHTML=names.map(n=>`<label data-n="${esc(norm(n))}"><input type="checkbox" value="${esc(n)}"${chosen.includes(n)?' checked':''}> ${esc(n)}</label>`).join('');
   esel.innerHTML='<option value="">— none —</option>'+activeEntities().map(e=>`<option>${esc(e.name)}</option>`).join('');
-  if(id){ dsel.value=dv||'IT'; esel.value=ev||''; } else { dsel.value=myDept(); esel.value=''; }
+  esel.value=id?(ev||''):'';
   document.getElementById('user-ov').style.display='flex';
 }
+function filterDeptPick(){ const q=norm(document.getElementById('u-dsearch').value); document.querySelectorAll('#u-depts label').forEach(l=>l.style.display=!q||l.dataset.n.includes(q)?'':'none'); }
 function closeUserModal(){ document.getElementById('user-ov').style.display='none'; editUserId=null; }
 
 async function editUser(id){
@@ -2319,7 +2379,7 @@ async function editUser(id){
   document.getElementById('u-role').value=u.role;
   document.getElementById('u-owner').value=u.ownerName||'';
   document.getElementById('u-scope').value=u.scope||'All';
-  document.getElementById('u-dept').innerHTML=`<option>${esc(u.dept)}</option>`; document.getElementById('u-dept').value=u.dept;
+  window._uDepts=u.depts.slice();
   document.getElementById('u-entity').innerHTML=`<option>${esc(u.entity)}</option>`; document.getElementById('u-entity').value=u.entity;
   openUserModal(id);
 }
@@ -2330,14 +2390,15 @@ async function saveUser(){
   const role=document.getElementById('u-role').value;
   const owner=document.getElementById('u-owner').value.trim();
   const scope=document.getElementById('u-scope').value;
-  const dept=document.getElementById('u-dept').value;
+  const depts=[...document.querySelectorAll('#u-depts input:checked')].map(i=>i.value);
   const entity=document.getElementById('u-entity').value;
   const needsOwner=!['Group CFO','FP&A','BU Head','Admin','IT Head','Finance','Viewer'].includes(role);
   if(!name||!email||(needsOwner&&!owner)){showToast(needsOwner?'Name, email and owner name are required.':'Name and email are required.');return}
   if(role==='BU Head'&&!entity){showToast('Pick the entity this BU head approves for.');return}
+  if(needsOwner&&!depts.length){showToast('Tick at least one department.');return}
   setSyncing();
   try {
-    const data={UserName:name,UserEmail:email,UserRole:role,OwnerName:owner||null,AccessScope:scope,IsActive:true,Department:dept,EntityName:entity||null};
+    const data={UserName:name,UserEmail:email,UserRole:role,OwnerName:owner||null,AccessScope:scope,IsActive:true,Department:depts[0]||null,Departments:depts.join('; ')||null,EntityName:entity||null};
     if(editUserId) await spPatch(SP_CONFIG.lists.users,editUserId,data);
     else await spPost(SP_CONFIG.lists.users,data);
     closeUserModal();
@@ -2368,7 +2429,7 @@ async function buildDynamicRoleMap(){
   users.filter(u=>u.active).forEach(u=>{
     const prefix = u.email.split('@')[0].toLowerCase();
     const isOwnerRole=!['Group CFO','FP&A','BU Head','Admin','IT Head','Finance','Viewer'].includes(u.role);
-    ROLE_MAP[prefix] = { role: u.role, ownerName: isOwnerRole ? (u.ownerName||null) : null, scope: u.scope, dept: u.dept, entity: u.entity };
+    ROLE_MAP[prefix] = { role: u.role, ownerName: isOwnerRole ? (u.ownerName||null) : null, scope: u.scope, dept: u.dept, depts: u.depts, entity: u.entity };
   });
 }
 
