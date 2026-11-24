@@ -898,7 +898,7 @@ function methodBadge(item){
   if(!usesDist(item.dept)) return '<span style="color:var(--tx3)">—</span>';
   if(isHybrid(item)) return '<span class="badge b-b" style="background:var(--cyl);color:var(--cy)">HYBRID</span>';
   if(item.entity) return '<span class="badge b-gr">DIRECT</span>';
-  return `<span class="badge ${item.method==='SAP'?'b-p':item.method==='HR'?'b-g':item.method==='MANUAL'?'b-b':'b-a'}">${item.method}</span>`;
+  return `<span class="badge ${item.method==='SAP'?'b-p':item.method==='HR'?'b-g':item.method==='MANUAL'?'b-b':'b-a'}" title="${esc(METHOD_LABEL[item.method]||item.method||'')}">${METHOD_SHORT[item.method]||esc(item.method||'')}</span>`;
 }
 function yearItems(type){ return (STATE[type]||[]).filter(r=>r.year===STATE.activeYear); }
 
@@ -1048,7 +1048,7 @@ function renderOPEX(){
       <td>${updCell(r)}</td>
       <td><div style="display:flex;gap:3px">
         ${lineActions('opex',r)}
-        ${canEditLine(r)&&!r.entity&&usesDist(r.dept)&&r.method!=='MANUAL'?`<button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="openOverride(${r.id})">Overrides</button>`:''}
+        ${canEditLine(r)&&!r.entity&&usesDist(r.dept)&&!['MANUAL','FIXED'].includes(r.method)?`<button class="btn btn-c" style="font-size:10px;padding:3px 7px" onclick="openOverride(${r.id})">Overrides</button>`:''}
       </div></td></tr>`;
   }).join(''):'<tr><td colspan="16"><div class="empty">No OPEX items for this year</div></td></tr>';
 }
@@ -1253,8 +1253,9 @@ const IT_GROUPS=['Application','Network','End User Support','Datacentre'];
 const GROUPS=IT_GROUPS;
 const CTYPES=['Prof & Consulting','Annual Subscription','Repair & Maint','Software License','Software Expenses','Manpower','Rent & Utilities','Travel & Conveyance','Training','Marketing & Promotion','Insurance','Communication','Capital Asset','Other'];
 const METHODS=['SAP','HR','FIXED'];
-const METHOD_LABEL={SAP:'SAP users',HR:'HR users',FIXED:'FIXED',MANUAL:'Manual split'};
-function methodOpts(type,sel){ const L=type==='capex'?METHODS:[...METHODS,'MANUAL']; return L.map(v=>`<option value="${v}"${v===sel?' selected':''}>${METHOD_LABEL[v]||v}</option>`).join(''); }
+const METHOD_LABEL={SAP:'SAP users',HR:'HR users',FIXED:'Manual amount based split',MANUAL:'Manual % based split'};
+const METHOD_SHORT={FIXED:'MANUAL ₹',MANUAL:'MANUAL %'};
+function methodOpts(type,sel){ const L=type==='capex'?METHODS:['SAP','HR','MANUAL','FIXED']; return L.map(v=>`<option value="${v}"${v===sel?' selected':''}>${METHOD_LABEL[v]||v}</option>`).join(''); }
 const PAYERS=['IT','Business'];
 function req(l){return `${l}<span class="req">*</span>`}
 function selOpts(arr,sel){return arr.map(v=>`<option value="${v}"${v===sel?' selected':''}>${v}</option>`).join('')}
@@ -1981,25 +1982,56 @@ function prevFYAmt(fy,dept,cc,m){
   const byCC=cc?L.filter(r=>norm(r.cc)===norm(cc)):L;
   return (byCC.length?byCC:L).reduce((a,r)=>a+r.curBudget,0);
 }
-/* ---- manual distribution split (% per entity) ---- */
+/* ---- manual distribution split: % (MANUAL) or ₹ amount (FIXED) per entity ---- */
 function manualBlock(d){
-  const ents=activeEntities(), ov=(d&&d.method==='MANUAL'&&d.overrides)||{}, cur=(d&&d.curBudget)||0;
-  const pc=e=>{const v=ov[String(e.id)]; return v!=null&&cur?Math.round(Number(v)/cur*10000)/100:'';};
-  return `<div class="phase" id="g-manual" hidden><strong>Manual split across entities</strong> <span style="font-size:11px;color:var(--tx2)">Enter each entity's share in %. Applied to every line saved from this form.</span>
-    <div class="fgrid3" style="margin-top:8px">${ents.map(e=>`<div class="fg" style="margin-bottom:4px"><label>${esc(e.name)}</label><input class="mp" data-eid="${e.id}" type="number" min="0" max="100" step="0.01" value="${pc(e)}" placeholder="0" oninput="manualCalc()"></div>`).join('')}</div>
+  const ents=activeEntities(), ov=(d&&['MANUAL','FIXED'].includes(d.method)&&d.overrides)||{}, cur=(d&&d.curBudget)||0;
+  const val=e=>{const v=ov[String(e.id)]; if(v==null) return ''; return d.method==='MANUAL'?(cur?Math.round(Number(v)/cur*10000)/100:''):Math.round(Number(v)*10000)/10000;};
+  return `<div class="phase" id="g-manual" hidden data-mode="${d&&d.method==='MANUAL'?'pct':d&&d.method==='FIXED'?'amt':''}"><strong id="mp-title">Manual split across entities</strong> <span id="mp-hint" style="font-size:11px;color:var(--tx2)"></span>
+    <div class="fgrid3" style="margin-top:8px">${ents.map(e=>`<div class="fg" style="margin-bottom:4px"><label>${esc(e.name)} <span class="mp-u" style="color:var(--tx3)"></span></label><input class="mp" data-eid="${e.id}" type="number" min="0" step="0.01" value="${val(e)}" placeholder="0" oninput="manualCalc()"></div>`).join('')}</div>
     <div id="f-mps" style="font-size:12px"></div></div>`;
 }
-function isManual(){ const m=document.getElementById('f-method'), e=document.getElementById('f-entity'); return !!(m&&!m.disabled&&m.value==='MANUAL'&&(!e||!e.value)&&document.getElementById('g-method')?.style.display!=='none'); }
-function manualShow(){ const g=document.getElementById('g-manual'); if(g) g.hidden=!isManual(); manualCalc(); }
+function manualMode(){ const m=document.getElementById('f-method'), e=document.getElementById('f-entity');
+  if(!(m&&!m.disabled&&(!e||!e.value)&&document.getElementById('g-method')?.style.display!=='none'&&document.getElementById('g-manual'))) return null;
+  return m.value==='MANUAL'?'pct':m.value==='FIXED'?'amt':null; }
+function isManual(){ return !!manualMode(); }
+function manualShow(){
+  const g=document.getElementById('g-manual'); if(!g){ return; }
+  const mode=manualMode(); g.hidden=!mode;
+  if(mode){
+    if(g.dataset.mode&&g.dataset.mode!==mode) g.querySelectorAll('.mp').forEach(i=>i.value='');
+    g.dataset.mode=mode;
+    document.getElementById('mp-title').textContent=mode==='pct'?'Manual % based split':'Manual amount based split';
+    document.getElementById('mp-hint').textContent=mode==='pct'?"Enter each entity's share in %. Must total 100%; applied to every line saved from this form.":"Enter each entity's amount in ₹ lakhs. Must equal the line total; with several items in one form the amounts are applied pro rata.";
+    g.querySelectorAll('.mp-u').forEach(x=>x.textContent=mode==='pct'?'(%)':'(₹L)');
+    g.querySelectorAll('.mp').forEach(x=>{ if(mode==='pct') x.max='100'; else x.removeAttribute('max'); });
+  }
+  manualCalc();
+}
 function manualPct(){ const o={}; document.querySelectorAll('#g-manual .mp').forEach(i=>{const v=parseFloat(i.value); if(v>0) o[i.dataset.eid]=v;}); return o; }
+function formTotal(){ return parseFloat((document.getElementById('g-total')?.textContent||document.getElementById('hc-total')?.dataset.v||'0').replace(/[^0-9.]/g,''))||0; }
 function manualCalc(){
   const el=document.getElementById('f-mps'); if(!el) return;
-  const p=manualPct(), sum=Object.values(p).reduce((a,b)=>a+b,0);
-  const tot=parseFloat((document.getElementById('g-total')?.textContent||document.getElementById('hc-total')?.dataset.v||'0').replace(/[^0-9.]/g,''))||0;
-  el.innerHTML=(Math.abs(sum-100)>0.05?`<span style="color:var(--rd);font-weight:600">Total ${fmtR(sum)}% — must be 100%</span>`:`<span style="color:var(--gn);font-weight:600">Total 100%</span>`)+(tot?` · `+activeEntities().filter(e=>p[e.id]).map(e=>`${esc(e.name)} ₹${fmt(tot*p[e.id]/100)}L`).join(' · '):'');
+  const mode=manualMode(); if(!mode){ el.innerHTML=''; return; }
+  const p=manualPct(), sum=Object.values(p).reduce((a,b)=>a+b,0), tot=formTotal();
+  if(mode==='pct'){
+    el.innerHTML=(Math.abs(sum-100)>0.05?`<span style="color:var(--rd);font-weight:600">Total ${fmtR(sum)}% — must be 100%</span>`:`<span style="color:var(--gn);font-weight:600">Total 100%</span>`)+(tot?` · `+activeEntities().filter(e=>p[e.id]).map(e=>`${esc(e.name)} ₹${fmt(tot*p[e.id]/100)}L`).join(' · '):'');
+  } else {
+    const diff=Math.round((tot-sum)*100)/100;
+    el.innerHTML=Math.abs(diff)>0.01?`<span style="color:var(--rd);font-weight:600">Allocated ₹${fmt(sum)}L of ₹${fmt(tot)}L — ${diff>0?'₹'+fmt(diff)+'L still to allocate':'₹'+fmt(-diff)+'L too much'}</span>`:`<span style="color:var(--gn);font-weight:600">Allocated ₹${fmt(sum)}L = line total</span>`;
+  }
 }
-function manualOK(){ if(!isManual()) return true; const s=Object.values(manualPct()).reduce((a,b)=>a+b,0); if(Math.abs(s-100)>0.05){ showToast('Manual split must add up to 100%.'); return false; } return true; }
-function manualOverrides(cur){ if(!isManual()) return null; const p=manualPct(); return Object.fromEntries(Object.entries(p).map(([k,v])=>[k,Math.round(cur*v/100*1e6)/1e6])); }
+function manualOK(){
+  const mode=manualMode(); if(!mode) return true;
+  const sum=Object.values(manualPct()).reduce((a,b)=>a+b,0);
+  if(mode==='pct'&&Math.abs(sum-100)>0.05){ showToast('Manual % split must add up to 100%.'); return false; }
+  if(mode==='amt'&&Math.abs(sum-formTotal())>0.01){ showToast('Manual amounts must add up to the line total (₹'+fmt(formTotal())+'L).'); return false; }
+  return true;
+}
+function manualOverrides(cur){
+  const mode=manualMode(); if(!mode) return null; const p=manualPct();
+  const base=mode==='pct'?100:Object.values(p).reduce((a,b)=>a+b,0)||1;
+  return Object.fromEntries(Object.entries(p).map(([k,v])=>[k,Math.round(cur*v/base*1e6)/1e6]));
+}
 /* ---- quarterly phasing ---- */
 function phasePct(d){
   const q=d&&d.q, cur=d&&d.curBudget;
@@ -2239,7 +2271,7 @@ async function xlExport(kind){
 async function exportLines(type){
   try{ await loadXLSX(); }catch(e){ showToast(e.message); return; }
   const cols=['Budget ID','Budget Year','Department','Cost Center','Person Responsible','Entity','Owner','Nature','Expense Type','Expense Type GL','Sub Group','Sub Group GL','Budget Item','Budget Item GL','Description','Quantity','Unit','Persons','Nights/Legs','Rate (Rs)','Std Rate (Rs)','Payer','Distribution','Prev FY (Rs L)','Current FY (Rs L)','Q1 (Rs L)','Q2 (Rs L)','Q3 (Rs L)','Q4 (Rs L)','Status','Justification','BU Approved By','CFO Approved By','Created By','Created On','Updated By','Updated On'];
-  const rows=visibleItems(type).map(r=>{const c=STATE.ccs.find(x=>norm(x.cc)===norm(r.cc))||{};const q=qOf(r);return [r.budgetId||'',r.year,r.dept,r.cc||'',c.hodName||'',r.entity||'Shared',r.owner,natureOf(r),r.group,r.etGL,r.sub,r.sgGL,r.activity,r.itemGL,r.desc,r.qty,r.unit,r.persons,r.factor,r.rate,r.stdRate,r.payer,r.entity?'Direct':r.method,r.prevBudget,r.curBudget,q[0],q[1],q[2],q[3],r.status,r.just,r.buBy,r.cfoBy,r.cBy,dt(r.cAt),r.uBy,dt(r.uAt)];});
+  const rows=visibleItems(type).map(r=>{const c=STATE.ccs.find(x=>norm(x.cc)===norm(r.cc))||{};const q=qOf(r);return [r.budgetId||'',r.year,r.dept,r.cc||'',c.hodName||'',r.entity||'Shared',r.owner,natureOf(r),r.group,r.etGL,r.sub,r.sgGL,r.activity,r.itemGL,r.desc,r.qty,r.unit,r.persons,r.factor,r.rate,r.stdRate,r.payer,r.entity?'Direct':(METHOD_LABEL[r.method]||r.method),r.prevBudget,r.curBudget,q[0],q[1],q[2],q[3],r.status,r.just,r.buBy,r.cfoBy,r.cBy,dt(r.cAt),r.uBy,dt(r.uAt)];});
   xlSave(rows,cols,`${type.toUpperCase()} ${STATE.activeYear} - ${new Date().toISOString().slice(0,10)}.xlsx`,type.toUpperCase());
 }
 function prevYearOf(fy){ const L=STATE.budgetYears.slice().sort(), i=L.indexOf(fy); return i>0?L[i-1]:''; }
@@ -2253,8 +2285,8 @@ function lineTemplate(kind){
   const ws=XLSX.utils.aoa_to_sheet([t.cols,...sample]); ws['!cols']=t.cols.map(c=>({wch:Math.max(14,c.length+2)}));
   XLSX.utils.book_append_sheet(wb,ws,kind==='opexup'?'OPEX':'Headcount');
   const notes=kind==='opexup'
-    ?[['Column','How to fill'],['Budget Year','e.g. '+fy+' (must exist in the app)'],['Department / Cost Center','As in the Department master (see Departments sheet). Cost center can be blank if the department has only one'],['Owner','Person responsible for the line; blank = the person uploading'],['Entity','Entity name for a direct line; leave blank for a shared line'],['Expense Type / Sub Group / Budget Item','Exactly as in the Expense master (see Budget items sheet)'],['Payer',PAYER_OWN+' (default) or Business'],['Distribution Method','Only for shared lines of departments flagged for distribution: SAP, HR or FIXED'],['Amount (Rs L)','Budget amount in Rs lakhs'],['Status','Approved (default) or Draft']]
-    :[['Column','How to fill'],['Budget Year','e.g. '+fy],['Department / Cost Center / Owner / Entity','As for OPEX'],['Category','Existing or New'],['Type','Employee, Consultant or Trainee'],['Headcount','Number of heads in the line'],['Salary (Rs)','Total annual salary amount in Rs (excluding variable pay)'],['Variable Pay (Rs)','Total variable pay amount in Rs (employees only)'],['Payer',PAYER_OWN+' (default) or Business'],['Distribution Method','SAP, HR or FIXED for shared lines of distribution departments'],['Status','Approved (default) or Draft']];
+    ?[['Column','How to fill'],['Budget Year','e.g. '+fy+' (must exist in the app)'],['Department / Cost Center','As in the Department master (see Departments sheet). Cost center can be blank if the department has only one'],['Owner','Person responsible for the line; blank = the person uploading'],['Entity','Entity name for a direct line; leave blank for a shared line'],['Expense Type / Sub Group / Budget Item','Exactly as in the Expense master (see Budget items sheet)'],['Payer',PAYER_OWN+' (default) or Business'],['Distribution Method','Only for shared lines of departments flagged for distribution: SAP or HR. Set a manual %/amount split later by editing the line'],['Amount (Rs L)','Budget amount in Rs lakhs'],['Status','Approved (default) or Draft']]
+    :[['Column','How to fill'],['Budget Year','e.g. '+fy],['Department / Cost Center / Owner / Entity','As for OPEX'],['Category','Existing or New'],['Type','Employee, Consultant or Trainee'],['Headcount','Number of heads in the line'],['Salary (Rs)','Total annual salary amount in Rs (excluding variable pay)'],['Variable Pay (Rs)','Total variable pay amount in Rs (employees only)'],['Payer',PAYER_OWN+' (default) or Business'],['Distribution Method','SAP or HR for shared lines of distribution departments'],['Status','Approved (default) or Draft']];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(notes),'Instructions');
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Department','Cost Center','HOD','Distribution'],...STATE.ccs.filter(c=>c.active!==false).sort((a,b)=>(a.name+a.cc).localeCompare(b.name+b.cc)).map(c=>[c.name,c.cc,c.hodName,c.dist?'Y':'N'])]),'Departments');
   if(kind==='opexup') XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Expense Type','Sub Group','Budget Item','GL','Nature','Department (blank = all)'],...STATE.master.filter(x=>x.active&&!isHCItem(x)).sort((a,b)=>(a.et+a.sg+a.item).localeCompare(b.et+b.sg+b.item)).map(x=>[x.et,x.sg,x.item,x.itemGL,x.nature,x.dept])]),'Budget items');
@@ -2270,11 +2302,11 @@ function planLines(kind,data){
     const ccs=deptCCs(dept); let cc=g('Cost Center'); const ccOk=!cc||ccs.some(c=>norm(c.cc)===norm(cc)); if(!cc&&ccs.length===1) cc=ccs[0].cc;
     const entName=g('Entity (blank = shared)'), ent=entName?activeEntities().find(e=>norm(e.name)===norm(entName)):null;
     const payer=g('Payer')?(norm(g('Payer'))==='business'?'Business':PAYER_OWN):PAYER_OWN;
-    const dist=!entName&&usesDist(dept), meth=g('Distribution Method').toUpperCase().replace(/ USERS?$/,'');
+    const dist=!entName&&usesDist(dept), meth=(m0=>/AMOUNT/.test(m0)?'FIXED':/%|PERCENT/.test(m0)?'MANUAL%':m0.replace(/ USERS?$/,''))(g('Distribution Method').toUpperCase());
     const status=stOf(g('Status'));
     let err=!fy?'Budget Year is required':!STATE.budgetYears.includes(fy)?`Budget Year "${fy}" is not set up in the app`
       :!dObj?`Department "${g('Department')}" is not in the department master`:!ccOk?`Cost center ${cc} does not belong to ${dept}`:(ccs.length>1&&!cc)?'Cost Center is required for this department'
-      :(entName&&!ent)?`Entity "${entName}" not found`:(dist&&!['SAP','HR','FIXED'].includes(meth))?'Distribution Method must be SAP, HR or FIXED for this department'
+      :(entName&&!ent)?`Entity "${entName}" not found`:(dist&&!['SAP','HR'].includes(meth))?'Distribution Method must be SAP or HR for this department (set manual splits by editing the line in the app)'
       :!status?'Status must be Approved or Draft':'';
     const common={BudgetYear:fy,Department:dept,CostCenter:cc||null,ITOwner:g('Owner')||CU.name,EntityName:ent?ent.name:null,Payer:payer,DistMethod:distFor(dept,!entName,meth),LineStatus:status,Justification:'Uploaded from Excel',Overrides:'{}'};
     if(kind==='opexup'){
