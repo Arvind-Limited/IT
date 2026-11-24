@@ -260,7 +260,7 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
             <select id="opex-f-own" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"></select>
             <select id="opex-f-st" onchange="renderOPEX()" style="padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px"><option value="">All statuses</option><option>Draft</option><option>Pending BU Head</option><option>Pending FP&amp;A</option><option>Pending CFO</option><option>Approved</option><option>Returned</option></select>
           </div>
-          <div style="display:flex;gap:6px"><button class="btn" onclick="exportLines('opex')">&#x2B07; Export to Excel</button><button class="btn btn-p" id="btn-opex" onclick="openModal('opex')">+ Add OPEX items</button></div>
+          <div style="display:flex;gap:6px"><button class="btn adm-only" onclick="xlTemplate('opexup')">&#x2B07; Upload template</button><button class="btn adm-only" onclick="xlPick('opexup')">&#x2B06; Upload Excel</button><button class="btn" onclick="exportLines('opex')">&#x2B07; Export to Excel</button><button class="btn btn-p" id="btn-opex" onclick="openModal('opex')">+ Add OPEX items</button></div>
         </div>
         <div class="tw"><table><thead><tr><th>Budget ID</th><th>Department</th><th>Entity</th><th>Owner</th><th>Expense type</th><th>Sub-group</th><th>Budget item</th><th>Qty &times; Rate</th><th>Payer</th><th>Method</th><th>Prev (&#x20B9;L)</th><th>Current (&#x20B9;L)</th><th>Fixed total</th><th>Status</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-opex"></tbody></table></div>
       </div>
@@ -315,8 +315,8 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
       <!-- HEADCOUNT & SALARY -->
       <div class="page" id="page-hc">
         <div class="ph">
-          <div class="info-box" style="flex:1;margin-right:12px;font-size:11px">Salary is budgeted from headcount, not GL by GL: headcount &times; average monthly CTC (incl. variable pay) &times; months, with the increment applied to existing employees. Variable pay is split out by its %. Consultants on payroll and trainees use their monthly fee / stipend.</div>
-          <div style="display:flex;gap:6px"><button class="btn" onclick="exportHC()">&#x2B07; Export to Excel</button><button class="btn btn-p" id="btn-hc" onclick="openModal('hc')">+ Add headcount</button></div>
+          <div class="info-box" style="flex:1;margin-right:12px;font-size:11px">Salary is budgeted from headcount: Salary = previous-year CTC &times; (1 + increment %) for existing staff (annual CTC pro-rated by months for new positions), plus variable pay as an amount. Total budget = Salary + Variable pay. Previous-year budget is the CTC without the increment.</div>
+          <div style="display:flex;gap:6px"><button class="btn adm-only" onclick="xlTemplate('hcup')">&#x2B07; Upload template</button><button class="btn adm-only" onclick="xlPick('hcup')">&#x2B06; Upload Excel</button><button class="btn" onclick="exportHC()">&#x2B07; Export to Excel</button><button class="btn btn-p" id="btn-hc" onclick="openModal('hc')">+ Add headcount</button></div>
         </div>
         <div class="tw"><table><thead><tr><th>Department</th><th>Entity</th><th>Category</th><th>Type</th><th style="text-align:right">HC</th><th style="text-align:right">Prev year CTC (&#x20B9;)</th><th>Incr. %</th><th>Months</th><th style="text-align:right">Salary (&#x20B9;L)</th><th style="text-align:right">Variable pay (&#x20B9;L)</th><th style="text-align:right">Total (&#x20B9;L)</th><th style="text-align:right">Prev FY (&#x20B9;L)</th><th>Status</th><th>Updated by</th><th>Actions</th></tr></thead><tbody id="t-hc"></tbody><tfoot id="t-hc-foot"></tfoot></table></div>
       </div>
@@ -799,6 +799,7 @@ async function startApp(){
   buildDeptFilter();
   const itNav=isAdmin()||isCFO()||isFPA()||myDepts().some(usesDist);
   document.querySelectorAll('.it-only').forEach(el=>el.style.display=itNav?'':'none');
+  document.querySelectorAll('.adm-only').forEach(el=>el.style.display=isAdmin()?'':'none');
   if(isCFO()||isBUHead()||isFPA()){ ['btn-opex','btn-capex','btn-hc'].forEach(id=>{const b=document.getElementById(id); if(b) b.style.display='none';}); }
   await buildDynamicRoleMap();
   buildYearSelector();
@@ -1259,10 +1260,10 @@ function selOpts(arr,sel){return arr.map(v=>`<option value="${v}"${v===sel?' sel
 function yearOpts(sel){return STATE.budgetYears.map(y=>`<option${y===sel?' selected':''}>${y}</option>`).join('')}
 function ownerField(sel){
   if(isAdmin()){
-    const known=[...new Set(['Kirit Mehta','Prajesh Desai','Mukesh Jhanwar','Advait','Anil Patel','Mishal/Shailesh',...STATE.users.map(u=>u.ownerName).filter(Boolean),...STATE.opex.map(r=>r.owner),...STATE.capex.map(r=>r.owner)].filter(Boolean))];
-    return `<input id="f-owner" list="owner-list" value="${esc(sel||'')}" placeholder="Type or pick an owner" required><datalist id="owner-list">${known.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`;
+    const known=uniq([...STATE.users.filter(u=>u.active).map(u=>u.name),...STATE.users.map(u=>u.ownerName),...STATE.opex.map(r=>r.owner),...STATE.hc.map(r=>r.owner),...STATE.capex.map(r=>r.owner)]);
+    return `<input id="f-owner" list="owner-list" value="${esc(sel||(CU&&CU.name)||'')}" placeholder="Type or pick an owner" required><datalist id="owner-list">${known.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`;
   }
-  return `<select id="f-owner" disabled><option selected>${esc(myOwner()||sel||'')}</option></select>`;
+  return `<select id="f-owner" disabled><option selected>${esc(sel||myOwner()||(CU&&CU.name)||'')}</option></select>`;
 }
 function deptField(sel){
   const d=sel||myDept();
@@ -1899,7 +1900,8 @@ function buildGrid(){
       std, rate:(d.rate!=null?d.rate:(std!=null?std:cur)), fixed:!!r, qty:d.qty!=null?d.qty:1, pers:d.persons||1, fac:d.factor||1, desc:d.desc||'', prev:d.prevBudget}];
   } else if(et&&sg){
     rows=masterFor(dept).filter(m=>m.et===et&&m.sg===sg).sort((a,b)=>a.item.localeCompare(b.item)).map(m=>{const r=rateFor(fy,m.et,m.sg,m.item);
-      return {item:m.item,nature:m.nature,etGL:m.etGL,sgGL:m.sgGL,itemGL:m.itemGL,unit:r?r.unit:'Lump sum',std:r?r.rate:null,rate:r?r.rate:'',fixed:!!r,qty:r?'':1,pers:1,fac:1,desc:'',prev:''};});
+      const pv=prevFYAmt(fy,dept,document.getElementById('f-cc')?.value||'',m);
+      return {item:m.item,nature:m.nature,etGL:m.etGL,sgGL:m.sgGL,itemGL:m.itemGL,unit:r?r.unit:'Lump sum',std:r?r.rate:null,rate:r?r.rate:'',fixed:!!r,qty:r?'':1,pers:1,fac:1,desc:'',prev:pv?Math.round(pv*100)/100:''};});
   }
   // keep what the user already typed (by item, in row order)
   const old={}; document.querySelectorAll('#f-grid tbody tr').forEach(tr=>{(old[tr.dataset.item]=old[tr.dataset.item]||[]).push({q:tr.querySelector('.g-qty').value,p:tr.querySelector('.g-prev').value,r:tr.querySelector('.g-rate').value,n:tr.querySelector('.g-pers').value,f:tr.querySelector('.g-fac').value,d:tr.querySelector('.g-desc').value});});
@@ -1952,6 +1954,12 @@ function calcGrid(){
   const tt=document.getElementById('g-total'); if(tt) tt.textContent='₹'+fmt(t)+'L';
   phaseCalc();
 }
+function prevFYAmt(fy,dept,cc,m){
+  const py=prevYearOf(fy); if(!py) return 0;
+  const L=(STATE[LF.type]||[]).filter(r=>r.year===py&&r.dept===dept&&norm(r.group)===norm(m.et)&&norm(r.sub)===norm(m.sg)&&norm(r.activity)===norm(m.item));
+  const byCC=cc?L.filter(r=>norm(r.cc)===norm(cc)):L;
+  return (byCC.length?byCC:L).reduce((a,r)=>a+r.curBudget,0);
+}
 /* ---- manual distribution split (% per entity) ---- */
 function manualBlock(d){
   const ents=activeEntities(), ov=(d&&d.method==='MANUAL'&&d.overrides)||{}, cur=(d&&d.curBudget)||0;
@@ -2001,7 +2009,7 @@ function phaseOK(){ const s=readPhase().reduce((a,b)=>a+b,0); if(Math.abs(s-100)
 function phaseAmounts(cur){ const p=readPhase(); return Object.fromEntries(p.map((x,i)=>['PhaseQ'+(i+1),Math.round(cur*x/100*1e6)/1e6])); }
 async function saveLines(type,id){
   const gv=i=>{const el=document.getElementById(i);return el?el.value.trim():''};
-  const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
+  const owner=isAdmin()?gv('f-owner'):(gv('f-owner')||myOwner()||(CU&&CU.name));
   const shared=!gv('f-entity');
   const needCC=deptCCs(gv('f-dept')).length>0;
   const dist=shared&&usesDist(gv('f-dept'));
@@ -2132,7 +2140,7 @@ function hcCalc(){
 }
 async function saveHC(id){
   const gv=i=>{const el=document.getElementById(i);return el?el.value.trim():''};
-  const owner=isAdmin()?gv('f-owner'):(myOwner()||gv('f-owner'));
+  const owner=isAdmin()?gv('f-owner'):(gv('f-owner')||myOwner()||(CU&&CU.name));
   const shared=!gv('f-entity'), needCC=deptCCs(gv('f-dept')).length>0;
   if(!validate([{id:'f-payer'},{id:'f-hcnt'},{id:'f-hctc'},...(gv('f-hcat')==='New'?[{id:'f-hmon'}]:[]),...(shared&&usesDist(gv('f-dept'))?[{id:'f-method'}]:[]),...(needCC?[{id:'f-cc'}]:[])])) return false;
   if(!owner){ showToast('Owner is required.'); return false; }
@@ -2174,6 +2182,10 @@ async function loadXLSX(){
   await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load the Excel library from cdnjs.cloudflare.com'));document.head.appendChild(s);});
 }
 const XL={
+  opexup:{name:'OPEX Budget Lines',req:['Budget Year','Department','Owner','Expense Type','Sub Group','Budget Item','Amount (Rs L)'],
+    cols:['Budget Year','Department','Cost Center','Owner','Entity (blank = shared)','Expense Type','Sub Group','Budget Item','Description','Payer','Distribution Method','Amount (Rs L)','Status']},
+  hcup:{name:'Headcount Lines',req:['Budget Year','Department','Owner','Category','Type','Headcount','Salary (Rs)'],
+    cols:['Budget Year','Department','Cost Center','Owner','Entity (blank = shared)','Category','Type','Headcount','Salary (Rs)','Variable Pay (Rs)','Payer','Distribution Method','Status']},
   dept:{name:'Department Master',cols:['Cost Center','Department','HOD Name','HOD Email','Approval Required (Y/N)','Active (Y/N)','Distribution (Y/N)'],
     sample:[['1007GMIT','IT','','','N','Y','Y'],['1007HRCORP','Corporate HR','','','Y','Y','Y']]},
   master:{name:'Expense Master',cols:['Expense Type','Expense Type GL','Sub Group','Sub Group GL','Budget Item','Budget Item GL','Department (blank = all)','Active (Y/N)','Nature'],
@@ -2187,6 +2199,7 @@ function xlSave(rows,cols,file,sheet){
 }
 async function xlTemplate(kind){
   try{ await loadXLSX(); }catch(e){ showToast(e.message); return; }
+  if(kind==='opexup'||kind==='hcup') return lineTemplate(kind);
   const t=XL[kind]; const rows=kind==='master'&&STATE.master.length?[]:t.sample;
   xlSave(rows,t.cols,`${t.name} - Upload Template.xlsx`,t.name);
 }
@@ -2207,6 +2220,63 @@ async function exportLines(type){
   const rows=visibleItems(type).map(r=>{const c=STATE.ccs.find(x=>norm(x.cc)===norm(r.cc))||{};const q=qOf(r);return [r.budgetId||'',r.year,r.dept,r.cc||'',c.hodName||'',r.entity||'Shared',r.owner,natureOf(r),r.group,r.etGL,r.sub,r.sgGL,r.activity,r.itemGL,r.desc,r.qty,r.unit,r.persons,r.factor,r.rate,r.stdRate,r.payer,r.entity?'Direct':r.method,r.prevBudget,r.curBudget,q[0],q[1],q[2],q[3],r.status,r.just,r.buBy,r.cfoBy,r.cBy,dt(r.cAt),r.uBy,dt(r.uAt)];});
   xlSave(rows,cols,`${type.toUpperCase()} ${STATE.activeYear} - ${new Date().toISOString().slice(0,10)}.xlsx`,type.toUpperCase());
 }
+function prevYearOf(fy){ const L=STATE.budgetYears.slice().sort(), i=L.indexOf(fy); return i>0?L[i-1]:''; }
+function lineTemplate(kind){
+  const t=XL[kind], fy=prevYearOf(STATE.activeYear)||STATE.activeYear;
+  const d=activeDepts().find(x=>x.ccs&&x.ccs.length)||{name:'',ccs:[]}, cc=(d.ccs[0]||{}).cc||'', hod=(d.ccs[0]||{}).hodName||'';
+  const m=masterFor(d.name)[0]||{et:'',sg:'',item:''};
+  const sample=kind==='opexup'?[[fy,d.name,cc,hod,'',m.et,m.sg,m.item,'',PAYER_OWN,'',12.5,'Approved']]
+    :[[fy,d.name,cc,hod,'','Existing','Employee',5,6000000,600000,PAYER_OWN,'','Approved']];
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([t.cols,...sample]); ws['!cols']=t.cols.map(c=>({wch:Math.max(14,c.length+2)}));
+  XLSX.utils.book_append_sheet(wb,ws,kind==='opexup'?'OPEX':'Headcount');
+  const notes=kind==='opexup'
+    ?[['Column','How to fill'],['Budget Year','e.g. '+fy+' (must exist in the app)'],['Department / Cost Center','As in the Department master (see Departments sheet). Cost center can be blank if the department has only one'],['Owner','Person responsible for the line; blank = the person uploading'],['Entity','Entity name for a direct line; leave blank for a shared line'],['Expense Type / Sub Group / Budget Item','Exactly as in the Expense master (see Budget items sheet)'],['Payer',PAYER_OWN+' (default) or Business'],['Distribution Method','Only for shared lines of departments flagged for distribution: SAP, HR or FIXED'],['Amount (Rs L)','Budget amount in Rs lakhs'],['Status','Approved (default) or Draft']]
+    :[['Column','How to fill'],['Budget Year','e.g. '+fy],['Department / Cost Center / Owner / Entity','As for OPEX'],['Category','Existing or New'],['Type','Employee, Consultant or Trainee'],['Headcount','Number of heads in the line'],['Salary (Rs)','Total annual salary amount in Rs (excluding variable pay)'],['Variable Pay (Rs)','Total variable pay amount in Rs (employees only)'],['Payer',PAYER_OWN+' (default) or Business'],['Distribution Method','SAP, HR or FIXED for shared lines of distribution departments'],['Status','Approved (default) or Draft']];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(notes),'Instructions');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Department','Cost Center','HOD','Distribution'],...STATE.ccs.filter(c=>c.active!==false).sort((a,b)=>(a.name+a.cc).localeCompare(b.name+b.cc)).map(c=>[c.name,c.cc,c.hodName,c.dist?'Y':'N'])]),'Departments');
+  if(kind==='opexup') XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Expense Type','Sub Group','Budget Item','GL','Nature','Department (blank = all)'],...STATE.master.filter(x=>x.active&&!isHCItem(x)).sort((a,b)=>(a.et+a.sg+a.item).localeCompare(b.et+b.sg+b.item)).map(x=>[x.et,x.sg,x.item,x.itemGL,x.nature,x.dept])]),'Budget items');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Entity'],...activeEntities().map(e=>[e.name])]),'Entities');
+  XLSX.writeFile(wb,`${t.name} - Upload Template.xlsx`);
+}
+function planLines(kind,data){
+  const plan=[], num=v=>parseFloat(String(v).replace(/[,₹\s]/g,'')), r6=v=>Math.round(v*1e6)/1e6;
+  const stOf=v=>{ const x=norm(v); if(!x||x==='approved') return ST.ok; if(x==='draft') return ST.draft; return null; };
+  data.forEach(({row,v})=>{
+    const g=c=>v[XL[kind].cols.indexOf(c)]||'';
+    const fy=g('Budget Year'), dObj=STATE.depts.find(x=>norm(x.name)===norm(g('Department'))), dept=dObj?dObj.name:g('Department');
+    const ccs=deptCCs(dept); let cc=g('Cost Center'); const ccOk=!cc||ccs.some(c=>norm(c.cc)===norm(cc)); if(!cc&&ccs.length===1) cc=ccs[0].cc;
+    const entName=g('Entity (blank = shared)'), ent=entName?activeEntities().find(e=>norm(e.name)===norm(entName)):null;
+    const payer=g('Payer')?(norm(g('Payer'))==='business'?'Business':PAYER_OWN):PAYER_OWN;
+    const dist=!entName&&usesDist(dept), meth=g('Distribution Method').toUpperCase().replace(/ USERS?$/,'');
+    const status=stOf(g('Status'));
+    let err=!fy?'Budget Year is required':!STATE.budgetYears.includes(fy)?`Budget Year "${fy}" is not set up in the app`
+      :!dObj?`Department "${g('Department')}" is not in the department master`:!ccOk?`Cost center ${cc} does not belong to ${dept}`:(ccs.length>1&&!cc)?'Cost Center is required for this department'
+      :(entName&&!ent)?`Entity "${entName}" not found`:(dist&&!['SAP','HR','FIXED'].includes(meth))?'Distribution Method must be SAP, HR or FIXED for this department'
+      :!status?'Status must be Approved or Draft':'';
+    const common={BudgetYear:fy,Department:dept,CostCenter:cc||null,ITOwner:g('Owner')||CU.name,EntityName:ent?ent.name:null,Payer:payer,DistMethod:distFor(dept,!entName,meth),LineStatus:status,Justification:'Uploaded from Excel',Overrides:'{}'};
+    if(kind==='opexup'){
+      const m=STATE.master.find(x=>norm(x.et)===norm(g('Expense Type'))&&norm(x.sg)===norm(g('Sub Group'))&&norm(x.item)===norm(g('Budget Item')));
+      const amt=num(g('Amount (Rs L)'));
+      if(!err) err=!m?'Expense Type / Sub Group / Budget Item not found in the expense master':(isNaN(amt)||amt<=0)?'Amount (Rs L) must be a number above 0':'';
+      const cur=r6(amt||0);
+      plan.push({row,op:err?'error':'new',err,label:`${fy} · ${dept} · ${g('Budget Item')} · ₹${isNaN(amt)?g('Amount (Rs L)'):fmt(amt)}L`,
+        payload:m?{...common,GroupName:m.et,FunctionalCost:m.et,SubGroup:m.sg,ActivityName:m.item,LineDescription:g('Description')||null,Nature:m.nature||'Functional Cost',
+          ExpenseTypeGL:m.etGL||'',SubGroupGL:m.sgGL||'',BudgetItemGL:m.itemGL||'',Quantity:1,Unit:'Lump sum',Rate:r6(cur*100000),Persons:1,Factor:1,StdRate:null,
+          CurBudget:cur,PrevBudget:0,...Object.fromEntries([1,2,3,4].map(i=>['PhaseQ'+i,r6(cur/4)]))}:null});
+    } else {
+      const cat=['existing','new'].includes(norm(g('Category')))?(norm(g('Category'))==='new'?'New':'Existing'):'';
+      const ht=['Employee','Consultant','Trainee'].find(x=>norm(x)===norm(g('Type')))||'';
+      const hc=num(g('Headcount')), sal=num(g('Salary (Rs)')), vp=num(g('Variable Pay (Rs)'))||0;
+      if(!err) err=!cat?'Category must be Existing or New':!ht?'Type must be Employee, Consultant or Trainee':(isNaN(hc)||hc<=0)?'Headcount must be above 0':(isNaN(sal)||sal<=0)?'Salary (Rs) must be above 0':'';
+      const s5=r6((sal||0)/100000), v5=ht==='Employee'?r6(vp/100000):0, tot=r6(s5+v5);
+      plan.push({row,op:err?'error':'new',err,label:`${fy} · ${dept} · ${cat} ${ht} × ${g('Headcount')} · ₹${fmt(tot)}L`,
+        payload:{...common,HCCategory:cat,HCType:ht,Band:null,Headcount:hc,MonthlyCTC:sal,VPPercent:0,IncrementPercent:0,Months:12,SalaryAmount:s5,VPAmount:v5,CurBudget:tot,PrevBudget:0,
+          Nature:'Salary',GroupName:ht==='Consultant'?'Consultant':'Salary',SubGroup:`${cat} ${ht}`,ActivityName:ht,...Object.fromEntries([1,2,3,4].map(i=>['PhaseQ'+i,r6(tot/4)]))}});
+    }
+  });
+  return plan;
+}
 let XLKIND=null, XLPLAN=null;
 function xlPick(kind){ XLKIND=kind; const f=document.getElementById('xl-file'); f.value=''; f.click(); }
 async function xlRead(input){
@@ -2220,7 +2290,7 @@ async function xlRead(input){
     const ALIAS={'cost centre':'cost center','department name':'department','person responsible':'hod name','hod':'hod name','hod mail':'hod email','person responsible email':'hod email'};
     const t=XL[XLKIND], head=aoa[0].map(h=>{const x=norm(h).replace(/\s+/g,' ').replace(/centre/g,'center'); return ALIAS[x]||x;});
     const idx=t.cols.map(c=>{const k=norm(c).replace(/\s*\(.*\)/,''); return head.findIndex(h=>h.replace(/\s*\(.*\)/,'')===k);});
-    const missing=t.cols.filter((c,i)=>idx[i]<0&&!/active|approval|distribution|department \(|nature/i.test(c)&&!/gl$/i.test(c)&&!/hod/i.test(c));
+    const missing=t.req?t.req.filter(c=>idx[t.cols.indexOf(c)]<0):t.cols.filter((c,i)=>idx[i]<0&&!/active|approval|distribution|department \(|nature/i.test(c)&&!/gl$/i.test(c)&&!/hod/i.test(c));
     if(missing.length){ showToast('Missing columns: '+missing.join(', ')+'. Use the template.'); return; }
     const data=aoa.slice(1).map((r,n)=>({row:n+2,v:idx.map(i=>i<0?'':String(r[i]??'').trim())}));
     XLPLAN=planImport(XLKIND,data);
@@ -2229,6 +2299,7 @@ async function xlRead(input){
 }
 const yesNo=(v,def)=>{const s=norm(v); if(!s) return def; return ['y','yes','true','1','active'].includes(s);};
 function planImport(kind,data){
+  if(kind==='opexup'||kind==='hcup') return planLines(kind,data);
   const plan=[]; const seen={};
   const push=(row,key,label,op,payload,id,err)=>{
     if(!err&&seen[key]) err='Duplicate of row '+seen[key]+' in this file';
@@ -2291,13 +2362,14 @@ function showImportPreview(fname){
 function impTodo(){ const ret=document.getElementById('imp-retire')?.checked; return XLPLAN.filter(p=>p.op==='new'||p.op==='update'||(ret&&p.op==='retire')); }
 function impBtn(){ const n=impTodo().length, b=document.getElementById('imp-go'); b.disabled=!n; b.textContent=`Import ${n} row${n===1?'':'s'}`; }
 async function runImport(){
-  const list=SP_CONFIG.lists[{dept:'depts',master:'master',rates:'rates'}[XLKIND]];
+  const ltype={opexup:'opex',hcup:'hc'}[XLKIND];
+  const list=SP_CONFIG.lists[ltype||{dept:'depts',master:'master',rates:'rates'}[XLKIND]];
   const todo=impTodo();
   const btn=document.getElementById('imp-go'); btn.disabled=true;
   const prog=document.getElementById('imp-prog'); let done=0, fail=[];
   setSyncing();
   for(const p of todo){
-    try{ if(p.op==='new') await spPost(list,p.payload); else await spPatch(list,p.id,p.payload); done++; } // update + retire = patch
+    try{ if(p.op==='new'){ const res=await spPost(list,p.payload); if(ltype) await logAction(ltype,res.Id||res.ID,'Uploaded from Excel',p.payload.LineStatus); } else await spPatch(list,p.id,p.payload); done++; } // update + retire = patch
     catch(e){ fail.push(`Row ${p.row}: ${e.message}`); }
     prog.textContent=`Saving ${done+fail.length} of ${todo.length}…`;
   }
