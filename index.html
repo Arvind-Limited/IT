@@ -472,14 +472,16 @@ document.write('<scr'+'ipt src="https://alcdn.msauth.net/browser/2.38.0/js/msal-
             <div class="fg"><label>Default owner name (optional)</label><input id="u-owner" placeholder="Blank = the user's own name"></div>
             <div class="fg" style="grid-column:1/-1"><label>Departments <span style="font-weight:400;color:var(--tx3)">— tick one or more</span></label><input id="u-dsearch" placeholder="Filter departments" oninput="filterDeptPick()" style="margin-bottom:6px"><div id="u-depts" class="deptpick"></div></div>
             <div class="fg"><label>Entity (BU heads only)</label><select id="u-entity"></select></div>
-            <div class="fg" style="grid-column:1/-1"><label>Access Scope</label>
+            <div class="fg" style="grid-column:1/-1"><label>Access scope — IT sub department</label>
               <select id="u-scope">
-                <option value="All">All groups</option>
+                <option value="All">All (no restriction)</option>
+                <option value="Application">Application only</option>
                 <option value="Network">Network only</option>
                 <option value="End User Support">End User Support only</option>
                 <option value="Datacentre">Datacentre only</option>
-                <option value="Application">Application only</option>
+                <option value="IT Common">IT Common only</option>
               </select>
+              <div style="font-size:11px;color:var(--tx2);margin-top:4px">Applies to IT budget lines only: a user scoped to a sub department sees and enters IT lines of that sub department alone.</div>
             </div>
           </div>
           <div class="ma">
@@ -688,7 +690,8 @@ async function boot(){
       ownerName: roleInfo.ownerName,
       dept: (roleInfo.depts&&roleInfo.depts[0]) || roleInfo.dept || 'IT',
       depts: (roleInfo.depts&&roleInfo.depts.length)?roleInfo.depts:[roleInfo.dept||'IT'],
-      entity: roleInfo.entity || ''
+      entity: roleInfo.entity || '',
+      scope: roleInfo.scope || 'All'
     };
     setLoading('Loading budget data from SharePoint...');
     await loadAllData();
@@ -1487,7 +1490,7 @@ const FORMS={
   mrow:(d={})=>`<div class="fgrid3">
     <div class="fg"><label>${req('Expense type')}</label><input id="f-et" list="dl-et" value="${esc(d.et||'')}" placeholder="e.g. Travel Expense"><datalist id="dl-et">${uniq(STATE.master.map(m=>m.et)).map(v=>`<option value="${esc(v)}">`).join('')}</datalist></div>
     <div class="fg"><label>Expense type GL</label><input id="f-etgl" value="${esc(d.etGL||'')}"></div>
-    <div class="fg"><label>Departments (blank = all; separate with ;)</label><input id="f-mdept" list="dl-mdept" value="${esc(d.dept||'')}" placeholder="e.g. Admin; CMG"><datalist id="dl-mdept">${activeDepts().map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist></div>
+    <div class="fg"><label>Departments (blank = all; A; B = only those; "All except: A" = everyone else)</label><input id="f-mdept" list="dl-mdept" value="${esc(d.dept||'')}" placeholder="e.g. Admin; CMG"><datalist id="dl-mdept">${activeDepts().map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist></div>
     <div class="fg"><label>Budget level</label><select id="f-mlvl"><option value=""${!d.level?' selected':''}>Item level — IT</option><option value="Expense type"${d.level?' selected':''}>Expense-type level — other departments</option></select></div>
     <div class="fg"><label>${req('Sub group')}</label><input id="f-sg" list="dl-sg" value="${esc(d.sg||'')}" placeholder="e.g. Domestic"><datalist id="dl-sg">${uniq(STATE.master.map(m=>m.sg)).map(v=>`<option value="${esc(v)}">`).join('')}</datalist></div>
     <div class="fg"><label>Sub group GL</label><input id="f-sggl" value="${esc(d.sgGL||'')}"></div>
@@ -1702,8 +1705,10 @@ function statusNote(d){
 function canSeeLine(r){
   if(isAdmin()||isCFO()||isFPA()) return true;
   if(isBUHead()) return r.entity===CU.entity || (!r.entity && false);
-  return inMyDepts(r.dept); // visibility is by the user's departments; Owner is informational
+  return inMyDepts(r.dept) && inMyScope(r); // visibility is by the user's departments (and IT sub department scope); Owner is informational
 }
+function myScope(){ return CU&&CU.scope&&CU.scope!=='All'&&!isAdmin()&&!isCFO()&&!isFPA()?CU.scope:''; }
+function inMyScope(r){ const sc=myScope(); return !sc||!isITDept(r.dept)||r.subDept===sc; }
 function visibleItems(type){
   return yearItems(type).filter(canSeeLine).filter(r=>!STATE.deptFilter||r.dept===STATE.deptFilter);
 }
@@ -1715,7 +1720,7 @@ function l1Approver(r){
 function canEditLine(r){
   if(isAdmin()) return true;
   if(isCFO()||isBUHead()||isFPA()) return false;
-  if(isViewer()||!inMyDepts(r.dept)) return false;
+  if(isViewer()||!inMyDepts(r.dept)||!inMyScope(r)) return false;
   if(!needsApproval(r.dept)) return true;
   return [ST.draft,ST.ret,ST.ok].includes(r.status);
 }
@@ -1959,9 +1964,12 @@ function subCell(r){ return !etLevel(r.dept)||norm(r.sub)!=='general'?esc(r.sub|
 function itemCell(r){ return etLevel(r.dept)&&norm(r.activity)===norm(r.group)?'<span style="color:var(--tx3)">—</span>':esc(r.activity); }
 // every department (incl. IT) budgets at expense-type level; IT also records a Sub Department and keeps Budget ID
 function etLevel(dept){ return STATE.master.some(m=>m.level&&m.active!==false); }
-function deptListOf(m){ return String(m.dept||'').split(/\s*;\s*/).filter(Boolean); }
+// Department on a master row: blank = all; "A; B" = only those; "All except: A; B" = everyone else
+function deptExcl(m){ return /^all except\s*:/i.test(String(m.dept||'')); }
+function deptListOf(m){ return String(m.dept||'').replace(/^all except\s*:/i,'').split(/\s*;\s*/).filter(Boolean); }
+function masterApplies(m,dept){ if(!m.dept) return true; const L=deptListOf(m).some(x=>norm(x)===norm(dept)); return deptExcl(m)?!L:L; }
 function masterFor(dept){ const el=etLevel(dept);
-  return STATE.master.filter(m=>m.active!==false&&!isHCItem(m)&&(!!m.level===el)&&(!m.dept||deptListOf(m).some(x=>norm(x)===norm(dept)))); }
+  return STATE.master.filter(m=>m.active!==false&&!isHCItem(m)&&(!!m.level===el)&&masterApplies(m,dept)); }
 function rateFor(fy,et,sg,item){ return STATE.rates.find(r=>norm(r.fy)===norm(fy)&&norm(r.et)===norm(et)&&norm(r.sg)===norm(sg)&&norm(r.item)===norm(item)); }
 function fmtR(n){ return Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2}); }
 function qtyRate(r){
@@ -1998,11 +2006,11 @@ function renderMaster(){
   document.getElementById('em-fy').textContent='('+STATE.activeYear+')';
   let rows=STATE.master.slice().sort((a,b)=>(a.et+a.sg+a.item).localeCompare(b.et+b.sg+b.item));
   if(ev) rows=rows.filter(m=>m.et===ev);
-  if(dv==='__common') rows=rows.filter(m=>!m.dept); else if(dv) rows=rows.filter(m=>(!!m.level===etLevel(dv))&&(!m.dept||deptListOf(m).includes(dv)));
+  if(dv==='__common') rows=rows.filter(m=>!m.dept); else if(dv) rows=rows.filter(m=>(!!m.level===etLevel(dv))&&masterApplies(m,dv));
   if(q) rows=rows.filter(m=>norm([m.et,m.sg,m.item,m.etGL,m.sgGL,m.itemGL].join(' ')).includes(q));
   tb.innerHTML=rows.length?rows.map(m=>{const r=rateFor(STATE.activeYear,m.et,m.sg,m.item);return `<tr style="${m.active?'':'opacity:.5'}">
     <td style="font-size:11px">${esc(m.nature)||'—'}${isHCItem(m)?'<div class="gl">via headcount</div>':''}</td><td><strong>${esc(m.et)}</strong></td><td class="gl">${esc(m.etGL)||'—'}</td><td>${esc(m.sg)}</td><td class="gl">${esc(m.sgGL)||'—'}</td>
-    <td>${esc(m.item)}</td><td class="gl">${esc(m.itemGL)||'—'}</td><td>${m.dept?deptListOf(m).map(x=>`<span class="dept-tag">${esc(x)}</span>`).join(' '):'<span style="color:var(--tx3);font-size:11px">All</span>'}<div class="gl">${m.level?'Expense-type level':'Item level (IT)'}</div></td>
+    <td>${esc(m.item)}</td><td class="gl">${esc(m.itemGL)||'—'}</td><td>${m.dept?(deptExcl(m)?'<span style="font-size:11px">All except</span> ':'')+deptListOf(m).map(x=>`<span class="dept-tag">${esc(x)}</span>`).join(' '):'<span style="color:var(--tx3);font-size:11px">All</span>'}<div class="gl">${m.level?'Expense-type level':'Item level (IT)'}</div></td>
     <td style="font-size:11px;white-space:nowrap">${r?`&#x20B9;${fmtR(r.rate)} / ${esc(r.unit)}`:'<span style="color:var(--tx3)">Lump sum</span>'}</td>
     <td><span class="badge ${m.active?'b-g':'b-r'}">${m.active?'Yes':'No'}</span></td><td>${updCell(m)}</td>
     <td>${isAdmin()?`<button class="btn btn-e" onclick="editMaster(${m.id})">✎</button>`:''}</td></tr>`;}).join('')
@@ -2070,7 +2078,7 @@ function lineForm(type,d){
     <div class="fg" id="g-method"${usesDist(dept)?'':' style="display:none"'}><label>${req('Distribution method')}</label><select id="f-method"${d.entity?' disabled':''} onchange="manualShow()"><option value="" disabled${!d.method||d.method==='N/A'?' selected':''}>— select —</option>${methodOpts(type,d.method)}</select></div>
     <div class="fg"><label>${req('Expense type')}</label><select id="f-et" onchange="onEtChange()" ${edit?'disabled':''}>${optList(ets,d.group||'')}</select></div>
     <div class="fg" id="g-sg"${etLevel(dept)?' style="display:none"':''}><label>${req('Sub group')}</label><select id="f-sg" onchange="buildGrid()" ${edit?'disabled':''}>${edit?optList([d.sub],d.sub):'<option value="">— select expense type —</option>'}</select></div>
-    <div class="fg" id="g-subdept"${isITDept(dept)?'':' style="display:none"'}><label>${req('Sub department')}</label><select id="f-subdept"><option value=""${!d.subDept?' selected':''} disabled>— select —</option>${IT_SUBDEPTS.map(x=>`<option${x===d.subDept?' selected':''}>${esc(x)}</option>`).join('')}</select></div>
+    <div class="fg" id="g-subdept"${isITDept(dept)?'':' style="display:none"'}><label>${req('Sub department')}</label><select id="f-subdept"><option value=""${!d.subDept?' selected':''} disabled>— select —</option>${(myScope()?[myScope()]:IT_SUBDEPTS).map(x=>`<option${x===(d.subDept||myScope())?' selected':''}>${esc(x)}</option>`).join('')}</select></div>
     <div class="fg" id="g-bid"${etLevel(dept)&&!isITDept(dept)?' style="display:none"':''}><label>Budget ID</label><input id="f-bid" value="${esc(d.budgetId||'')}" placeholder="Optional"></div>
   </div>
   ${!edit&&!ets.length?`<div class="warn-box" style="margin-bottom:10px">No expense master for <strong>${esc(dept)}</strong> yet. ${isAdmin()?'Add or upload budget items under Master Data → Expense master.':'Ask the budget administrator to set up the expense master.'}</div>`:''}
@@ -2589,9 +2597,9 @@ function planImport(kind,data){
   if(kind==='master'){
     const conflicts={};
     data.forEach(({row,v})=>{const [et,eg,sg,sgg,item,ig,dept,act,nat,lvl]=v;
-      const dl=String(dept||'').split(/\s*[;,]\s*/).filter(Boolean), bad=dl.filter(x=>!STATE.depts.some(d=>norm(d.name)===norm(x)));
+      const exc=/^all except\s*:/i.test(String(dept||'')), dl=String(dept||'').replace(/^all except\s*:/i,'').split(/\s*[;,]\s*/).filter(Boolean), bad=dl.filter(x=>!STATE.depts.some(d=>norm(d.name)===norm(x)));
       const deptOk=!bad.length;
-      const dName=dl.map(x=>(STATE.depts.find(d=>norm(d.name)===norm(x))||{}).name||x).join('; ');
+      const dName=(exc?'All except: ':'')+dl.map(x=>(STATE.depts.find(d=>norm(d.name)===norm(x))||{}).name||x).join('; ');
       const m={et,etGL:eg||'',sg,sgGL:sgg||'',item,itemGL:ig,dept:dName,active:yesNo(act,true),nature:nat||'',level:/expense/i.test(lvl||'')?'Expense type':''};
       const ex=STATE.master.find(x=>mkey(x)===mkey(m));
       let err=!et?'Expense Type is required':!sg?'Sub Group is required':!item?'Budget Item is required':!deptOk?`Department "${bad.join(', ')}" is not in the department master`:(conflicts[row]||'');
@@ -2674,7 +2682,7 @@ async function renderUsers(){
     tbody.innerHTML='<tr><td colspan="10"><div class="empty">No users added yet. Click "+ Add user" to get started.</div></td></tr>';
     return;
   }
-  const scopeColors = {'All':'b-b','Network':'b-p','End User Support':'b-g','Datacentre':'b-a','Application':'b-c'};
+  const scopeColors = {'All':'b-b','Network':'b-p','End User Support':'b-g','Datacentre':'b-a','Application':'b-c','IT Common':'b-gr'};
   tbody.innerHTML = users.map(u=>`<tr>
     <td style="font-weight:600">${u.name}</td>
     <td style="font-size:11px;color:var(--tx2)">${u.email}</td>
