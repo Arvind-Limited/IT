@@ -1176,8 +1176,8 @@ function renderOPEX(){
     const fs=getFixedSum(r);
     return`<tr><td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
       <td>${deptCell(r)}</td><td style="font-size:11px">${entLabel(r)}</td><td>${r.owner}</td>
-      <td><strong>${esc(r.group)}</strong></td><td>${esc(r.sub)}</td>
-      <td style="max-width:180px;font-size:12px">${esc(r.activity)}${r.desc?`<div style="font-size:10.5px;color:var(--tx2)">${esc(r.desc)}</div>`:''}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
+      <td><strong>${esc(r.group)}</strong></td><td>${subCell(r)}</td>
+      <td style="max-width:180px;font-size:12px">${itemCell(r)}${r.desc?`<div style="font-size:10.5px;color:var(--tx2)">${esc(r.desc)}</div>`:''}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
       <td style="font-size:11px;white-space:nowrap">${qtyRate(r)}</td>
       <td><span class="badge ${r.payer!=='Business'?'b-it':'b-biz'}">${esc(r.payer||'')}</span></td>
       <td>${methodBadge(r)}</td>
@@ -1198,7 +1198,7 @@ function renderCAPEX(){
   document.getElementById('t-capex').innerHTML=items.length?items.map(r=>`<tr>
     <td style="font-size:10px;color:var(--tx2)">${r.budgetId||'—'}</td>
     <td>${deptCell(r)}</td><td style="font-size:11px">${entLabel(r)}</td><td>${r.owner}</td>
-    <td><strong>${esc(r.group)}</strong></td><td>${esc(r.sub)}</td><td>${esc(r.activity)}${r.desc?`<div style="font-size:10.5px;color:var(--tx2)">${esc(r.desc)}</div>`:''}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
+    <td><strong>${esc(r.group)}</strong></td><td>${subCell(r)}</td><td>${itemCell(r)}${r.desc?`<div style="font-size:10.5px;color:var(--tx2)">${esc(r.desc)}</div>`:''}${r.itemGL?`<div class="gl">GL ${esc(r.itemGL)}</div>`:''}</td>
     <td style="font-size:11px;white-space:nowrap">${qtyRate(r)}</td>
     <td><span class="badge ${r.payer!=='Business'?'b-it':'b-biz'}">${esc(r.payer||'')}</span></td>
     <td>${r.entity?'<span class="badge b-gr">DIRECT</span>':`<span class="badge b-p">${r.method}</span>`}</td>
@@ -1950,6 +1950,8 @@ function masterData(m){ return {Nature:m.nature||null,ExpenseType:m.et,ExpenseTy
 const HC_NATURES=['salary','variable pay','recovered'];
 function isHCItem(m){ return HC_NATURES.includes(norm(m.nature))||['salary','variable pay'].includes(norm(m.et)); }
 // IT budgets at expense type > sub group > budget item; all other departments at expense-type level (master rows with BudgetLevel set)
+function subCell(r){ return !etLevel(r.dept)||norm(r.sub)!=='general'?esc(r.sub||'—'):'<span style="color:var(--tx3)">—</span>'; }
+function itemCell(r){ return etLevel(r.dept)&&norm(r.activity)===norm(r.group)?'<span style="color:var(--tx3)">—</span>':esc(r.activity); }
 function etLevel(dept){ return norm(dept)!=='it' && STATE.master.some(m=>m.level&&m.active!==false); }
 function deptListOf(m){ return String(m.dept||'').split(/\s*;\s*/).filter(Boolean); }
 function masterFor(dept){ const el=etLevel(dept);
@@ -2112,7 +2114,7 @@ function buildGrid(){
   const grp=el?uniq(rows.filter(r=>r.fixed).map(r=>r.sg)):[];
   wrap.innerHTML=`${!LF.edit&&grp.length>1?`<div class="qall">Total units ${grp.map(g=>`&nbsp; ${esc(g)} <input class="qall-g" data-sg="${esc(g)}" type="number" min="0" step="any" placeholder="e.g. 10" oninput="qtyAll(this)">`).join('')} <span style="font-weight:500">${units.length===1?esc(units[0])+'s':''} · fills the rate-based rows of each group</span></div>`:''}${LF.edit||!units.length||grp.length>1?'':`<div class="qall">Quantity for all rate-based items <input id="f-qall" type="number" min="0" step="any" placeholder="e.g. 10" oninput="qtyAll()"> <span style="font-weight:500">${units.length===1?esc(units[0])+'s':''} · you can still change each row below</span></div>`}
   ${nLump&&!LF.edit?`<div class="info-box" style="font-size:11px;padding:6px 10px;margin-bottom:8px">${nLump===rows.length?'These items have':'Items marked <strong>Lump sum</strong> have'} no rate in the rate master. Enter the amount in &#x20B9;; leave it blank to skip the item.</div>`:''}
-  <div class="qgrid"><table id="f-grid"><thead><tr><th>Budget item</th><th>GL</th><th>Description / destination</th><th>Unit</th><th style="text-align:right" title="Standard rate from the rate master; change it to override">Rate / Amount (&#x20B9;)</th><th style="text-align:right">Qty</th><th style="text-align:right">Persons</th><th style="text-align:right" title="Nights, legs or any other multiplier">Nights / legs</th><th style="text-align:right">Amount (&#x20B9;L)</th><th style="text-align:right">Prev FY (&#x20B9;L)</th></tr></thead>
+  <div class="qgrid"><table id="f-grid"><thead><tr><th>${el?'Expense type / category':'Budget item'}</th><th>GL</th><th>Description / destination</th><th>Unit</th><th style="text-align:right" title="Standard rate from the rate master; change it to override">Rate / Amount (&#x20B9;)</th><th style="text-align:right">Qty</th><th style="text-align:right">Persons</th><th style="text-align:right" title="Nights, legs or any other multiplier">Nights / legs</th><th style="text-align:right">Amount (&#x20B9;L)</th><th style="text-align:right">Prev FY (&#x20B9;L)</th></tr></thead>
   <tbody>${out.map(r=>gridRow(r,r.o)).join('')}</tbody>
   <tfoot><tr><td colspan="8">Total</td><td class="amt" id="g-total">—</td><td></td></tr></tfoot></table></div>
   <div style="font-size:11px;color:var(--tx2);margin:-4px 0 10px">Amount = Rate &times; Qty &times; Persons &times; Nights/legs. Use <strong>＋</strong> to add another line for the same item (e.g. a second destination). A changed standard rate turns amber and needs a justification.</div>`;
@@ -2429,7 +2431,7 @@ async function loadXLSX(){
   await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load the Excel library from cdnjs.cloudflare.com'));document.head.appendChild(s);});
 }
 const XL={
-  opexup:{name:'OPEX Budget Lines',req:['Budget Year','Department','Expense Type','Budget Item','Amount (Rs L)'],
+  opexup:{name:'OPEX Budget Lines',req:['Budget Year','Department','Expense Type','Amount (Rs L)'],
     cols:['Budget Year','Department','Cost Center','Owner','Entity (blank = shared)','Expense Type','Sub Group','Budget Item','Description','For Whom','Distribution Method','Amount (Rs L)','Status']},
   hcup:{name:'Headcount Lines',req:['Budget Year','Department','Owner','Category','Type','Headcount','Salary (Rs)'],
     cols:['Budget Year','Department','For Department','Cost Center','Owner','Entity (blank = shared)','Category','Type','Headcount','Salary (Rs)','Variable Pay (Rs)','For Whom','Distribution Method','Status']},
@@ -2503,9 +2505,10 @@ function planLines(kind,data){
       :!status?'Status must be Approved or Draft':'';
     const common={BudgetYear:fy,Department:dept,CostCenter:cc||null,ITOwner:g('Owner')||CU.name,EntityName:ent?ent.name:null,Payer:payer,DistMethod:distFor(dept,!entName,meth),LineStatus:status,Justification:'Uploaded from Excel',Overrides:'{}'};
     if(kind==='opexup'){
-      const m=masterFor(dept).find(x=>norm(x.et)===norm(g('Expense Type'))&&(!g('Sub Group')||norm(x.sg)===norm(g('Sub Group')))&&norm(x.item)===norm(g('Budget Item')));
+      const cand=masterFor(dept).filter(x=>norm(x.et)===norm(g('Expense Type'))&&(!g('Sub Group')||norm(x.sg)===norm(g('Sub Group'))));
+      const m=g('Budget Item')?cand.find(x=>norm(x.item)===norm(g('Budget Item'))):(cand.length===1?cand[0]:null);
       const amt=num(g('Amount (Rs L)'));
-      if(!err) err=!m?`Budget item not found in the expense master for ${dept}`:(isNaN(amt)||amt<=0)?'Amount (Rs L) must be a number above 0':'';
+      if(!err) err=!m?(g('Budget Item')?`Budget item not found in the expense master for ${dept}`:`Expense type not found for ${dept}, or it needs a Sub Group / Budget Item (Travel: Domestic / International)`):(isNaN(amt)||amt<=0)?'Amount (Rs L) must be a number above 0':'';
       const cur=r6(amt||0);
       plan.push({row,op:err?'error':'new',err,label:`${fy} · ${dept} · ${g('Budget Item')} · ₹${isNaN(amt)?g('Amount (Rs L)'):fmt(amt)}L`,
         payload:m?{...common,GroupName:m.et,FunctionalCost:m.et,SubGroup:m.sg,ActivityName:m.item,LineDescription:g('Description')||null,Nature:m.nature||'Functional Cost',
