@@ -158,6 +158,9 @@ tbody tr:hover{background:#f8fafc}
 .qgrid .dup{border:0;background:none;color:var(--bl);cursor:pointer;font-size:14px;padding:0 4px}
 .phase{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;font-size:12px}
 .phase[hidden]{display:none}
+#f-grid.amt-only th:nth-child(4),#f-grid.amt-only td:nth-child(4),#f-grid.amt-only th:nth-child(6),#f-grid.amt-only td:nth-child(6),#f-grid.amt-only th:nth-child(7),#f-grid.amt-only td:nth-child(7),#f-grid.amt-only th:nth-child(8),#f-grid.amt-only td:nth-child(8){display:none}
+#f-grid.amt-only .g-rate{min-width:140px}
+#f-grid.unit-only th:nth-child(4),#f-grid.unit-only td:nth-child(4),#f-grid.unit-only th:nth-child(7),#f-grid.unit-only td:nth-child(7),#f-grid.unit-only th:nth-child(8),#f-grid.unit-only td:nth-child(8){display:none}
 .appr-box{padding:6px 9px;border:1px solid var(--bd);border-radius:var(--r);background:var(--sf2);font-size:12px;min-height:34px;line-height:1.35}
 #g-manual{display:block}#g-manual[hidden]{display:none}#g-manual input{width:100%}
 .phase input{width:64px;padding:5px 7px;border:1px solid var(--bd2);border-radius:6px;text-align:right}
@@ -2112,22 +2115,25 @@ function buildGrid(){
   const units=uniq(rows.filter(r=>r.fixed).map(r=>r.unit));
   const nLump=rows.filter(r=>!r.fixed&&r.unit==='Lump sum').length;
   const grp=el?uniq(rows.filter(r=>r.fixed).map(r=>r.sg)):[];
+  const amtOnly=el&&rows.every(r=>!r.fixed&&r.unit==='Lump sum'); // other departments: amount only, no qty / persons / nights
+  const unitOnly=el&&!amtOnly; // Travel / Employee Welfare / Conveyance: per unit cost x total units
+  if(unitOnly) out.forEach(r=>{ r.unitTag=r.unit&&r.unit!=='Lump sum'?r.unit:''; });
   wrap.innerHTML=`${!LF.edit&&grp.length>1?`<div class="qall">Total units ${grp.map(g=>`&nbsp; ${esc(g)} <input class="qall-g" data-sg="${esc(g)}" type="number" min="0" step="any" placeholder="e.g. 10" oninput="qtyAll(this)">`).join('')} <span style="font-weight:500">${units.length===1?esc(units[0])+'s':''} · fills the rate-based rows of each group</span></div>`:''}${LF.edit||!units.length||grp.length>1?'':`<div class="qall">Quantity for all rate-based items <input id="f-qall" type="number" min="0" step="any" placeholder="e.g. 10" oninput="qtyAll()"> <span style="font-weight:500">${units.length===1?esc(units[0])+'s':''} · you can still change each row below</span></div>`}
-  ${nLump&&!LF.edit?`<div class="info-box" style="font-size:11px;padding:6px 10px;margin-bottom:8px">${nLump===rows.length?'These items have':'Items marked <strong>Lump sum</strong> have'} no rate in the rate master. Enter the amount in &#x20B9;; leave it blank to skip the item.</div>`:''}
-  <div class="qgrid"><table id="f-grid"><thead><tr><th>${el?'Expense type / category':'Budget item'}</th><th>GL</th><th>Description / destination</th><th>Unit</th><th style="text-align:right" title="Standard rate from the rate master; change it to override">Rate / Amount (&#x20B9;)</th><th style="text-align:right">Qty</th><th style="text-align:right">Persons</th><th style="text-align:right" title="Nights, legs or any other multiplier">Nights / legs</th><th style="text-align:right">Amount (&#x20B9;L)</th><th style="text-align:right">Prev FY (&#x20B9;L)</th></tr></thead>
+  ${nLump&&!LF.edit&&!amtOnly?`<div class="info-box" style="font-size:11px;padding:6px 10px;margin-bottom:8px">${nLump===rows.length?'These items have':'Items marked <strong>Lump sum</strong> have'} no rate in the rate master. Enter the amount in &#x20B9;; leave it blank to skip the item.</div>`:''}
+  <div class="qgrid"><table id="f-grid" class="${amtOnly?'amt-only':unitOnly?'unit-only':''}"><thead><tr><th>${el?'Expense type / category':'Budget item'}</th><th>GL</th><th>Description${amtOnly?'':' / destination'}</th><th>Unit</th><th style="text-align:right" title="${amtOnly?'Budget amount for the year':'Standard rate from the rate master; change it to override'}">${amtOnly?'Budget amount (&#x20B9;)':unitOnly?'Per unit cost (&#x20B9;)':'Rate / Amount (&#x20B9;)'}</th><th style="text-align:right">${unitOnly?'Total units':'Qty'}</th><th style="text-align:right">Persons</th><th style="text-align:right" title="Nights, legs or any other multiplier">Nights / legs</th><th style="text-align:right">Amount (&#x20B9;L)</th><th style="text-align:right">Prev FY (&#x20B9;L)</th></tr></thead>
   <tbody>${out.map(r=>gridRow(r,r.o)).join('')}</tbody>
-  <tfoot><tr><td colspan="8">Total</td><td class="amt" id="g-total">—</td><td></td></tr></tfoot></table></div>
-  <div style="font-size:11px;color:var(--tx2);margin:-4px 0 10px">Amount = Rate &times; Qty &times; Persons &times; Nights/legs. Use <strong>＋</strong> to add another line for the same item (e.g. a second destination). A changed standard rate turns amber and needs a justification.</div>`;
+  <tfoot><tr><td colspan="${amtOnly?4:unitOnly?5:8}">Total</td><td class="amt" id="g-total">—</td><td></td></tr></tfoot></table></div>
+  <div style="font-size:11px;color:var(--tx2);margin:-4px 0 10px">${amtOnly?'Enter the budget amount for the year in &#x20B9;. Use <strong>＋</strong> to add more lines with their own description.':unitOnly?'Budget amount = Per unit cost &times; Total units. A changed standard cost turns amber and needs a justification.':`Amount = Rate &times; Qty &times; Persons &times; Nights/legs. Use <strong>＋</strong> to add another line for the same item (e.g. a second destination). A changed standard rate turns amber and needs a justification.`}</div>`;
   calcGrid();
 }
 function gridRow(r,o){
   const v=(a,b)=>a!=null&&a!==''?a:b;
   return `<tr data-item="${esc(r.item)}" data-sg="${esc(r.sg||'')}" data-key="${esc(r.key||r.item)}" data-unit="${esc(r.unit)}" data-fixed="${r.fixed?1:0}" data-std="${r.std!=null?r.std:''}" data-nature="${esc(r.nature||'')}" data-etgl="${esc(r.etGL||'')}" data-sggl="${esc(r.sgGL||'')}" data-itemgl="${esc(r.itemGL||'')}">
-    <td style="white-space:nowrap"><strong>${esc(r.label||r.item)}</strong>${LF.edit?'':'<button type="button" class="dup" title="Add another line for this item" onclick="dupRow(this)">＋</button>'}</td><td class="gl">${esc(r.itemGL)||'—'}</td>
+    <td style="white-space:nowrap"><strong>${esc(r.label||r.item)}</strong>${r.unitTag?` <span class="gl">per ${esc(r.unitTag)}</span>`:''}${LF.edit?'':'<button type="button" class="dup" title="Add another line for this item" onclick="dupRow(this)">＋</button>'}</td><td class="gl">${esc(r.itemGL)||'—'}</td>
     <td><input class="g-desc" maxlength="250" value="${esc(v(o.d,r.desc))}" placeholder="optional"></td>
     <td>${r.unit&&r.unit!=='Lump sum'?esc(r.unit):'<span class="badge b-gr">Lump sum</span>'}</td>
-    <td><input class="g-rate" type="number" min="0" step="0.01" value="${v(o.r,r.rate)}" ${r.fixed?'title="Standard rate — change only with justification"':r.unit&&r.unit!=='Lump sum'?'placeholder="Rate per '+esc(r.unit)+'" title="No standard rate: enter the rate"':'placeholder="Lump-sum amount" title="No rate in the rate master: enter the amount"'} oninput="calcGrid()"></td>
-    <td><input class="g-qty" type="number" min="0" step="any" value="${v(o.q,r.qty)}" oninput="calcGrid()"></td>
+    <td><input class="g-rate" type="number" min="0" step="0.01" value="${v(o.r,r.rate)}" ${r.fixed?'title="Standard rate — change only with justification"':r.unit&&r.unit!=='Lump sum'?'placeholder="Rate per '+esc(r.unit)+'" title="No standard rate: enter the rate"':'placeholder="Amount (₹)" title="Enter the amount in ₹"'} oninput="calcGrid()"></td>
+    <td><input class="g-qty" type="number" min="0" step="any" value="${v(o.q,r.qty)}" oninput="calcGrid()"${r.unitTag?` placeholder="${esc(r.unitTag)}s"`:''}></td>
     <td><input class="g-pers" type="number" min="0" step="any" value="${v(o.n,r.pers)}" oninput="calcGrid()" style="min-width:56px"></td>
     <td><input class="g-fac" type="number" min="0" step="any" value="${v(o.f,r.fac)}" oninput="calcGrid()" style="min-width:56px"></td>
     <td class="amt g-amt">—</td>
